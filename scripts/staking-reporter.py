@@ -1,5 +1,6 @@
 from pathlib import Path
-from brownie import web3
+from brownie import web3, interface, Wei
+from operator import add
 
 import csv
 import requests
@@ -7,8 +8,10 @@ import datetime
 import calendar
 import json
 
-safes_staked = map(web3.toChecksumAddress, ['0xea9f2e31ad16636f4e1af0012db569900401248a'])
+from toolz.itertoolz import accumulate
 
+safes_staked = map(web3.toChecksumAddress, ['0xea9f2e31ad16636f4e1af0012db569900401248a'])
+VEDOUGH_ADDRESS = web3.toChecksumAddress('0xe6136f2e90eeea7280ae5a0a8e6f48fb222af945')
 
 def yes_or_no(question):
     while "the answer is invalid":
@@ -57,12 +60,17 @@ def write_dictionaries(start_timestamp, dicts, filename, fieldnames):
         writer.writeheader()
         writer.writerows(dicts)
 
+def participation(address, voters):
+    if web3.toChecksumAddress(address) in voters:
+        return 1
+    else:
+        return 0
 
 def write_participation(start_timestamp, voted):
     date = datetime.date.fromtimestamp(start_timestamp)
     with open(f'reports/staking/{date}/participation.json', 'w+') as f:
         voters = [v['address'] for v in voted]
-        stakers = {web3.toChecksumAddress(addr): amount for (addr, amount) in get_stakers() if web3.toChecksumAddress(addr) in voters}
+        stakers = {web3.toChecksumAddress(addr): participation(addr, voters) for (addr, _) in get_stakers() }
         participation_json = json.dumps(stakers, indent=4)
         f.write(participation_json)
 
@@ -73,6 +81,12 @@ def write_to_slash(start_timestamp, not_voted):
         voters = [v['address'] for v in not_voted]
         to_slash_json = json.dumps(voters, indent=4)
         f.write(to_slash_json)
+
+def write_kpi_options(date, airdrop_map):
+    with open(f'reports/staking/{date}/kpi-options.json', 'w+') as f:
+        kpi_airdrop_json = json.dumps(airdrop_map, indent=4)
+        f.write(kpi_airdrop_json)
+
 
 
 def get_stakers():
@@ -85,12 +99,12 @@ def get_stakers():
 
 def filter_proposals(proposals):
     if yes_or_no('Do you want to filter proposals?'):
-        to_filter = []
+        take = []
         for p in proposals:
             title = p['title']
             if yes_or_no(f'Is proposal {title} a valid proposal?'):
-                to_filter.append(p['id'])
-        proposals = [p for p in proposals if p['id'] not in to_filter]
+                take.append(p['id'])
+        proposals = [p for p in proposals if p['id'] in take]
 
     return proposals
 
@@ -119,7 +133,7 @@ def report_proposals(start_timestamp, end_timestamp):
     response = requests.post(snapshot_graphql, json={'query': proposals_query, 'variables': variables})
     proposals = response.json()['data']['proposals']
 
-    filter_proposals(proposals)
+    proposals = filter_proposals(proposals)
 
     write_proposals(start_timestamp, proposals)
 
