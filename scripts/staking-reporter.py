@@ -33,7 +33,7 @@ def get_timestamps(month):
 
 def write_proposals(start_timestamp, proposals):
     date = datetime.date.fromtimestamp(start_timestamp)
-    with open(f'reports/staking/{date}/proposals.csv', 'w+') as f:
+    with open(f'reports/staking/{date.year}-{date.month}/proposals.csv', 'w+') as f:
         fieldnames = ['id', 'title', 'author', 'choices', 'created', 'start', 'end']
         writer = csv.DictWriter(f, delimiter=',', fieldnames=fieldnames)
 
@@ -43,7 +43,7 @@ def write_proposals(start_timestamp, proposals):
 
 def write_votes(start_timestamp, votes):
     date = datetime.date.fromtimestamp(start_timestamp)
-    with open(f'reports/staking/{date}/votes.csv', 'w+') as f:
+    with open(f'reports/staking/{date.year}-{date.month}/votes.csv', 'w+') as f:
         fieldnames = ['voter', 'choice', 'proposal', 'created']
         writer = csv.DictWriter(f, delimiter=',', fieldnames=fieldnames)
 
@@ -53,7 +53,7 @@ def write_votes(start_timestamp, votes):
 
 def write_dictionaries(start_timestamp, dicts, filename, fieldnames):
     date = datetime.date.fromtimestamp(start_timestamp)
-    with open(f'reports/staking/{date}/{filename}', 'w+') as f:
+    with open(f'reports/staking/{date.year}-{date.month}/{filename}', 'w+') as f:
         writer = csv.DictWriter(f, delimiter=',', fieldnames=fieldnames)
 
         writer.writeheader()
@@ -67,26 +67,18 @@ def participation(address, voters):
 
 def write_participation(start_timestamp, voted):
     date = datetime.date.fromtimestamp(start_timestamp)
-    with open(f'reports/staking/{date}/participation.json', 'w+') as f:
+    with open(f'reports/staking/{date.year}-{date.month}/participation.json', 'w+') as f:
         voters = [v['address'] for v in voted]
         stakers = {web3.toChecksumAddress(addr): participation(addr, voters) for (addr, _) in get_stakers() }
         participation_json = json.dumps(stakers, indent=4)
         f.write(participation_json)
 
-
 def write_to_slash(start_timestamp, not_voted):
     date = datetime.date.fromtimestamp(start_timestamp)
-    with open(f'reports/staking/{date}/to-slash.json', 'w+') as f:
+    with open(f'reports/staking/{date.year}-{date.month}/to-slash.json', 'w+') as f:
         voters = [v['address'] for v in not_voted]
         to_slash_json = json.dumps(voters, indent=4)
         f.write(to_slash_json)
-
-def write_kpi_options(date, airdrop_map):
-    with open(f'reports/staking/{date}/kpi-options.json', 'w+') as f:
-        kpi_airdrop_json = json.dumps(airdrop_map, indent=4)
-        f.write(kpi_airdrop_json)
-
-
 
 def get_stakers():
     subgraph = "https://api.thegraph.com/subgraphs/name/pie-dao/vedough"
@@ -190,7 +182,7 @@ def report():
     month = int(input('What month? [1-12]: '))
     (date, start_date, end_date) = get_timestamps(month)
 
-    Path(f'reports/staking/{date}').mkdir(parents=True, exist_ok=True)
+    Path(f'reports/staking/{date.year}-{date.month}').mkdir(parents=True, exist_ok=True)
 
     print(f'Thank you. Reporting from {start_date} to {end_date}...')
 
