@@ -1,6 +1,6 @@
 from pathlib import Path
 from brownie import web3, interface, Wei
-from operator import add
+from decimal import Decimal
 
 import csv
 import requests
@@ -8,7 +8,6 @@ import datetime
 import calendar
 import json
 
-from toolz.itertoolz import accumulate
 
 safes_staked = map(web3.toChecksumAddress, ['0xea9f2e31ad16636f4e1af0012db569900401248a'])
 VEDOUGH_ADDRESS = web3.toChecksumAddress('0xe6136f2e90eeea7280ae5a0a8e6f48fb222af945')
@@ -202,3 +201,31 @@ def report():
 
     write_participation(int(start_date.timestamp()), voted)
     write_to_slash(int(start_date.timestamp()), not_voted)
+
+def kpi_airdrop():
+    Path(f'reports/airdrops').mkdir(parents=True, exist_ok=True)
+
+    print(f'Generating airdrop amounts for KPI options..')
+
+    EXPLODE_DECIMALS = Decimal(1e18)
+    KPI_OPTIONS_UNITS = Decimal(10_000_000 * EXPLODE_DECIMALS)
+    total_supply = Decimal(interface.ERC20(VEDOUGH_ADDRESS).totalSupply())
+    prorata = Decimal(KPI_OPTIONS_UNITS * EXPLODE_DECIMALS / total_supply)
+    
+    stakers = get_stakers()
+    airdrop = []
+    airdropped = 0
+    for (addr, bal) in stakers:
+        staker_balance = Decimal(bal)
+        staker_prorata = int(prorata * staker_balance / EXPLODE_DECIMALS)
+        airdrop.append({"address": web3.toChecksumAddress(addr), "amount": staker_prorata})
+        airdropped += staker_prorata
+    
+    with open(f'reports/airdrops/kpi_options.csv', 'w+') as f:
+        writer = csv.DictWriter(f, delimiter=',', fieldnames=["address", "amount"])
+
+        writer.writeheader()
+        writer.writerows(airdrop)
+    
+    print(f'Generated report in reports/airdrops/kpi_options.csv')
+    print(f'KPI options to airdrop: {airdropped}')
