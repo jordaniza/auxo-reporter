@@ -123,9 +123,7 @@ def report_proposals(start_timestamp, end_timestamp):
     }
     response = requests.post(snapshot_graphql, json={'query': proposals_query, 'variables': variables})
     proposals = response.json()['data']['proposals']
-
     proposals = filter_proposals(proposals)
-
     write_proposals(start_timestamp, proposals)
 
     return proposals
@@ -148,7 +146,7 @@ def report_votes(start_timestamp, proposals):
         }
     """
 
-    variables = {'space': "piedao.eth", 'proposals_in': proposals_ids}
+    variables = {'space': "piedao.eth", 'proposals': proposals_ids}
     response = requests.post(snapshot_graphql, json={'query': votes_query, 'variables': variables})
     votes = response.json()['data']['votes']
 
@@ -177,6 +175,21 @@ def report_voters(start_timestamp, votes):
 
     return (voted, not_voted)
 
+def get_stakers_from_voters_file(f, vedough):
+    with open(f, 'r') as voters_file:
+        reader = csv.DictReader(voters_file,fieldnames=["address"])
+        stakers = []
+
+        for voter in reader:
+            if reader.line_num == 1:
+                continue
+            
+            checksum_address = web3.toChecksumAddress(voter['address'])
+            balance = vedough.balanceOf(checksum_address)
+            stakers.append((voter['address'], Decimal(int(balance))))
+
+    return stakers
+
 
 def report():
     month = int(input('What month? [1-12]: '))
@@ -199,12 +212,18 @@ def kpi_airdrop():
 
     print(f'Generating airdrop amounts for KPI options..')
 
+    vedough = interface.ERC20(VEDOUGH_ADDRESS)
+
     EXPLODE_DECIMALS = Decimal(1e18)
     KPI_OPTIONS_UNITS = Decimal(10_000_000 * EXPLODE_DECIMALS)
-    total_supply = Decimal(interface.ERC20(VEDOUGH_ADDRESS).totalSupply())
-    prorata = Decimal(KPI_OPTIONS_UNITS * EXPLODE_DECIMALS / total_supply)
     
-    stakers = get_stakers()
+    stakers = get_stakers_from_voters_file('reports/staking/2021-10/voted.csv', vedough)
+    total_supply = Decimal(0)
+    for (_, bal) in stakers:
+        total_supply += bal
+
+    prorata = Decimal(KPI_OPTIONS_UNITS * EXPLODE_DECIMALS / total_supply)
+
     airdrop = []
     airdropped = 0
     for (addr, bal) in stakers:
