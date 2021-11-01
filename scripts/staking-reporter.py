@@ -80,6 +80,14 @@ def write_to_slash(start_timestamp, not_voted):
         to_slash_json = json.dumps(voters, indent=4)
         f.write(to_slash_json)
 
+def get_delegates():
+    subgraph = "https://api.thegraph.com/subgraphs/name/pie-dao/vedough"
+    query = '{ delegates(first: 1000) { delegator, delegate } }'
+    response = requests.post(subgraph, json={'query': query})
+    subgraph_delegates = response.json()['data']['delegates']
+
+    return [(web3.toChecksumAddress(d['delegator']), web3.toChecksumAddress(d['delegate'])) for d in subgraph_delegates]
+
 def get_stakers():
     subgraph = "https://api.thegraph.com/subgraphs/name/pie-dao/vedough"
     query = '{ stakers(first: 1000) { id, accountVeTokenBalance } }'
@@ -157,18 +165,21 @@ def report_votes(start_timestamp, proposals):
 
 def report_voters(start_timestamp, votes):
     stakers = get_stakers()
+    delegates = get_delegates()
+
+    
+
     voters = set([web3.toChecksumAddress(v['voter']) for v in votes])
-
     stakers_addrs = [web3.toChecksumAddress(addr) for (addr, _) in stakers]
+    delegators = [delegator for (delegator, _) in delegates]
+    stakers_addrs_no_delegators = [addr for addr in stakers_addrs if addr not in delegators]
 
-    voted = [{'address': addr} for addr in stakers_addrs if addr in voters]
+
+    voted = [{'address': addr} for addr in stakers_addrs_no_delegators if addr in voters]
+    voted.extend([{'address': delegator} for (delegator, delegate) in delegates if delegate in voters])
     
-    # TODO: we add safes that staked here (hardcoded) while we ponder about how to deal with delegation
-    voted.extend([{'address': address} for address in safes_staked])  
-    
-    not_voted = [{
-        'address': addr
-    } for addr in stakers_addrs if addr not in voters]
+    not_voted = [{'address': addr} for addr in stakers_addrs_no_delegators if addr not in voters]
+    not_voted.extend([{'address': delegator}] for (delegator, delegate) in delegates if delegate not in voters)
 
     write_dictionaries(start_timestamp, voted, 'voted.csv', ['address'])
     write_dictionaries(start_timestamp, not_voted, 'not_voted.csv', ['address'])
