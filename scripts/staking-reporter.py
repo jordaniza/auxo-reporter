@@ -8,9 +8,9 @@ import datetime
 import calendar
 import json
 
-
 safes_staked = map(web3.toChecksumAddress, ['0xea9f2e31ad16636f4e1af0012db569900401248a'])
 VEDOUGH_ADDRESS = web3.toChecksumAddress('0xe6136f2e90eeea7280ae5a0a8e6f48fb222af945')
+SLICE_ADDRESS = web3.toChecksumAddress('0x1083D743A1E53805a95249fEf7310D75029f7Cd6')
 
 def yes_or_no(question):
     while "the answer is invalid":
@@ -49,6 +49,15 @@ def write_votes(start_timestamp, votes):
 
         writer.writeheader()
         writer.writerows(votes)
+
+def write_stakers(start_timestamp, stakers):
+    date = datetime.date.fromtimestamp(start_timestamp)
+    with open(f'reports/staking/{date.year}-{date.month}/stakers.csv', 'w+') as f:
+        fieldnames = ['address', 'amount']
+        writer = csv.DictWriter(f, delimiter=',', fieldnames=fieldnames)
+
+        writer.writeheader()
+        writer.writerows(stakers)
 
 
 def write_dictionaries(start_timestamp, dicts, filename, fieldnames):
@@ -90,7 +99,7 @@ def get_delegates():
 
 def get_stakers():
     subgraph = "https://api.thegraph.com/subgraphs/name/pie-dao/vedough"
-    query = '{ stakers(first: 1000) { id, accountVeTokenBalance } }'
+    query = '{ stakers(first: 1000, block: {number: 13527858}) { id, accountVeTokenBalance } }'
     response = requests.post(subgraph, json={'query': query})
     subgraph_stakers = response.json()['data']['stakers']
 
@@ -186,7 +195,7 @@ def report_voters(start_timestamp, votes):
 
     return (voted, not_voted)
 
-def get_stakers_from_voters_file(f, vedough):
+def get_stakers_from_voters_file(f):
     with open(f, 'r') as voters_file:
         reader = csv.DictReader(voters_file,fieldnames=["address"])
         stakers = []
@@ -196,11 +205,60 @@ def get_stakers_from_voters_file(f, vedough):
                 continue
             
             checksum_address = web3.toChecksumAddress(voter['address'])
-            balance = vedough.balanceOf(checksum_address)
-            stakers.append((voter['address'], Decimal(int(balance))))
+            stakers.append(checksum_address)
 
     return stakers
 
+def write_reward_window(window_index, rewards, rewarded):
+    reward_window = {'chainId': 1, 'rewardToken': SLICE_ADDRESS, 'windowIndex': window_index, 'totalRewardsDistributed': str(rewarded)}
+    recipients = {reward["address"] : {"amount": str(reward["amount"]), "metaData": {"reason": [f'Distribution for epoch {window_index}']}} for reward in rewards}
+    reward_window['recipients'] = recipients
+
+    with open(f'reports/reward_windows/{window_index}/{window_index}.json', 'w+') as f:
+        reward_window_json = json.dumps(reward_window, indent=4)
+        f.write(reward_window_json)
+
+def report_prorata():    
+    print(f'Generating amounts for SLICE rewards...')
+
+    vedough = interface.ERC20(VEDOUGH_ADDRESS)
+
+    EXPLODE_DECIMALS = Decimal(1e18)
+    SLICE_UNITS = Decimal(1350000 * EXPLODE_DECIMALS)
+    
+    voters = get_stakers_from_voters_file('reports/staking/2021-10/voted.csv', vedough)
+    stakers = [(web3.toChecksumAddress(addr), Decimal(bal)) for (addr, bal) in get_stakers() if web3.toChecksumAddress(addr) in voters]
+    print(len(stakers))
+    total_supply = Decimal(0)
+    for (_, bal) in stakers:
+        total_supply += bal
+
+    prorata = Decimal(SLICE_UNITS * EXPLODE_DECIMALS / total_supply)
+
+    rewards = []
+    rewarded = 0
+    for (addr, bal) in stakers:
+        staker_balance = Decimal(bal)
+        staker_prorata = int(prorata * staker_balance / EXPLODE_DECIMALS)
+        rewards.append({"address": web3.toChecksumAddress(addr), "amount": staker_prorata})
+        rewarded += staker_prorata
+    
+    with open(f'reports/staking/2021-10/slice_amounts.csv', 'w+') as f:
+        writer = csv.DictWriter(f, delimiter=',', fieldnames=["address", "amount"])
+
+        writer.writeheader()
+        writer.writerows(rewards)
+    
+    with open(f'reports/staking/2021-10/slice_amounts.json', 'w+') as f:
+        slice_amounts_json = json.dumps(rewards, indent=4)
+        f.write(slice_amounts_json)
+    
+    print(f'Generated report in reports/staking/2021-10/slice_amount.csv')
+    print(f'SLICE to distribute: {rewarded}')
+
+    window_index = int(input('Window index number? [1-12]: '))
+    Path(f'reports/reward_windows/{window_index}').mkdir(parents=True, exist_ok=True)
+    write_reward_window(window_index, rewards, rewarded)
 
 def report():
     month = int(input('What month? [1-12]: '))
@@ -218,6 +276,9 @@ def report():
     write_participation(int(start_date.timestamp()), voted)
     write_to_slash(int(start_date.timestamp()), not_voted)
 
+    stakers = [{'address': addr, 'amount': amount} for (addr, amount) in get_stakers()]
+    write_stakers(int(start_date.timestamp()), stakers)
+
 def kpi_airdrop():
     Path(f'reports/airdrops').mkdir(parents=True, exist_ok=True)
 
@@ -228,10 +289,10 @@ def kpi_airdrop():
     EXPLODE_DECIMALS = Decimal(1e18)
     KPI_OPTIONS_UNITS = Decimal(10_000_000 * EXPLODE_DECIMALS)
     
-    stakers = get_stakers_from_voters_file('reports/staking/2021-10/voted.csv', vedough)
+    stakers = get_stakers()
     total_supply = Decimal(0)
     for (_, bal) in stakers:
-        total_supply += bal
+        total_supply += Decimal(bal)
 
     prorata = Decimal(KPI_OPTIONS_UNITS * EXPLODE_DECIMALS / total_supply)
 
@@ -248,6 +309,10 @@ def kpi_airdrop():
 
         writer.writeheader()
         writer.writerows(airdrop)
+    
+    with open(f'reports/airdrops/kpi_options.json', 'w+') as f:
+        airdrop_json = json.dumps(airdrop, indent=4)
+        f.write(airdrop_json)
     
     print(f'Generated report in reports/airdrops/kpi_options.csv')
     print(f'KPI options to airdrop: {airdropped}')
