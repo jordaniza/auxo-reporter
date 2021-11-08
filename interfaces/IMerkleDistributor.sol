@@ -28,6 +28,8 @@ interface IMerkleDistributor {
     // Windows are mapped to arbitrary indices.
     function merkleWindows(uint256 index) external view returns(Window memory);
 
+    function initialize() external;
+
     /**
      * @notice Set merkle root for the next available window index and seed allocations.
      * @notice Callable only by owner of this contract. Caller must have approved this contract to transfer

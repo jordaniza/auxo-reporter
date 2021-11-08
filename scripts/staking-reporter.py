@@ -226,9 +226,8 @@ def report_prorata():
     EXPLODE_DECIMALS = Decimal(1e18)
     SLICE_UNITS = Decimal(1350000 * EXPLODE_DECIMALS)
     
-    voters = get_stakers_from_voters_file('reports/staking/2021-10/voted.csv', vedough)
+    voters = get_stakers_from_voters_file('reports/staking/2021-10/voted.csv')
     stakers = [(web3.toChecksumAddress(addr), Decimal(bal)) for (addr, bal) in get_stakers() if web3.toChecksumAddress(addr) in voters]
-    print(len(stakers))
     total_supply = Decimal(0)
     for (_, bal) in stakers:
         total_supply += bal
@@ -242,7 +241,7 @@ def report_prorata():
         staker_prorata = int(prorata * staker_balance / EXPLODE_DECIMALS)
         rewards.append({"address": web3.toChecksumAddress(addr), "amount": staker_prorata})
         rewarded += staker_prorata
-    
+        
     with open(f'reports/staking/2021-10/slice_amounts.csv', 'w+') as f:
         writer = csv.DictWriter(f, delimiter=',', fieldnames=["address", "amount"])
 
@@ -280,11 +279,9 @@ def report():
     write_stakers(int(start_date.timestamp()), stakers)
 
 def kpi_airdrop():
-    Path(f'reports/airdrops').mkdir(parents=True, exist_ok=True)
+    Path(f'reports/airdrops/kpi').mkdir(parents=True, exist_ok=True)
 
     print(f'Generating airdrop amounts for KPI options..')
-
-    vedough = interface.ERC20(VEDOUGH_ADDRESS)
 
     EXPLODE_DECIMALS = Decimal(1e18)
     KPI_OPTIONS_UNITS = Decimal(10_000_000 * EXPLODE_DECIMALS)
@@ -304,15 +301,24 @@ def kpi_airdrop():
         airdrop.append({"address": web3.toChecksumAddress(addr), "amount": staker_prorata})
         airdropped += staker_prorata
     
-    with open(f'reports/airdrops/kpi_options.csv', 'w+') as f:
+    with open('reports/airdrops/kpi/kpi_options.csv', 'w+') as f:
         writer = csv.DictWriter(f, delimiter=',', fieldnames=["address", "amount"])
 
         writer.writeheader()
         writer.writerows(airdrop)
     
-    with open(f'reports/airdrops/kpi_options.json', 'w+') as f:
+    with open('reports/airdrops/kpi/kpi_options.json', 'w+') as f:
         airdrop_json = json.dumps(airdrop, indent=4)
         f.write(airdrop_json)
+    
+    with open('reports/airdrops/kpi/claims.json', 'w+') as f:
+        reward_window = {'chainId': 1, 'rewardToken': '', 'windowIndex': '1', 'totalRewardsDistributed': str(airdropped)}
+        recipients = {reward["address"] : {"amount": str(reward["amount"]), "metaData": {"reason": ['wKPI-DOUGH airdrop']}} for reward in airdrop}
+        reward_window['recipients'] = recipients
+
+        reward_window_json = json.dumps(reward_window, indent=4)
+        f.write(reward_window_json)
+
     
     print(f'Generated report in reports/airdrops/kpi_options.csv')
     print(f'KPI options to airdrop: {airdropped}')
