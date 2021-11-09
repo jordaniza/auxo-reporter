@@ -1,6 +1,6 @@
 {
     "chainId": 1,
-    "rewardToken": "",
+    "rewardToken": "0xC67C620074440C15683acE78c1EfA38A4569969b",
     "windowIndex": "1",
     "totalRewardsDistributed": "9999999999999999999999879",
     "recipients": {

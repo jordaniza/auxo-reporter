@@ -312,7 +312,7 @@ def kpi_airdrop():
         f.write(airdrop_json)
     
     with open('reports/airdrops/kpi/claims.json', 'w+') as f:
-        reward_window = {'chainId': 1, 'rewardToken': '', 'windowIndex': '1', 'totalRewardsDistributed': str(airdropped)}
+        reward_window = {'chainId': 1, 'rewardToken': '0xC67C620074440C15683acE78c1EfA38A4569969b', 'windowIndex': '1', 'totalRewardsDistributed': str(airdropped)}
         recipients = {reward["address"] : {"amount": str(reward["amount"]), "metaData": {"reason": ['wKPI-DOUGH airdrop']}} for reward in airdrop}
         reward_window['recipients'] = recipients
 
