@@ -62,6 +62,10 @@ interface IMerkleDistributor {
         string memory ipfsHash
     ) external;
 
+    function deleteWindow(uint256 windowIndex) external;
+
+    function withdrawRewards(address rewardCurrency, uint256 amount) external;
+
     /**
      * @notice Claim amount of reward tokens for account, as described by Claim input object.
      * @dev    If the `_claim`'s `amount`, `accountIndex`, and `account` do not exactly match the

@@ -1,0 +1,345 @@
+[
+    {
+        "address": "0x0056D1fd2ca3c0F3A7B6ed6CDd1F1F104B4BF9A9",
+        "amount": 3154136538694458679240,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x01298D8c3C581744A7985D91deA5FbCB9f4F58ec",
+        "amount": 437279578760725638461,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x139776871Ee95f55d20b10d9Ba5a0385451066cd",
+        "amount": 52958832342801581722,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x1f540E4D3211D393C31Fa343cFFD080D9B11b29e",
+        "amount": 304540024343255377160,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x2459d93923CC940E3AA1935Ead83eF8011534BB1",
+        "amount": 5309897222120955440,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x280dEd1b7e430BeD0Cbb0Aace452Fd2ADEf2b581",
+        "amount": 17389985083103467602,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x2E6a4C895E3a466f86cc00d9f8B33A1eeCe3fc5a",
+        "amount": 38952793811346618008,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x2EC8db4C68717b9101578a3760cD70D859587b43",
+        "amount": 108663324878261903311,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x329c54289Ff5D6B7b7daE13592C6B1EDA1543eD4",
+        "amount": 887431547511258843517,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x3de51076B07cA102ABF377a0718Fb377669C9be0",
+        "amount": 952572866841112749491,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x4059457092Cc3812d56676DF6A75fD21204Fbe2F",
+        "amount": 116795240495763957788,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x4E62CF78dA0c0D97D06BA0b3E26cF695bbBc75b5",
+        "amount": 54849042877048802200,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x4e97DA0282BB922C4938bF6122F8e493D6FD6A20",
+        "amount": 32595696479532854309,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x4f38F2DA7720F1077A45b80E88c0A78C0144c136",
+        "amount": 12735594575195357303,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x555c929D0f0162B6A434d924865Cf10b667F98E2",
+        "amount": 93693890062451404063,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x56446712B219fcC34a5604f5E7AF5d50d65B6647",
+        "amount": 1846097562353521402,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x5976fec487B0640e97BB0Aa67a4AD81D76C6AA77",
+        "amount": 32667183879629640812,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x68F18759e83a21dA121E134949103bf5F0737073",
+        "amount": 8724333991890837938244,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x7136fbDdD4DFfa2369A9283B6E90A040318011Ca",
+        "amount": 1947104055959639291,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x73B3cE33d3750fcEe9aaB1200B80c5AA66B4b5fa",
+        "amount": 3795436415970861315,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x7558B9A644CcD3C815F7b717213Dff0B0a9b0f98",
+        "amount": 81632466878417872383,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x7bDb45b1fe5B3eB17a4C7a16C9750C7e10CcF08d",
+        "amount": 14435055507347354526081,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x7DFceB66eE379b66946158c40Bd4cac1C7db50b1",
+        "amount": 30071474312871110196,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x852cFCA2F9DB0D9b2016C467BDb989C694f078F7",
+        "amount": 8605026269233843796,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x86CDf20021c2544D8e3d1843ccc5780344EB575F",
+        "amount": 6834444732354452068,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x9309026ae5f4c5ea1D6B5812C49C14DacB35211b",
+        "amount": 250372018767583982883,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0x9cA10fe0cCc43d8464e91938E56411e6eCFb8e2d",
+        "amount": 146922855930251925562,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+        "amount": 10623560044537825541,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xAC60913f8E9821E9006507b05E1956f5A82749c1",
+        "amount": 140663195074264496780,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xAF312F43cbe83b44bEbAF47b203D6099BC73A84e",
+        "amount": 42515931287208654225,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xB4ADB7794432dAE7E78C2258fF350fBA88250C32",
+        "amount": 354116307375878345,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xBc4811f78DCb2AC60c026e871f697d87Fc36022b",
+        "amount": 22937129159748854661514,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xbC60AA031a9f34BD7992c99eaE5e2C4Dd1b5dBc3",
+        "amount": 2950969228131139158,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xbE8Fe12B9EB1CA2a593e6C070c71c294b6FE9f00",
+        "amount": 7444887168806030279093,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xC07EF9FDa2d42a7757172f6A7CDa2a63599591ED",
+        "amount": 649381052084153257490,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xc31dB4e4d5C2c803A3B1b3F484e248E70185D40d",
+        "amount": 7372278342162739253,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xc86A24B95E34ad68584cD8a3323f87d64F474225",
+        "amount": 15729006182672028586,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xce56D6b89aBa96C43E8FbF02C3BF34A751952c19",
+        "amount": 1770581536879391727678,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xD63E2Af499327DC60bB06948a9c1f72bE633a2B6",
+        "amount": 1838189929956402196,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xd7dEdcf8fFDDCEeD9aD20A41A5F88DC1268B3ad4",
+        "amount": 134576938401277970882,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xDE60d916a99D51C1bf58D36674492033Fe580BbB",
+        "amount": 219628330527058159927,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xEE5C256721Abe58Af6f582C0eFd6774Dd2765038",
+        "amount": 634265197095407211,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xEeaA36420519d85EfaB3b7120ac5Afa5a5825bFB",
+        "amount": 118280110924170027840792,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xf0754756E71aac7aD2B6497E7006F5E44D68D592",
+        "amount": 299007209091666969759,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xF16579B805fca520f06280AB2A539868D75dd01B",
+        "amount": 229308157947333456927,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xF7b8a7D68338f6B1d0EFa76eA5964042cbF16aBd",
+        "amount": 35033469932941134068,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xfDf7F859807d1dC73873640759b2706822802529",
+        "amount": 19667013140256784646,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xFeFe8736B8DEbEb1592DaC993c81e002aF8C34e9",
+        "amount": 263514854702014403587,
+        "inactive_windows": [
+            2
+        ]
+    },
+    {
+        "address": "0xff67A86A01C7c90B0c3f3A26B65C25f432ec1751",
+        "amount": 110456578717098940520,
+        "inactive_windows": [
+            2
+        ]
+    }
+]
