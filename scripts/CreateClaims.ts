@@ -72,7 +72,7 @@ async function main() {
     chainId: recipientsObject.chainId,
     rewardToken: recipientsObject.rewardToken,
     windowIndex: recipientsObject.windowIndex,
-    totalRewardsDistributed: recipientsObject.totalRewardsDistributed.toLocaleString('fullwide', {useGrouping:false}),
+    totalRewardsDistributed: recipientsObject.totalRewardsDistributed,
     windowStart: recipientsObject.windowStart,
     merkleRoot,
     claims: recipientsDataWithProof,
