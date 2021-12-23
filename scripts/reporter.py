@@ -245,7 +245,6 @@ def inactive_for_window(window_index, rewards, path):
                 inactive.append(inactive_item)
             else:
                 if addr in prev_inactive_addresses:
-                    print(addr, prev_inactive[addr], rewards[addr])
                     amount += prev_inactive[addr]['amount']
                 rewards[addr] = amount
 
