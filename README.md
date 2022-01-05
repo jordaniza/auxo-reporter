@@ -35,7 +35,7 @@ To run the `reporter`:
 brownie run reporter report
 ```
 
-Reports generated explained for Dummies
+## Reports generated explained for Dummies
 **address.csv**: All voting addresses
 **proposals.csv**: All eligible proposals considered for the reporting month
 **slice_amounts.csv**: Slice amounts entitled for each address for the current month's treasury distribution depending on their voting weight
