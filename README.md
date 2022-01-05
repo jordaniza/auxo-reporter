@@ -36,13 +36,17 @@ brownie run reporter report
 ```
 
 ## Reports generated explained for Dummies
-**proposals.csv**: All eligible proposals considered for the reporting month
-**slice_amounts.csv**: Slice amounts entitled for each address for the current month's treasury distribution depending on their voting weight
-**slice_amounts_after_unclaimed.csv**: every eligible and non eligible addresses and their accrued rewards. Use for the notarization but delete the not eligible addressess to leave only those eligible during the reporting month.
-**stakers.csv**: Amount of veDough staked per address
-**unclaimed.csv**: amount of unclaimed rewards per address
-**voted.csv**: addresses that voted on the reporting month
-**not_voted.csv**: addresses that did not vote on the reporting month
+
+```
+reports/staking/<month-year>
+├── proposals.csv: All eligible proposals considered for the reporting month
+├── slice_amounts.csv: Slice amounts entitled for each address for the current month's treasury distribution depending on their voting weight
+├── slice_amounts_after_unclaimed.csv: every eligible and non eligible addresses and their accrued rewards. Use for the notarization but delete the not eligible addressess to leave only those eligible during the reporting month.
+├── stakers.csv: Amount of veDough staked per address
+├── unclaimed.csv: amount of unclaimed rewards per address
+├── voted.csv: addresses that voted on the reporting month
+└── not_voted.csv: addresses that did not vote on the reporting month
+```
 
 ### Future improvements
 
