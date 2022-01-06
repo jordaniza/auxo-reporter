@@ -11,13 +11,12 @@ def yes_or_no(question):
         if reply[:1] == 'n':
             return False
 
-def get_timestamps(month):
-    today = datetime.date.today()
-    (_, n_days) = calendar.monthrange(today.year, month)
+def get_timestamps(month, year):
+    (_, n_days) = calendar.monthrange(year, month)
 
-    date = datetime.date(today.year, month, 1)
-    start_date = datetime.datetime(today.year, month, 1, 0, 0, 0)
-    end_date = datetime.datetime(today.year, month, n_days, 23, 59, 59)
+    date = datetime.date(year, month, 1)
+    start_date = datetime.datetime(year, month, 1, 0, 0, 0)
+    end_date = datetime.datetime(year, month, n_days, 23, 59, 59)
 
     return (date, start_date, end_date)
 

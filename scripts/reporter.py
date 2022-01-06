@@ -47,7 +47,7 @@ def get_delegates():
 
 def get_stakers():
     subgraph = "https://api.thegraph.com/subgraphs/name/pie-dao/vedough"
-    query = '{ stakers(first: 1000, block: {number: 13717847}) { id, accountVeTokenBalance } }'
+    query = '{ stakers(first: 1000, block: {number: 13916165}) { id, accountVeTokenBalance } }'
     response = requests.post(subgraph, json={'query': query})
     subgraph_stakers = response.json()['data']['stakers']
 
@@ -254,10 +254,10 @@ def inactive_for_window(window_index, rewards, path):
 def report_prorata(path):    
     print(f'Generating amounts for SLICE rewards...')
 
-    units = int(input('How many units to distribute? '))
+    units = Decimal(input('How many units to distribute? '))
 
     EXPLODE_DECIMALS = Decimal(1e18)
-    SLICE_UNITS = Decimal(int(units) * EXPLODE_DECIMALS)
+    SLICE_UNITS = Decimal(int(units * EXPLODE_DECIMALS))
     
     stakers = [(stk['address'], stk['amount']) for stk in get_stakers_from_file(f'{path}/stakers.csv')]
     total_supply = Decimal(0)
@@ -313,8 +313,9 @@ def report_prorata(path):
     write_reward_window(window_index, rewards)
 
 def report():
-    month = int(input('What month? [1-12]: '))
-    (date, start_date, end_date) = get_timestamps(month)
+    epoch = input('What epoch? [month-year, {1-12}-{year}]: ')
+    epoch = [int(token) for token in epoch.split("-")]
+    (date, start_date, end_date) = get_timestamps(epoch[0], epoch[1])
 
     Path(f'reports/staking/{date.year}-{date.month}').mkdir(parents=True, exist_ok=True)
 
