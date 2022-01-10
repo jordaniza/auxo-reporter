@@ -190,11 +190,11 @@ def get_claimed_for_window(window_index):
 
 
 
-def compound_for_window(window_index, rewards):
+def compound_for_window(window_index, rewards, path_date):
     if window_index == 0:
         return ([], [])
     
-    prev_window = 0
+    prev_window = window_index - 1
     prev_window_claims = f'reports/epochs/{prev_window}/claims.json'
     claimed = [web3.toChecksumAddress(item['account']) for item in get_claimed_for_window(prev_window)]
 
@@ -203,7 +203,7 @@ def compound_for_window(window_index, rewards):
 
         # Needed to report who claimed last month
         claimed_prev_window = [{'address': web3.toChecksumAddress(address), 'amount': item['amount']} for (address, item) in claims_prev_window.items() if address in claimed]
-        claimed_prev_file = open('reports/staking/2021-11/claimed.csv', 'w+')
+        claimed_prev_file = open(f'reports/staking/{path_date}/claimed.csv', 'w+')
         claimed_writer = csv.DictWriter(claimed_prev_file, fieldnames=['address','amount'])
         claimed_writer.writeheader()
         claimed_writer.writerows(claimed_prev_window)
@@ -230,28 +230,27 @@ def inactive_for_window(window_index, rewards, path):
 
     with open(f'{path}/not_voted.csv') as non_voters_file:
         reader = csv.DictReader(non_voters_file, fieldnames=['address'])
-        inactive_addresses = [item['address'] for item in list(reader)[1:]]
-        prev_inactive_addresses = [item['address'] for item in prev_inactive]
+        inactive_addresses = [item['address'] for item in list(reader)[1:]] # take non-voting addresses
+        prev_inactive_addresses = [item['address'] for item in prev_inactive] # take prev window non-voting addresses
         prev_inactive = {item['address']:{'amount': item['amount'], 'inactive_windows': item['inactive_windows']} for item in prev_inactive}
 
         inactive = []
-        for (addr, amount) in rewards.items():
-            if addr in inactive_addresses:
-                if addr in prev_inactive_addresses:
-                    inactive_item = {'address': addr, 'amount': amount + prev_inactive[addr]['amount'], 'inactive_windows': prev_inactive[addr]['inactive_windows'] + [window_index]}
+        new_rewards = {}
+        for (addr, amount) in rewards.items(): # for each reward entry
+            if addr in inactive_addresses: # if in currently non-voters addresses:
+                if addr in prev_inactive_addresses: # and non-voter previously:
+                    inactive_item = {'address': addr, 'amount': amount, 'inactive_windows': prev_inactive[addr]['inactive_windows'] + [window_index]}
                 else:
                     inactive_item = {'address': addr, 'amount': amount, 'inactive_windows': [window_index]}
                 
                 inactive.append(inactive_item)
             else:
-                if addr in prev_inactive_addresses:
-                    amount += prev_inactive[addr]['amount']
-                rewards[addr] = amount
+                new_rewards[addr] = amount
 
-    return (rewards, inactive)
+    return (new_rewards, inactive)
 
 
-def report_prorata(path):    
+def report_prorata(path, path_date):    
     print(f'Generating amounts for SLICE rewards...')
 
     units = Decimal(input('How many units to distribute? '))
@@ -297,20 +296,20 @@ def report_prorata(path):
 
     window_index = int(input('Window index? (int) '))
 
-    (rewards, unclaimed, compound_report) = compound_for_window(window_index, rewards) # compound rewards
+    (rewards, unclaimed, compound_report) = compound_for_window(window_index, rewards, path_date) # compound rewards
 
     rewards_serialized = [{'address': addr, 'amount': amt} for (addr, amt) in rewards.items()]
 
     write_csv(rewards_serialized, f'{path}/slice_amounts_after_unclaimed.csv', ["address", "amount"])
 
-    (rewards, inactive) = inactive_for_window(window_index, rewards, path=path) # account inactive stakers
+    (new_rewards, inactive) = inactive_for_window(window_index, rewards, path=path) # account inactive stakers
 
     Path(f'reports/epochs/{window_index}').mkdir(parents=True, exist_ok=True)
     
     write_csv(unclaimed, f'{path}/unclaimed.csv', ['address', 'amount'])
     write_json(compound_report, f'reports/epochs/{window_index}/compound_report.json')
     write_json(inactive, f'reports/epochs/{window_index}/inactive.json')
-    write_reward_window(window_index, rewards)
+    write_reward_window(window_index, new_rewards)
 
 def report():
     epoch = input('What epoch? [month-year, {1-12}-{year}]: ')
@@ -331,4 +330,4 @@ def report():
     stakers = [{'address': addr, 'amount': amount} for (addr, amount) in get_stakers()]
     write_staking_csv(int(start_date.timestamp()), stakers, 'stakers.csv', stakers_fieldnames)
 
-    report_prorata(f'reports/staking/{date.year}-{date.month}')
+    report_prorata(f'reports/staking/{date.year}-{date.month}', f'{date.year}-{date.month}')
