@@ -81,8 +81,8 @@ def filter_proposals(proposals):
 def report_proposals(start_timestamp, end_timestamp):
     snapshot_graphql = "https://hub.snapshot.org/graphql"
     proposals_query = """
-        query($space: String, $created_gt: Int, $end_lt: Int) { 
-            proposals(first: 1000, where: {space: $space, created_gt: $created_gt, end_lt: $end_lt}) { 
+        query($space: String, $end_gte: Int, $end_lte: Int) { 
+            proposals(first: 1000, where: {space: $space, end_gte: $end_gte, end_lte: $end_lte}) { 
                 id
                 title
                 author
@@ -96,8 +96,8 @@ def report_proposals(start_timestamp, end_timestamp):
 
     variables = {
         "space": "piedao.eth",
-        "created_gt": start_timestamp,
-        "end_lt": end_timestamp,
+        "end_gte": start_timestamp,
+        "end_lte": end_timestamp,
     }
     response = requests.post(
         snapshot_graphql, json={"query": proposals_query, "variables": variables}
