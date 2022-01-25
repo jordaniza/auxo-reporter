@@ -66,88 +66,74 @@ def get_stakers():
     return [(s["id"], s["accountVeTokenBalance"]) for s in subgraph_stakers]
 
 
-def filter_proposals(proposals):
+def filter_votes_by_proposal(votes):
+    proposals_map = {v["proposal"]["id"]: v["proposal"] for v in votes}
+
     if yes_or_no("Do you want to filter proposals?"):
-        take = []
-        for p in proposals:
+        proposals = []
+        proposals_ids = []
+        for (p_id, p) in proposals_map.items():
             title = p["title"]
             if yes_or_no(f"Is proposal {title} a valid proposal?"):
-                take.append(p["id"])
-        proposals = [p for p in proposals if p["id"] in take]
+                proposals.append(p)
+                proposals_ids.append(p_id)
+        return ([v for v in votes if v["proposal"]["id"] in proposals_ids], proposals)
+    else:
+        return (votes, list(proposals_map.values()))
 
-    return proposals
 
-
-def report_proposals(start_timestamp, end_timestamp):
+def report_votes(start_timestamp, end_timestamp):
     snapshot_graphql = "https://hub.snapshot.org/graphql"
-    proposals_query = """
-        query($space: String, $created_gt: Int, $end_lt: Int) { 
-            proposals(first: 1000, where: {space: $space, created_gt: $created_gt, end_lt: $end_lt}) { 
-                id
-                title
-                author
+    votes_query = """
+        query($skip: Int, $space: String, $created_gte: Int, $created_lte: Int) { 
+            votes(skip: $skip, first: 1000, where: {space: $space, created_gte: $created_gte, created_lte: $created_lte}) {
+                voter
+                choice
                 created
-                start
-                end
-                choices
-            } 
+                proposal {
+                    id
+                    title
+                    author
+                    created
+                    start
+                    end
+                    choices
+                }
+            }
         }
     """
 
     variables = {
+        "skip": 0,
         "space": "piedao.eth",
-        "created_gt": start_timestamp,
-        "end_lt": end_timestamp,
+        "created_gte": start_timestamp,
+        "created_lte": end_timestamp,
     }
-    response = requests.post(
-        snapshot_graphql, json={"query": proposals_query, "variables": variables}
-    )
-    proposals = response.json()["data"]["proposals"]
-    proposals = filter_proposals(proposals)
-    write_staking_csv(start_timestamp, proposals, "proposals.csv", proposals_fieldnames)
 
-    return proposals
-
-
-def report_votes(start_timestamp, proposals):
-    proposals_ids = [p["id"] for p in proposals]
-
-    snapshot_graphql = "https://hub.snapshot.org/graphql"
-    votes_query = """
-        query($skip: Int, $space: String, $proposals: [String]) { 
-            votes(skip: $skip, first: 1000, where: {space: $space, proposal_in: $proposals}) {
-                voter
-                choice
-                proposal {
-                    id
-                }
-                created
-            } 
-        }
-    """
-
-    votes = []
-    variables = {"skip": 0, "space": "piedao.eth", "proposals": proposals_ids}
     response = requests.post(
         snapshot_graphql, json={"query": votes_query, "variables": variables}
     )
+
+    print(response)
+
     tmp_votes = response.json()["data"]["votes"]
     votes = tmp_votes
     while len(tmp_votes) > 0:
-        variables = {
-            "skip": len(votes),
-            "space": "piedao.eth",
-            "proposals": proposals_ids,
-        }
+        variables["skip"] = len(votes)
+
         response = requests.post(
             snapshot_graphql, json={"query": votes_query, "variables": variables}
         )
+
         tmp_votes = response.json()["data"]["votes"]
         votes += tmp_votes
 
-    write_staking_csv(start_timestamp, votes, "votes.csv", votes_fieldnames)
+    (votes, proposals) = filter_votes_by_proposal(votes)
 
-    return votes
+    write_staking_csv(start_timestamp, votes, "votes.csv", votes_fieldnames)
+    write_staking_csv(start_timestamp, proposals, "proposals.csv", proposals_fieldnames)
+
+    return (votes, proposals)
 
 
 def report_voters(start_timestamp, votes):
@@ -182,6 +168,8 @@ def report_voters(start_timestamp, votes):
             if delegate not in voters
         ]
     )
+
+    write_participation(start_timestamp, voted)
 
     write_staking_csv(start_timestamp, voted, "voted.csv", ["address"])
     write_staking_csv(start_timestamp, not_voted, "not_voted.csv", ["address"])
@@ -431,12 +419,10 @@ def report():
 
     print(f"Thank you. Reporting from {start_date} to {end_date}...")
 
-    proposals = report_proposals(int(start_date.timestamp()), int(end_date.timestamp()))
-    votes = report_votes(int(start_date.timestamp()), proposals)
+    (votes, _) = report_votes(int(start_date.timestamp()), int(end_date.timestamp()))
     (voted, _) = report_voters(int(start_date.timestamp()), votes)
-    print("Generating JSONs for distribution...")
 
-    write_participation(int(start_date.timestamp()), voted)
+    print("Generating JSONs for distribution...")
 
     stakers = [{"address": addr, "amount": amount} for (addr, amount) in get_stakers()]
     write_staking_csv(
