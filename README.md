@@ -2,52 +2,44 @@
 
 A collection of scripts enabling analysis of PieDAO staking initiative.
 
-## Folder structure overview
-
-```
-pie-reporter: a collection of scripts enabling analysis of PieDAO staking initiative
-├── interfaces: helpful interfaces to interact with pie-dao contracts via brownie
-├── reports: contains reports (atm only for the staking initiative)
-│   ├── airdrops: airdrops reports (merkle tree, amounts...)
-│   ├── epochs: staking rewards epochs (merkle tree, amounts, )
-│   └── staking: staking reports (csv files, useful for data analysis & extraction)
-└── scripts: the actual scripts
-    ├── check-slice-redeem.py: script used to simulate the claim for all the stakers
-    ├── CreateClaims.ts: used to generate merkle tree and claims
-    ├── edough-compounding.py: used to generate and post transactions 
-    ├── helpers.py: utility methods (mostly json/csv io)
-    └── reporter.py: the reporter, generates all the staking reports and needed data
-```
-
 ## How to run
 
-First, install `brownie-eth`:
+First, init a virtualenv:
 
 ```
-python3.7 -m venv ~/brownie_venv # creates a python virtualenv
-source ~/brownie_venv/bin/activate
-pip install eth-brownie (see https://eth-brownie.readthedocs.io/en/stable/install.html)
+python3.8 -m venv ./env # creates a python virtualenv
+source ./env/activate
+pip install -r requirements.txt
 ```
 
-To run the `reporter`: 
+To build a distribution:
 
 ```
-brownie run reporter report
+python ./reporter/run.py conf
+python ./reporter/run.py build <current-epoch-folder> <previous-epoch-folder>
+python ./reporter/run.py report <current-epoch-folder>
 ```
 
 ## Reports generated explained for Dummies
 
 ```
-reports/staking/<month-year>
-├── proposals.csv: All eligible proposals considered for the reporting month
-├── slice_amounts.csv: Slice amounts entitled for each address for the current month's treasury distribution depending on their voting weight
-├── slice_amounts_after_unclaimed.csv: every eligible and non eligible addresses and their accrued rewards. Use for the notarization but delete the not eligible addressess to leave only those eligible during the reporting month.
-├── stakers.csv: Amount of veDough staked per address
-├── unclaimed.csv: amount of unclaimed rewards per address
-├── voted.csv: addresses that voted on the reporting month
-└── not_voted.csv: addresses that did not vote on the reporting month
+reports/<month-year>
+├── csv
+     ├── distribution.csv: Rewards distributed for this month (including slashed)
+     ├── rewards.csv: Rewards distributed including any unclaimed reward
+     ├── voters.csv: Addresses that voted on the reporting month
+     ├── non_voters.csv: Addresses that did not vote on the reporting month
+     ├── proposals.csv: All eligible proposals considered for the reporting month
+     └── stakers.csv: Amount of veDough staked per address
+├── json
+     ├── rewards.json: rewards.csv in a JSON format
+     └── stakers.json: stakers.csv in a JSON format
+├── claims.json: Claims for this month (used to generate the merkle tree)
+├── epoch-conf.json: Epoch configuration
+├── reporter-db.json: JSON format document-based database (used by the reporter)
+└── merkle-tree.json: Final merkle tree
 ```
 
 ### Future improvements
 
-- [ ] Implement a sqlite database for reports
+- [ ] Implement a CLI to query `reporter-db`
