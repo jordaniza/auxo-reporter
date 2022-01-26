@@ -114,6 +114,7 @@ def rebuild():
     Path(f"{path}/json/").mkdir(parents=True, exist_ok=True)
 
     db = TinyDB(f"{path}/reporter-db.json")
+    db.drop_tables()
 
     stakers = read_stakers("./reports/staking/2021-12/stakers.csv")
     stakers_map = {addr: int(amount) for (addr, amount) in stakers}
@@ -123,7 +124,7 @@ def rebuild():
     inactive_stakers = json.load(open(("./reports/epochs/3/inactive.json")))
 
     amounts_after_unclaimed = read_amounts_for_active(
-        "./reports/staking/2021-12/slice_amounts_after_unclaimed.csv",
+        "./reports/staking/2021-11/slice_amounts_after_unclaimed.csv",
         [item["address"] for item in inactive_stakers],
     )
 

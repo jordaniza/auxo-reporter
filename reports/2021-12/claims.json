@@ -2,7 +2,7 @@
     "chainId": 1,
     "rewardToken": "0x1083D743A1E53805a95249fEf7310D75029f7Cd6",
     "windowIndex": 3,
-    "totalRewardsDistributed": "391512268874242867878946",
+    "totalRewardsDistributed": "195756134437121433939473",
     "recipients": {
         "0x00BA3CA0B6Df1486c912893d9f288311A60ED753": {
             "amount": "153925766457737355509",
