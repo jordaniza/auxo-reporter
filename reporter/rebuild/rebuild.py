@@ -116,15 +116,17 @@ def rebuild():
     db = TinyDB(f"{path}/reporter-db.json")
     db.drop_tables()
 
-    stakers = read_stakers("./reports/staking/2021-12/stakers.csv")
+    stakers = read_stakers("./reports/old_reports/staking/2021-12/stakers.csv")
     stakers_map = {addr: int(amount) for (addr, amount) in stakers}
-    (votes, proposals, voters, non_voters) = read_gov_stats("./reports/staking/2021-12")
-    distribution = get_distribution("./reports/staking/2021-12")
+    (votes, proposals, voters, non_voters) = read_gov_stats(
+        "./reports/old_reports/staking/2021-12"
+    )
+    distribution = get_distribution("./reports/old_reports/staking/2021-12")
 
-    inactive_stakers = json.load(open(("./reports/epochs/3/inactive.json")))
+    inactive_stakers = json.load(open(("./reports/old_reports/epochs/3/inactive.json")))
 
     amounts_after_unclaimed = read_amounts_for_active(
-        "./reports/staking/2021-11/slice_amounts_after_unclaimed.csv",
+        "./reports/old_reports/staking/2021-12/slice_amounts_after_unclaimed.csv",
         [item["address"] for item in inactive_stakers],
     )
 

@@ -5343,7 +5343,7 @@
         "208": {
             "state": "inactive",
             "address": "0x0056D1fd2ca3c0F3A7B6ed6CDd1F1F104B4BF9A9",
-            "slice_amount": 93509913126888376224,
+            "slice_amount": 3247646451821347055464,
             "vedough_balance": 17000000000000000000000,
             "inactive_windows": [
                 2,
@@ -5353,7 +5353,7 @@
         "209": {
             "state": "inactive",
             "address": "0x01298D8c3C581744A7985D91deA5FbCB9f4F58ec",
-            "slice_amount": 67923804179224668658,
+            "slice_amount": 505203382939950307119,
             "vedough_balance": 12348473358968280013601,
             "inactive_windows": [
                 2,
@@ -5435,7 +5435,7 @@
         "218": {
             "state": "inactive",
             "address": "0x139776871Ee95f55d20b10d9Ba5a0385451066cd",
-            "slice_amount": 8226236788389270248,
+            "slice_amount": 61185069131190851970,
             "vedough_balance": 1495520856840636576045,
             "inactive_windows": [
                 2,
@@ -5499,7 +5499,7 @@
         "225": {
             "state": "inactive",
             "address": "0x2459d93923CC940E3AA1935Ead83eF8011534BB1",
-            "slice_amount": 824800508977132973,
+            "slice_amount": 6134697731098088413,
             "vedough_balance": 149947831023911055769,
             "inactive_windows": [
                 2,
@@ -5509,7 +5509,7 @@
         "226": {
             "state": "inactive",
             "address": "0x280dEd1b7e430BeD0Cbb0Aace452Fd2ADEf2b581",
-            "slice_amount": 2701232801247948771,
+            "slice_amount": 20091217884351416373,
             "vedough_balance": 491081170815575849823,
             "inactive_windows": [
                 2,
@@ -5555,7 +5555,7 @@
         "231": {
             "state": "inactive",
             "address": "0x2E6a4C895E3a466f86cc00d9f8B33A1eeCe3fc5a",
-            "slice_amount": 6050641437622189049,
+            "slice_amount": 45003435248968807057,
             "vedough_balance": 1100000000000000000000,
             "inactive_windows": [
                 2,
@@ -5619,7 +5619,7 @@
         "238": {
             "state": "inactive",
             "address": "0x3de51076B07cA102ABF377a0718Fb377669C9be0",
-            "slice_amount": 147965686065488077672,
+            "slice_amount": 1100538552906600827163,
             "vedough_balance": 26900000000000000000000,
             "inactive_windows": [
                 2,
@@ -5638,7 +5638,7 @@
         "240": {
             "state": "inactive",
             "address": "0x4059457092Cc3812d56676DF6A75fD21204Fbe2F",
-            "slice_amount": 18142116462384961981,
+            "slice_amount": 134937356958148919769,
             "vedough_balance": 3298216943502438733889,
             "inactive_windows": [
                 2,
@@ -5693,7 +5693,7 @@
         "246": {
             "state": "inactive",
             "address": "0x4e97DA0282BB922C4938bF6122F8e493D6FD6A20",
-            "slice_amount": 5063176540363255433,
+            "slice_amount": 37658873019896109742,
             "vedough_balance": 920479960978865789040,
             "inactive_windows": [
                 2,
@@ -5703,7 +5703,7 @@
         "247": {
             "state": "inactive",
             "address": "0x4f38F2DA7720F1077A45b80E88c0A78C0144c136",
-            "slice_amount": 1978253899903500565,
+            "slice_amount": 14713848475098857868,
             "vedough_balance": 359644396768124638199,
             "inactive_windows": [
                 2,
@@ -5722,7 +5722,7 @@
         "249": {
             "state": "inactive",
             "address": "0x555c929D0f0162B6A434d924865Cf10b667F98E2",
-            "slice_amount": 2777719801529736221,
+            "slice_amount": 96471609863981140284,
             "vedough_balance": 504986423866404500000,
             "inactive_windows": [
                 2,
@@ -5732,7 +5732,7 @@
         "250": {
             "state": "inactive",
             "address": "0x56446712B219fcC34a5604f5E7AF5d50d65B6647",
-            "slice_amount": 54730802094855255,
+            "slice_amount": 1900828364448376657,
             "vedough_balance": 9950000000000000000,
             "inactive_windows": [
                 2,
@@ -5751,7 +5751,7 @@
         "252": {
             "state": "inactive",
             "address": "0x5976fec487B0640e97BB0Aa67a4AD81D76C6AA77",
-            "slice_amount": 5074280869038327164,
+            "slice_amount": 37741464748667967976,
             "vedough_balance": 922498715794946763272,
             "inactive_windows": [
                 2,
@@ -5815,7 +5815,7 @@
         "259": {
             "state": "inactive",
             "address": "0x68F18759e83a21dA121E134949103bf5F0737073",
-            "slice_amount": 258648192195683271664,
+            "slice_amount": 8982982184086521209908,
             "vedough_balance": 47021958638332554536620,
             "inactive_windows": [
                 2,
@@ -5843,7 +5843,7 @@
         "262": {
             "state": "inactive",
             "address": "0x7136fbDdD4DFfa2369A9283B6E90A040318011Ca",
-            "slice_amount": 302448870327751826,
+            "slice_amount": 2249552926287391117,
             "vedough_balance": 54984874048539000000,
             "inactive_windows": [
                 2,
@@ -5853,7 +5853,7 @@
         "263": {
             "state": "inactive",
             "address": "0x73B3cE33d3750fcEe9aaB1200B80c5AA66B4b5fa",
-            "slice_amount": 589555269477078755,
+            "slice_amount": 4384991685447940070,
             "vedough_balance": 107180503606183215903,
             "inactive_windows": [
                 2,
@@ -5863,7 +5863,7 @@
         "264": {
             "state": "inactive",
             "address": "0x7558B9A644CcD3C815F7b717213Dff0B0a9b0f98",
-            "slice_amount": 12680188978023927670,
+            "slice_amount": 94312655856441800053,
             "vedough_balance": 2305244496740126786493,
             "inactive_windows": [
                 2,
@@ -5891,7 +5891,7 @@
         "267": {
             "state": "inactive",
             "address": "0x7bDb45b1fe5B3eB17a4C7a16C9750C7e10CcF08d",
-            "slice_amount": 2242235702787780595920,
+            "slice_amount": 16677291210135135122001,
             "vedough_balance": 407636000000000000000000,
             "inactive_windows": [
                 2,
@@ -5928,7 +5928,7 @@
         "271": {
             "state": "inactive",
             "address": "0x852cFCA2F9DB0D9b2016C467BDb989C694f078F7",
-            "slice_amount": 1336641699401992671,
+            "slice_amount": 9941667968635836467,
             "vedough_balance": 243000000000000000000,
             "inactive_windows": [
                 2,
@@ -5938,7 +5938,7 @@
         "272": {
             "state": "inactive",
             "address": "0x86CDf20021c2544D8e3d1843ccc5780344EB575F",
-            "slice_amount": 1061612543146438624,
+            "slice_amount": 7896057275500890692,
             "vedough_balance": 193000000000000000000,
             "inactive_windows": [
                 2,
@@ -5984,7 +5984,7 @@
         "277": {
             "state": "inactive",
             "address": "0x9309026ae5f4c5ea1D6B5812C49C14DacB35211b",
-            "slice_amount": 7422717893516147305,
+            "slice_amount": 257794736661100130188,
             "vedough_balance": 1349442000000000000000,
             "inactive_windows": [
                 2,
@@ -6003,7 +6003,7 @@
         "279": {
             "state": "inactive",
             "address": "0x9cA10fe0cCc43d8464e91938E56411e6eCFb8e2d",
-            "slice_amount": 22821919386085874879,
+            "slice_amount": 169744775316337800441,
             "vedough_balance": 4149000000000000000000,
             "inactive_windows": [
                 2,
@@ -6049,7 +6049,7 @@
         "284": {
             "state": "inactive",
             "address": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
-            "slice_amount": 1650185938699574508,
+            "slice_amount": 12273745983237400049,
             "vedough_balance": 300002000000000000000,
             "inactive_windows": [
                 2,
@@ -6059,7 +6059,7 @@
         "285": {
             "state": "inactive",
             "address": "0xAC60913f8E9821E9006507b05E1956f5A82749c1",
-            "slice_amount": 21849589556699761285,
+            "slice_amount": 162512784630964258065,
             "vedough_balance": 3972231499775493715370,
             "inactive_windows": [
                 2,
@@ -6078,7 +6078,7 @@
         "287": {
             "state": "inactive",
             "address": "0xAF312F43cbe83b44bEbAF47b203D6099BC73A84e",
-            "slice_amount": 6604113092667258944,
+            "slice_amount": 49120044379875913169,
             "vedough_balance": 1200620541941886001130,
             "inactive_windows": [
                 2,
@@ -6088,7 +6088,7 @@
         "288": {
             "state": "inactive",
             "address": "0xB4ADB7794432dAE7E78C2258fF350fBA88250C32",
-            "slice_amount": 55005831251110809,
+            "slice_amount": 409122138626989154,
             "vedough_balance": 10000000000000000000,
             "inactive_windows": [
                 2,
@@ -6116,7 +6116,7 @@
         "291": {
             "state": "inactive",
             "address": "0xBc4811f78DCb2AC60c026e871f697d87Fc36022b",
-            "slice_amount": 680011448076409723097,
+            "slice_amount": 23617140607825264384611,
             "vedough_balance": 123625338006809469417068,
             "inactive_windows": [
                 2,
@@ -6126,7 +6126,7 @@
         "292": {
             "state": "inactive",
             "address": "0xbC60AA031a9f34BD7992c99eaE5e2C4Dd1b5dBc3",
-            "slice_amount": 458381927092406726,
+            "slice_amount": 3409351155223545884,
             "vedough_balance": 83333333333300000000,
             "inactive_windows": [
                 2,
@@ -6136,7 +6136,7 @@
         "293": {
             "state": "inactive",
             "address": "0xbE8Fe12B9EB1CA2a593e6C070c71c294b6FE9f00",
-            "slice_amount": 1156434196226456311810,
+            "slice_amount": 8601321365032486590903,
             "vedough_balance": 210238472889745270706131,
             "inactive_windows": [
                 2,
@@ -6146,7 +6146,7 @@
         "294": {
             "state": "inactive",
             "address": "0xc31dB4e4d5C2c803A3B1b3F484e248E70185D40d",
-            "slice_amount": 1145155673372543593,
+            "slice_amount": 8517434015535282846,
             "vedough_balance": 208188049762345490721,
             "inactive_windows": [
                 2,
@@ -6174,7 +6174,7 @@
         "297": {
             "state": "inactive",
             "address": "0xc86A24B95E34ad68584cD8a3323f87d64F474225",
-            "slice_amount": 22506982756851437297,
+            "slice_amount": 38235988939523465883,
             "vedough_balance": 4091744865031363810768,
             "inactive_windows": [
                 2,
@@ -6202,7 +6202,7 @@
         "300": {
             "state": "inactive",
             "address": "0xce56D6b89aBa96C43E8FbF02C3BF34A751952c19",
-            "slice_amount": 275029156255554047719,
+            "slice_amount": 2045610693134945775397,
             "vedough_balance": 50000000000000000000000,
             "inactive_windows": [
                 2,
@@ -6239,7 +6239,7 @@
         "304": {
             "state": "inactive",
             "address": "0xD63E2Af499327DC60bB06948a9c1f72bE633a2B6",
-            "slice_amount": 54496366454729146,
+            "slice_amount": 1892686296411131342,
             "vedough_balance": 9907379856863562139,
             "inactive_windows": [
                 2,
@@ -6249,7 +6249,7 @@
         "305": {
             "state": "inactive",
             "address": "0xd7dEdcf8fFDDCEeD9aD20A41A5F88DC1268B3ad4",
-            "slice_amount": 34116043073776061640,
+            "slice_amount": 168692981475054032522,
             "vedough_balance": 6202259341928790277779,
             "inactive_windows": [
                 2,
@@ -6295,7 +6295,7 @@
         "310": {
             "state": "inactive",
             "address": "0xDE60d916a99D51C1bf58D36674492033Fe580BbB",
-            "slice_amount": 34115454824596059149,
+            "slice_amount": 253743785351654219076,
             "vedough_balance": 6202152398870823016983,
             "inactive_windows": [
                 2,
@@ -6341,7 +6341,7 @@
         "315": {
             "state": "inactive",
             "address": "0xEE5C256721Abe58Af6f582C0eFd6774Dd2765038",
-            "slice_amount": 98522106079825860,
+            "slice_amount": 732787303175233071,
             "vedough_balance": 17911211200509994246,
             "inactive_windows": [
                 2,
@@ -6351,7 +6351,7 @@
         "316": {
             "state": "inactive",
             "address": "0xf0754756E71aac7aD2B6497E7006F5E44D68D592",
-            "slice_amount": 61662276325407608893,
+            "slice_amount": 360669485417074578652,
             "vedough_balance": 11210134439003205948478,
             "inactive_windows": [
                 2,
@@ -6361,7 +6361,7 @@
         "317": {
             "state": "inactive",
             "address": "0xF16579B805fca520f06280AB2A539868D75dd01B",
-            "slice_amount": 35619048255706731070,
+            "slice_amount": 264927206203040187997,
             "vedough_balance": 6475504041216980227206,
             "inactive_windows": [
                 2,
@@ -6380,7 +6380,7 @@
         "319": {
             "state": "inactive",
             "address": "0xF7b8a7D68338f6B1d0EFa76eA5964042cbF16aBd",
-            "slice_amount": 5441842397918019720,
+            "slice_amount": 40475312330859153788,
             "vedough_balance": 989321000000000000000,
             "inactive_windows": [
                 2,
@@ -6417,7 +6417,7 @@
         "323": {
             "state": "inactive",
             "address": "0xfDf7F859807d1dC73873640759b2706822802529",
-            "slice_amount": 3054929647332117021,
+            "slice_amount": 22721942787588901667,
             "vedough_balance": 555382870842520821360,
             "inactive_windows": [
                 2,
