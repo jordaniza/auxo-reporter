@@ -1,0 +1,5 @@
+fire>=0.4.0
+tinydb>=4.6.1
+eth-utils>=1.10.0
+requests>=2.27.1
+pycryptodome
