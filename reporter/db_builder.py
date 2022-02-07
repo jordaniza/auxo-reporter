@@ -68,6 +68,10 @@ def compute_distribution(conf, accounts):
 
     distribution = list(map(distribute, accounts, itertools.repeat(pro_rata)))
 
+    # least rewarded account gets the reminder
+    least_rewarded = min(filter(lambda a: a['amount'] > 0, distribution), key=lambda a: a['amount'])
+    least_rewarded['amount'] += int(slice_units - functools.reduce(lambda acc, a: acc + a['amount'], distribution, 0))
+
     return distribution
 
 

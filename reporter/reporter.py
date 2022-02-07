@@ -39,6 +39,14 @@ def report_rewards(db, path):
     write_csv(rewards, f"{path}/csv/rewards.csv", ["address", "amount"])
     write_json(rewards, f"{path}/json/rewards.json")
 
+def report_slashed(db, db_prev, path):
+    accounts = db.table("accounts").search(Account.state == AccountState.SLASHED.value)
+    accounts_prev = db_prev.table("accounts").search(Account.address.test(lambda addr: addr in [a["address"] for a in accounts]))
+
+    slashed_accounts = [{"address": a["address"], "slice_amount": a["slice_amount"]} for a in accounts_prev]
+
+    write_csv(slashed_accounts, f"{path}/csv/slashed.csv", ["address", "slice_amount"])
+    write_json(slashed_accounts, f"{path}/json/slashed.json")
 
 def build_claims(conf, db, path):
     accounts = db.table("accounts").search(Account.state == AccountState.ACTIVE.value)
@@ -63,10 +71,12 @@ def build_claims(conf, db, path):
     write_json(reward_window, f"{path}/claims.json")
 
 
-def report(path):
+def report(path, prev_path):
     conf = json.load(open(f"{path}/epoch-conf.json"))
     db = get_db(path)
+    db_prev = get_db(prev_path)
 
     build_claims(conf, db, path)
     report_rewards(db, path)
     report_governance(db, path)
+    report_slashed(db, db_prev, path)

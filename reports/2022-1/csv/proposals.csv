@@ -1,0 +1,5 @@
+id,title,author,created,start,end,choices
+0xb7288a01db911db9408c17afb3e7101e0f7434e684ca85c9cc02184306e483b4,Temperature check - Include PLAY in BCP,0x5f73a24771940b8c80b3570694072f606DF913cc,1643473395,1643472000,1643731200,"['Yes, add PLAY to BCP', 'No, leave BCP as is for now']"
+0x44791840ecbd96777d82abc1accbdbcda4507b1ff3df3f1ddb9b3e5fa77d73ba,[Epoch-3] MerkleTree Notarization (Reissuance),0x0810C422E4abD05c752618B403d26cf60bB50B5C,1641840709,1641852000,1641938400,"['Valid', 'Not Valid']"
+0x862480b8d82e544102508726f8048dd154008d88ef0a3b344fc65dd78ad0573a,[Epoch-3] MerkleTree Notarization,0x0810C422E4abD05c752618B403d26cf60bB50B5C,1641554042,1641556800,1641643200,"['Valid', 'Not Valid']"
+0x95509eaa1ce47cfe634734d215ad68bdacd0955bdfc7592c3562887f13bcf184,Olympus Pro x PieDAO,0xbd5361A94c803D26240A6B5586710ab48ed1d9Dd,1640654893,1640656800,1641016740,"['Yes, partner with OlympusDAO', 'No, do not partner w/ OlympusDAO']"

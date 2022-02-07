@@ -4350,7 +4350,7 @@
             "state": "active",
             "inactive_windows": [],
             "address": "0x4E62CF78dA0c0D97D06BA0b3E26cF695bbBc75b5",
-            "slice_amount": 1626096134902500090,
+            "slice_amount": 56475139011951302290,
             "vedough_balance": 295622499999881751000
         },
         "67": {
@@ -5001,7 +5001,7 @@
             "state": "active",
             "inactive_windows": [],
             "address": "0xC07EF9FDa2d42a7757172f6A7CDa2a63599591ED",
-            "slice_amount": 19252040937888783340,
+            "slice_amount": 668633093022042040830,
             "vedough_balance": 3500000000000000000000
         },
         "160": {
@@ -5246,7 +5246,7 @@
             "state": "active",
             "inactive_windows": [],
             "address": "0xEeaA36420519d85EfaB3b7120ac5Afa5a5825bFB",
-            "slice_amount": 3506621467229157852864,
+            "slice_amount": 121786732391399185693656,
             "vedough_balance": 637499950000000000000000
         },
         "195": {
@@ -5330,7 +5330,7 @@
             "state": "active",
             "inactive_windows": [],
             "address": "0xFeFe8736B8DEbEb1592DaC993c81e002aF8C34e9",
-            "slice_amount": 40932465768977876024,
+            "slice_amount": 304447320470992279611,
             "vedough_balance": 7441477537556760329372
         },
         "207": {
