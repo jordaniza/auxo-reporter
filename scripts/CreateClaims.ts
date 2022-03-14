@@ -29,6 +29,7 @@ import * as MerkleDistributorHelper from "@uma/merkle-distributor";
 
 program
   .requiredOption("-i, --input <path>", "input JSON file location containing a recipients payout")
+  .requiredOption("-o, --output <path>", "output merkle tree file")
   .parse(process.argv);
 
 const options = program.opts();
@@ -79,7 +80,7 @@ async function main() {
   };
 
   console.log("\n3. Saving proofs to disk 💿");
-  const savePath = `${path.resolve(__dirname)}/../reports/epochs/${recipientsObject.windowIndex}/merkle-tree.json`;
+  const savePath = `${options.output}/merkle-tree.json`;
   fs.writeFileSync(savePath, JSON.stringify(outputData));
   console.log("💿 File successfully written to", savePath);
 }

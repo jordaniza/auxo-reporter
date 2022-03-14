@@ -1,5 +1,5 @@
 from helpers import get_db
-from decimal import Decimal
+from decimal import *
 from queries import get_stakers, get_votes, get_claimed_for_window
 from account import (
     AccountState,
@@ -14,7 +14,7 @@ import itertools
 import functools
 
 
-def write_governance_stats(db, stakers, votes, proposals, voters, non_voters):
+def write_governance_stats(db, stakers, votes, proposals, voters, non_voters, pro_rata):
     db.table("governance_stats").insert(
         {
             "stakers": list(map(to_staker, stakers)),
@@ -22,6 +22,7 @@ def write_governance_stats(db, stakers, votes, proposals, voters, non_voters):
             "proposals": proposals,
             "voters": voters,
             "non_voters": non_voters,
+            "distribution_pro_rata": str(pro_rata)
         },
     )
 
@@ -72,11 +73,13 @@ def compute_distribution(conf, accounts):
     least_rewarded = min(filter(lambda a: a['amount'] > 0, distribution), key=lambda a: a['amount'])
     least_rewarded['amount'] += int(slice_units - functools.reduce(lambda acc, a: acc + a['amount'], distribution, 0))
 
-    return distribution
+    return (pro_rata, distribution)
 
 
 def build(path, prev_path):
     epoch_conf = json.load(open(f"{path}/epoch-conf.json"))
+
+    getcontext().prec = 42
 
     db = get_db(path, drop=True)
     db_prev = get_db(prev_path)
@@ -90,7 +93,6 @@ def build(path, prev_path):
     (votes, proposals, voters, non_voters) = get_votes(epoch_conf, stakers)
     claimed_addrs = get_claimed_for_window(epoch_conf["distribution_window"] - 1)
 
-    write_governance_stats(db, stakers, votes, proposals, voters, non_voters)
 
     # participation mapping (address -> voted?)
     participation = {addr: (lambda x: x in voters)(addr) for (addr, _) in stakers}
@@ -115,7 +117,7 @@ def build(path, prev_path):
 
     # compute distribution given configuration file and accounts state
     # `compute_distribution` will also update `account.slice_amount` for each account
-    distribution = compute_distribution(epoch_conf, accounts)
+    (pro_rata, distribution) = compute_distribution(epoch_conf, accounts)
     distribution_map = {distr["address"]: distr["amount"] for distr in distribution}
 
     accounts = map(
@@ -125,3 +127,4 @@ def build(path, prev_path):
     )
 
     write_accounts_and_distribution(db, accounts, distribution)
+    write_governance_stats(db, stakers, votes, proposals, voters, non_voters, pro_rata)

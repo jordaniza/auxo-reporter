@@ -1,0 +1,8 @@
+{
+    "date": "2022-2",
+    "start_timestamp": 1643670000,
+    "end_timestamp": 1646089199,
+    "block_snapshot": 14297759,
+    "distribution_window": 5,
+    "slice_to_distribute": "202252.4318841409"
+}
