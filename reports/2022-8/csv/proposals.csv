@@ -1,0 +1,4 @@
+id,title,author,created,start,end,choices
+0x7ea88f6bc39157a063c37123e6be035ab358640a1c53d140eed454ca5a569d69,[Gate 1] Implement Front-end sanctions screening tool,0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791,1660998153,1660998152,1661601600,"['FOR', 'AGAINST', 'Detail More']"
+0xe0048635b5baca752774ed44344a37a4977c2ee7c69ae90edc5f925cc8754e90,[PIP-73] [Gate 2] Add $APE to $PLAY & rebalancing ,0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791,1659519225,1659519144,1660125600,"['FOR', 'AGAINST', 'More info needed']"
+0x1c8f01c99b1c8056dbe0c8ec41e13a6251c2f3f40ba537442385b654c921f6a8,[Epoch-10] MerkleTree Notarization,0x0810C422E4abD05c752618B403d26cf60bB50B5C,1659465222,1659465197,1659724397,"['Valid', 'Invalid']"
