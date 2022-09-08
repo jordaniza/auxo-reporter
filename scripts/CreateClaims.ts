@@ -80,9 +80,11 @@ async function main() {
   };
 
   console.log("\n3. Saving proofs to disk 💿");
-  const savePath = `${options.output}/merkle-tree.json`;
-  fs.writeFileSync(savePath, JSON.stringify(outputData));
-  console.log("💿 File successfully written to", savePath);
+  [options.output, 'latest'].forEach(location => {
+    const savePath = `./reports/${location}/merkle-tree.json`;
+    fs.writeFileSync(savePath, JSON.stringify(outputData));
+    console.log("💿 File successfully written to", savePath);      
+  });
 }
 
 main().catch((e) => {
