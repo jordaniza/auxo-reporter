@@ -1,0 +1,4 @@
+id,title,author,created,start,end,choices
+0x625b318bf91343bb3904bafcaf0e32e2d44a8f6acd6cb9e436ae22464d349423,[PIP-75] Doughpamine programme Termination,0x0810C422E4abD05c752618B403d26cf60bB50B5C,1666263126,1666267200,1666872000,"['Stop incentivizing pools', 'Continue incentivizing pools', 'Need more Information']"
+0x59d09aee35366ea21271d4447ebe1daa426f69b46a6401862a6a244022255d9a,[Epoch-12] MerkleTree Notarization Reissuance,0x0810C422E4abD05c752618B403d26cf60bB50B5C,1665150673,1665150670,1665409870,"['Valid', 'Invalid']"
+0x1764c579a81ce48b1a258ec0489b3919df43d331113eb819a473b4f293d947a6,[Epoch-12] MerkleTree Notarization,0x0810C422E4abD05c752618B403d26cf60bB50B5C,1664875009,1664874977,1665134177,"['Valid', 'Invalid']"
