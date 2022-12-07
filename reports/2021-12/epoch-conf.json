@@ -1,8 +1,0 @@
-{
-    "date": "2021-12",
-    "start_timestamp": 1638313200,
-    "end_timestamp": 1640991599,
-    "block_snapshot": 13916165,
-    "distribution_window": 3,
-    "slice_to_distribute": "67468.9856"
-}
