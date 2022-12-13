@@ -1,0 +1,9 @@
+{
+  "ts-node": {
+    "files": true
+  },
+  "files": ["merkleTree/types.d.ts"],
+  "compilerOptions": {
+    "target": "ESNEXT"
+  }
+}

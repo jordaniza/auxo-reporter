@@ -1,5 +1,0 @@
-id,title,author,choices,created,start,end
-0x355ea2dda8d825ccda50b367719d1ad6d85f1786f1b177196eec9fc8dd94c810,[PIP-68] KPI Options Redeemable asset,0x0810C422E4abD05c752618B403d26cf60bB50B5C,"['(A) Redeemed as veDough', '(B) Redeemed as Dough', '(C) Allow veDough and Dough']",1640630918,1640630700,1640988000
-0x06c9d5622c289ab081fcddde987a03c9c54c6e369ce5254905e27b51e3b1ae7d,Linear Finance x PieDAO – Synthetic PLAY Index,0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791,"['Yep!', 'No']",1639437216,1639440000,1639872000
-0x76fe4afde494a29355bb7eafe0ff6efca7b232c1455ce645d23f879164bf7df0,The gas fee is too high,0x03C65618d9Ca830d9099B66bA6bd52A3B0344f82,"['Valid', 'Not Valid']",1638685569,1638676800,1638763200
-0x9297864c0e151eaa58372cf82a95f87873088f8bb9f7f1f2292759613eb9a282,[Epoch-1] MerkleTree Notarization.,0xe89dEe662C94FfEE76d0942f4a4bAD27cC076dd2,"['Valid', 'Not Valid']",1638559766,1638561600,1638648000

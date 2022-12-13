@@ -1,5 +1,0 @@
-id,title,author,created,start,end,choices
-0xea5fa52cd3e53bdbe452b43c6f4188f109b78e71063b22d7a76981fad786c3dc,[Generic Gate 1] Revised DOUGHpamine Incentives,0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791,1652687462,1652688000,1653292800,"['SUPPORT 1 & 2', 'SUPPORT 1, AGAINST 2', 'AGAINST 1, SUPPORT 2', 'AGAINST 1 & 2', 'More info please']"
-0x351cf17f1224cd7d9cfa88ef26dbce168f8f9d917919d6d75d2fb1a74ec6a9f0,[Generic Proposal Gate 1] UMA KPI Options for DOUGH Staking 2.0,0xEDDb8B0C46193cAEa0c2b453fb1e256AB68826Df,1652448532,1652526000,1653044400,"['FOR', 'AGAINST', 'Need more information']"
-0x8649a6a69cd9d293a41a39357d50ae9fc248e6c8cffeba3112f74e44acab70a5,[Generic Gate 1] BasketDAO acquisition proposal,0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791,1651709976,1651709906,1652306340,"['YES', 'NOPE', 'More info needed']"
-0x5c8da49a0ae080d42ae8be7728ace341b83d187433385da67ae6ee739b53edc0,[Epoch-7] MerkleTree Notarization,0x0810C422E4abD05c752618B403d26cf60bB50B5C,1651601444,1651601700,1651860900,"['Valid', 'Invalid']"
