@@ -19,6 +19,7 @@ pathspec==0.10.2
 platformdirs==2.5.4
 pluggy==1.0.0
 pycryptodome==3.16.0
+pydantic==1.10.2
 pytest==7.2.0
 pytest-cov==4.0.0
 pytest-cover==3.0.0
