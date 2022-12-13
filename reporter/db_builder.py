@@ -1,7 +1,7 @@
-from helpers import get_db
+from reporter.helpers import get_db
 from decimal import *
-from queries import get_stakers, get_votes, get_claimed_for_window
-from account import (
+from reporter.queries import get_stakers, get_votes, get_claimed_for_window
+from reporter.account import (
     AccountState,
     init_account,
     update_account_with_distribution,
@@ -22,7 +22,7 @@ def write_governance_stats(db, stakers, votes, proposals, voters, non_voters, pr
             "proposals": proposals,
             "voters": voters,
             "non_voters": non_voters,
-            "distribution_pro_rata": str(pro_rata)
+            "distribution_pro_rata": str(pro_rata),
         },
     )
 
@@ -70,8 +70,13 @@ def compute_distribution(conf, accounts):
     distribution = list(map(distribute, accounts, itertools.repeat(pro_rata)))
 
     # least rewarded account gets the reminder
-    least_rewarded = min(filter(lambda a: a['amount'] > 0, distribution), key=lambda a: a['amount'])
-    least_rewarded['amount'] += int(slice_units - functools.reduce(lambda acc, a: acc + a['amount'], distribution, 0))
+    least_rewarded = min(
+        filter(lambda a: a["amount"] > 0, distribution), key=lambda a: a["amount"]
+    )
+    least_rewarded["amount"] += int(
+        slice_units
+        - functools.reduce(lambda acc, a: acc + a["amount"], distribution, 0)
+    )
 
     return (pro_rata, distribution)
 
@@ -92,7 +97,6 @@ def build(path, prev_path):
     stakers = get_stakers(epoch_conf)
     (votes, proposals, voters, non_voters) = get_votes(epoch_conf, stakers)
     claimed_addrs = get_claimed_for_window(epoch_conf["distribution_window"] - 1)
-
 
     # participation mapping (address -> voted?)
     participation = {addr: (lambda x: x in voters)(addr) for (addr, _) in stakers}

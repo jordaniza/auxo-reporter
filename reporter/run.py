@@ -1,7 +1,5 @@
-import fire
-import reporter
-import db_builder
-import conf_generator
+import fire  # type: ignore
+from reporter import reporter, db_builder, conf_generator
 
 if __name__ == "__main__":
     fire.Fire(

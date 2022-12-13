@@ -1,10 +1,20 @@
 from pathlib import Path
-from helpers import get_dates
+from typing_extensions import TypedDict
+from reporter.helpers import get_dates
 
 import json
 
 
-def gen():
+class Config(TypedDict):
+    date: str
+    start_timestamp: int
+    end_timestamp: int
+    block_snapshot: int
+    distribution_window: int
+    slice_to_distribute: str
+
+
+def create_conf() -> Config:
     (date, start_date, end_date) = get_dates()
 
     block_snapshot = int(input("🔗 What is snapshot block? "))
@@ -13,7 +23,7 @@ def gen():
 
     slice_to_distribute = input("🤑 What is the number of SLICE units to distribute? ")
 
-    conf = {
+    return {
         "date": f"{date.year}-{date.month}",
         "start_timestamp": int(start_date.timestamp()),
         "end_timestamp": int(end_date.timestamp()),
@@ -22,7 +32,11 @@ def gen():
         "slice_to_distribute": slice_to_distribute,
     }
 
-    path = f"reports/{date.year}-{date.month}"
+
+def gen():
+    conf = create_conf()
+
+    path = f"reports/{conf['date']}"
 
     Path(path).mkdir(parents=True, exist_ok=True)
     Path(f"{path}/csv/").mkdir(parents=True, exist_ok=True)

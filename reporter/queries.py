@@ -1,7 +1,7 @@
 from eth_utils import to_checksum_address
 
 import requests
-from helpers import yes_or_no
+from reporter.helpers import yes_or_no
 
 
 def subgraph_query(query, response_key):
