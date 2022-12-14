@@ -7,6 +7,7 @@ from reporter.account import (
     update_account_with_distribution,
     to_staker,
 )
+from reporter.conf_generator import load_conf
 
 import json
 import datetime
@@ -81,16 +82,28 @@ def compute_distribution(conf, accounts):
     return (pro_rata, distribution)
 
 
-def build(path, prev_path):
+def build_v2(path: str):
+    conf = load_conf(path)
+
+    getcontext().prec = 42
+
+    db = get_db(path, drop=True)
+
+    start_date = datetime.date.fromtimestamp(conf.start_timestamp)
+    end_date = datetime.date.fromtimestamp(conf.end_timestamp)
+    print(f"⚗ Building database from {start_date} to {end_date}...")
+
+
+def build(path):
     epoch_conf = json.load(open(f"{path}/epoch-conf.json"))
 
     getcontext().prec = 42
 
     db = get_db(path, drop=True)
-    db_prev = get_db(prev_path)
 
     start_date = datetime.date.fromtimestamp(epoch_conf["start_timestamp"])
     end_date = datetime.date.fromtimestamp(epoch_conf["end_timestamp"])
+
     print(f"⚗ Building database from {start_date} to {end_date}...")
 
     # get stakers and misc governance stats
@@ -112,10 +125,8 @@ def build(path, prev_path):
         map(
             init_account,
             map(to_staker, stakers),  # all the stakers
-            itertools.repeat(db_prev),  # prev accounts
             itertools.repeat(epoch_conf["distribution_window"]),  # distribution window
             itertools.repeat(participation),  # participation
-            itertools.repeat(claimed_map),  # claimed
         )
     )
 

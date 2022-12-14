@@ -1,0 +1,86 @@
+[
+  {
+    "voter": "0x3070f20f86fDa706Ac380F5060D256028a46eC29",
+    "choice": 1,
+    "created": 1669837834,
+    "proposal": {
+      "id": "0x63cea594dceb8f8ffae3654a306a6791f60e15a6acae266ab4b71e8d6dff2b76",
+      "title": "DOUGH burn proposal",
+      "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+      "created": 1669643881,
+      "start": 1669644000,
+      "end": 1670248740,
+      "choices": ["FOR", "AGAINST", "MORE INFO"]
+    }
+  },
+  {
+    "voter": "0x7d0a2547b23e5F91F448bD9D2ae994748Af2C1E3",
+    "choice": 1,
+    "created": 1669832662,
+    "proposal": {
+      "id": "0x63cea594dceb8f8ffae3654a306a6791f60e15a6acae266ab4b71e8d6dff2b76",
+      "title": "DOUGH burn proposal",
+      "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+      "created": 1669643881,
+      "start": 1669644000,
+      "end": 1670248740,
+      "choices": ["FOR", "AGAINST", "MORE INFO"]
+    }
+  },
+  {
+    "voter": "0x71cfAfC5F334527Fd65821C0CbA69F000ad14F07",
+    "choice": 1,
+    "created": 1669822305,
+    "proposal": {
+      "id": "0x63cea594dceb8f8ffae3654a306a6791f60e15a6acae266ab4b71e8d6dff2b76",
+      "title": "DOUGH burn proposal",
+      "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+      "created": 1669643881,
+      "start": 1669644000,
+      "end": 1670248740,
+      "choices": ["FOR", "AGAINST", "MORE INFO"]
+    }
+  },
+  {
+    "voter": "0xe5cD86ff7f825a0ff6f699828D5c9bf163C0e3F9",
+    "choice": 1,
+    "created": 1669821203,
+    "proposal": {
+      "id": "0x63cea594dceb8f8ffae3654a306a6791f60e15a6acae266ab4b71e8d6dff2b76",
+      "title": "DOUGH burn proposal",
+      "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+      "created": 1669643881,
+      "start": 1669644000,
+      "end": 1670248740,
+      "choices": ["FOR", "AGAINST", "MORE INFO"]
+    }
+  },
+  {
+    "voter": "0x6593f0DC654597A5Bf2f78224FEEF81a545C1222",
+    "choice": 1,
+    "created": 1669819281,
+    "proposal": {
+      "id": "0x63cea594dceb8f8ffae3654a306a6791f60e15a6acae266ab4b71e8d6dff2b76",
+      "title": "DOUGH burn proposal",
+      "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+      "created": 1669643881,
+      "start": 1669644000,
+      "end": 1670248740,
+      "choices": ["FOR", "AGAINST", "MORE INFO"]
+    }
+  },
+  {
+    "voter": "0x657340f8F3187bB251700edE07140aaA93C08c35",
+    "choice": 1,
+    "created": 1669810481,
+    "proposal": {
+      "id": "0x63cea594dceb8f8ffae3654a306a6791f60e15a6acae266ab4b71e8d6dff2b77",
+      "title": "Proposal 2",
+      "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+      "created": 1669643881,
+      "start": 1669644000,
+      "end": 1670248740,
+      "choices": ["FOR", "AGAINST", "MORE INFO"]
+    }
+  }
+]

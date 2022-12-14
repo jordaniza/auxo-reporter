@@ -22,9 +22,13 @@ lint :; make type-check && make format
 
 ### TEST ###
 
-test :; python -m pytest reporter/test -rfP
+test :; python -m pytest reporter/test -rfP -s
 
 
 ### SCRIPTS ###
 
+# Generate the configuration file and initialise the directories
+conf :; python -m reporter.run conf
+
+# Generate a merkle tree
 merkle-tree :; yarn create-merkle-tree
