@@ -7,8 +7,7 @@ type RecipientAddress = keyof ReturnType<
 >["recipients"];
 
 export function createMerkleTree(
-  input: MerkleDistributorInput,
-  printSummary = true
+  input: MerkleDistributorInput
 ): MerkleDistributor {
   // transform sample recipients to array of values in correct order for merkle tree
   const inputData = Object.entries(input.recipients).map(([address, claim]) => [
@@ -33,17 +32,15 @@ export function createMerkleTree(
     (prev, [node, value]) => {
       const recipient = value[0] as RecipientAddress;
       const recipientWithProof = {
-        [recipient]: input.recipients[recipient],
-        proof: tree.getProof(node),
+        [recipient]: {
+          ...input.recipients[recipient],
+          proof: tree.getProof(node),
+        },
       };
       return { ...prev, ...recipientWithProof };
     },
     {}
   );
-
-  // print a value in the console if you want to test in a contract
-  if (printSummary) printTreeSummary(tree);
-
   // finally add the root
   return {
     ...input,
@@ -52,30 +49,16 @@ export function createMerkleTree(
   };
 }
 
-/// pretty prints the merkle tree
-function printFullTree(): void {
-  const tree = createMerkleTree(generateInputData(0));
-  console.log(JSON.stringify(tree, null, 4));
-}
-
-// summarize the merkle tree
-function printTreeSummary(
-  tree: StandardMerkleTree<(string | number | Reward[])[]>,
-  address = "0x00C67d9D6D3D13b42a87424E145826c467CcCd84"
-): void {
-  console.log("Merkle Root:", tree.root);
-  for (const [i, v] of tree.entries()) {
-    if (v[0] === address) {
-      const proof = tree.getProof(i);
-      console.log("Value:", v);
-      console.log("Proof:", proof);
-    }
-  }
-}
-
-[0, 1].forEach((idx) =>
-  fs.writeFileSync(
-    `merkleTree/examples/merkle-tree-${idx}.json`,
-    JSON.stringify(createMerkleTree(generateInputData(0)), null, 4)
-  )
+// [0, 1].forEach((idx) =>
+// fs.writeFileSync(
+// `merkleTree/examples/merkle-tree-${idx}.json`,
+// JSON.stringify(createMerkleTree(generateInputData(idx)), null, 4)
+// )
+// );
+const claims = JSON.parse(
+  fs.readFileSync("reporter/test/stubs/db/claims.json", { encoding: "utf8" })
+);
+fs.writeFileSync(
+  "merkleTree/examples/merkle-tree-real.json",
+  JSON.stringify(createMerkleTree(claims), null, 4)
 );

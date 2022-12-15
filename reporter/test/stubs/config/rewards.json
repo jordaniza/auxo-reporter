@@ -1,4 +1,14 @@
 [
-  { "amount": "234929429", "token": "0xcoffeecoffee", "decimals": 18 },
-  { "amount": "234929422020", "token": "0xcoffeecofffe", "decimals": 18 }
+  {
+    "amount": "234929429",
+    "token": "0xcoffeecoffee",
+    "decimals": 18,
+    "symbol": "WETH"
+  },
+  {
+    "amount": "234929422020",
+    "token": "0xcoffeecofffe",
+    "decimals": 18,
+    "symbol": "stETH"
+  }
 ]

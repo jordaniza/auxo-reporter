@@ -23,40 +23,19 @@ from reporter.queries import get_stakers, get_delegates
 from reporter.types import AccountState, Config, Delegate, Account, Vote, Staker
 
 
-@pytest.fixture
-def config() -> Config:
-    return Config(
-        date="2022-11",
-        start_timestamp=1667246400,
-        end_timestamp=1669838399,
-        block_snapshot=16086234,
-        distribution_window=14,
-        rewards=[
-            {
-                "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-                "amount": "414134000000",
-                "decimals": 6,
-            },
-            {
-                "token": "0xD533a949740bb3306d119CC777fa900bA034cd52",
-                "amount": "433907000000000000000000",
-                "decimals": 18,
-            },
-            {
-                "token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-                "amount": "509976000000000000000000",
-                "decimals": 18,
-            },
-        ],
-    )
-
-
 @dataclass
 class MockResponse:
     res: dict[str, Any]
 
     def json(self):
         return self.res
+
+
+@pytest.fixture(autouse=True)
+def before_each(monkeypatch):
+    """don't filter proposals based on user input"""
+    monkeypatch.setattr("builtins.input", lambda _: False)
+    yield
 
 
 def init_mocks(monkeypatch):
@@ -141,9 +120,6 @@ def test_get_voters_and_non_voters():
 
 def test_get_vote_data(config, monkeypatch):
 
-    # don't filter proposals based on user input
-    monkeypatch.setattr("builtins.input", lambda _: False)
-
     init_mocks(monkeypatch)
     stakers = get_stakers(config)
     (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
@@ -155,9 +131,6 @@ def test_get_vote_data(config, monkeypatch):
 
 
 def test_init_accounts(config, monkeypatch):
-
-    # don't filter proposals based on user input
-    monkeypatch.setattr("builtins.input", lambda _: False)
 
     init_mocks(monkeypatch)
     stakers = get_stakers(config)
@@ -178,11 +151,7 @@ def test_init_accounts(config, monkeypatch):
 
 
 def test_compute_distribution(config: Config, monkeypatch):
-
-    # don't filter proposals based on user input
-    monkeypatch.setattr("builtins.input", lambda _: False)
-
-    mocks = init_mocks(monkeypatch)
+    init_mocks(monkeypatch)
     stakers = get_stakers(config)
     (_, __, voters, ___) = get_vote_data(config, stakers)
     accounts = init_account_rewards(stakers, voters)
@@ -205,12 +174,9 @@ def test_compute_distribution(config: Config, monkeypatch):
 
 
 def test_build(config: Config, monkeypatch):
-    # don't filter proposals based on user input
-    monkeypatch.setattr("builtins.input", lambda _: False)
-
     getcontext().prec = 42
 
-    db = utils.get_db("reports/2026-2", drop=True)
+    db = utils.get_db("reporter/test/stubs/db", drop=True)
 
     start_date = datetime.date.fromtimestamp(config.start_timestamp)
     end_date = datetime.date.fromtimestamp(config.end_timestamp)

@@ -1,4 +1,4 @@
 [
-  { "amount": "234929429", "token": "0xcoffeecoffee" },
-  { "amount": "234929422020", "toen": "0xcoffeecofffe" }
+  { "amount": "234929429", "token": "0xcoffeecoffee", "symbol": "TEST" },
+  { "amount": "234929422020", "toen": "0xcoffeecofffe", "symbol": "TEST" }
 ]

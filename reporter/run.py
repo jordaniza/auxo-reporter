@@ -6,6 +6,6 @@ if __name__ == "__main__":
         {
             "conf": conf_generator.main,
             "build": rewards.main,
-            "report": writer.report,
+            "report": writer.main,
         }
     )

@@ -17,6 +17,7 @@ from reporter.types import (
     Reward,
     VeTokenStats,
     RewardSummary,
+    BaseReward,
 )
 from reporter.voters import get_vote_data
 from reporter.queries import get_stakers
@@ -57,13 +58,11 @@ def distribute_rewards(account: Account, pro_rata: Decimal, reward: Reward) -> A
             pro_rata * Decimal(account.vetoken_balance) / Decimal(10**reward.decimals)
         )
 
-    account.rewards.append(
-        Reward(token=reward.token, amount=account_reward, decimals=reward.decimals)
-    )
+    account.rewards.append(BaseReward(token=reward.token, amount=account_reward))
     return account
 
 
-def find_reward(token: str, account: Account) -> Reward:
+def find_reward(token: str, account: Account) -> BaseReward:
     """Scans the account for a reward token. Raises exception if not found"""
     found_token = next(filter(lambda r: r.token == token, account.rewards))
     if not found_token:

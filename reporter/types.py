@@ -3,12 +3,38 @@ import eth_utils as eth
 from enum import Enum
 
 
-class Reward(BaseModel):
+class BaseReward(BaseModel):
     """Grouped data about a particular token in rewards"""
 
     amount: str
     token: str
+
+
+class Reward(BaseReward):
+    """Adds additional metadata about the reward"""
+
     decimals: int
+    symbol: str
+
+
+class RewardSummary(Reward):
+    """
+    Extends the Reward object by giving the `pro_rata` reward per veToken
+    Example: 0.02 USDC per veToken
+
+    Note: because veTokens and reward tokens may have different decimal values, it can be tricky to display.
+    For fractional reward tokens, we preserve the fraction up to 18 decimal points.
+    """
+
+    pro_rata: str
+
+    @validator("pro_rata")
+    @classmethod
+    def transform_pro_rata(cls, p: str):
+        if float(p) >= 1:
+            return str(int(float(p)))
+        else:
+            return f"{float(p):.18f}"
 
 
 class Config(BaseModel):
@@ -130,28 +156,8 @@ class Account(BaseModel):
 
     address: str
     vetoken_balance: str
-    rewards: list[Reward]
+    rewards: list[BaseReward]
     state: AccountState
-
-
-class RewardSummary(Reward):
-    """
-    Extends the Reward object by giving the `pro_rata` reward per veToken
-    Example: 0.02 USDC per veToken
-
-    Note: because veTokens and reward tokens may have different decimal values, it can be tricky to display.
-    For fractional reward tokens, we preserve the fraction up to 18 decimal points.
-    """
-
-    pro_rata: str
-
-    @validator("pro_rata")
-    @classmethod
-    def transform_pro_rata(cls, p: str):
-        if float(p) >= 1:
-            return str(int(float(p)))
-        else:
-            return f"{float(p):.18f}"
 
 
 class VeTokenStats(BaseModel):

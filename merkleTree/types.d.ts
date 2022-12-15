@@ -2,10 +2,11 @@
 type Address = string;
 type Bytes32 = string;
 
-type Reward = { token: Address; amount: string };
+type BaseReward = { token: Address; amount: string };
+type Reward = BaseReward & { decimals: number; symbol: string };
 
 type RecipientData = {
-  rewards: Reward[];
+  rewards: BaseReward[];
   windowIndex: number;
   accountIndex: number;
 };
