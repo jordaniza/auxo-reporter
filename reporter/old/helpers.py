@@ -44,21 +44,3 @@ def get_dates():
 
 
 ## writers
-
-
-def write_csv(data, path, fieldnames):
-    with open(path, "w+") as f:
-        writer = csv.DictWriter(f, delimiter=",", fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(data)
-
-
-def write_list_csv(data, path, fieldname):
-    new_data = [{fieldname: d} for d in data]
-    write_csv(new_data, path, [fieldname])
-
-
-def write_json(data, path):
-    with open(path, "w+") as f:
-        data_json = json.dumps(data, indent=4)
-        f.write(data_json)

@@ -8,7 +8,7 @@ sys.path.append(parentdir)
 from tinydb import TinyDB
 from pathlib import Path
 from eth_utils import to_checksum_address
-from account import to_staker
+from reporter.old.rebuild.account import to_staker
 
 import csv
 import json

@@ -4,7 +4,7 @@ from tinydb import Query
 Account = Query()
 
 
-class AccountState(Enum):
+class AccountState(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     SLASHED = "slashed"

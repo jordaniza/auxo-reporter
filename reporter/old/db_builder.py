@@ -1,12 +1,13 @@
-from helpers import get_db
+from reporter.old.rebuild.helpers import get_db
 from decimal import *
-from queries import get_stakers, get_votes, get_claimed_for_window
-from account import (
+from reporter.old.rebuild.queries import get_stakers, get_votes, get_claimed_for_window
+from reporter.old.rebuild.account import (
     AccountState,
     init_account,
     update_account_with_distribution,
     to_staker,
 )
+from reporter.conf_generator import load_conf
 
 import json
 import datetime
@@ -22,7 +23,7 @@ def write_governance_stats(db, stakers, votes, proposals, voters, non_voters, pr
             "proposals": proposals,
             "voters": voters,
             "non_voters": non_voters,
-            "distribution_pro_rata": str(pro_rata)
+            "distribution_pro_rata": str(pro_rata),
         },
     )
 
@@ -70,29 +71,45 @@ def compute_distribution(conf, accounts):
     distribution = list(map(distribute, accounts, itertools.repeat(pro_rata)))
 
     # least rewarded account gets the reminder
-    least_rewarded = min(filter(lambda a: a['amount'] > 0, distribution), key=lambda a: a['amount'])
-    least_rewarded['amount'] += int(slice_units - functools.reduce(lambda acc, a: acc + a['amount'], distribution, 0))
+    least_rewarded = min(
+        filter(lambda a: a["amount"] > 0, distribution), key=lambda a: a["amount"]
+    )
+    least_rewarded["amount"] += int(
+        slice_units
+        - functools.reduce(lambda acc, a: acc + a["amount"], distribution, 0)
+    )
 
     return (pro_rata, distribution)
 
 
-def build(path, prev_path):
+def build_v2(path: str):
+    conf = load_conf(path)
+
+    getcontext().prec = 42
+
+    db = get_db(path, drop=True)
+
+    start_date = datetime.date.fromtimestamp(conf.start_timestamp)
+    end_date = datetime.date.fromtimestamp(conf.end_timestamp)
+    print(f"⚗ Building database from {start_date} to {end_date}...")
+
+
+def build(path):
     epoch_conf = json.load(open(f"{path}/epoch-conf.json"))
 
     getcontext().prec = 42
 
     db = get_db(path, drop=True)
-    db_prev = get_db(prev_path)
 
     start_date = datetime.date.fromtimestamp(epoch_conf["start_timestamp"])
     end_date = datetime.date.fromtimestamp(epoch_conf["end_timestamp"])
+
     print(f"⚗ Building database from {start_date} to {end_date}...")
 
     # get stakers and misc governance stats
     stakers = get_stakers(epoch_conf)
     (votes, proposals, voters, non_voters) = get_votes(epoch_conf, stakers)
     claimed_addrs = get_claimed_for_window(epoch_conf["distribution_window"] - 1)
-
 
     # participation mapping (address -> voted?)
     participation = {addr: (lambda x: x in voters)(addr) for (addr, _) in stakers}
@@ -108,10 +125,8 @@ def build(path, prev_path):
         map(
             init_account,
             map(to_staker, stakers),  # all the stakers
-            itertools.repeat(db_prev),  # prev accounts
             itertools.repeat(epoch_conf["distribution_window"]),  # distribution window
             itertools.repeat(participation),  # participation
-            itertools.repeat(claimed_map),  # claimed
         )
     )
 
