@@ -1,16 +1,26 @@
-from reporter.db_builder_v2 import *
-from reporter.conf_generator import Config
-from decimal import *
-
+import functools
+import pytest
+import json
+import datetime
+from pprint import pprint
 from eth_utils import to_checksum_address
 from dataclasses import dataclass
 from typing import Any
 from pydantic import parse_obj_as
-import pytest
-import json
-from reporter.account import AccountState
-from pprint import pprint
-import functools
+from decimal import Decimal, getcontext
+
+from reporter import utils
+from reporter.rewards import (
+    get_vote_data,
+    find_reward,
+    init_account_rewards,
+    distribute,
+    write_accounts_and_distribution,
+    write_governance_stats,
+)
+from reporter.voters import parse_votes, get_voters
+from reporter.queries import get_stakers, get_delegates
+from reporter.types import AccountState, Config, Delegate, Account, Vote, Staker
 
 
 @pytest.fixture
@@ -59,10 +69,15 @@ def init_mocks(monkeypatch):
     with open("reporter/test/stubs/delegates.json") as j:
         mock_delegates = json.load(j)
 
+    """
+    When patching, you need to specify the file where the function is *executed*
+    As opposed to where it was defined. See this SO answer:
+    https://stackoverflow.com/questions/31306080/pytest-monkeypatch-isnt-working-on-imported-function
+    """
     monkeypatch.setattr("requests.post", lambda url, json: MockResponse(mock_stakers))
-    monkeypatch.setattr("reporter.db_builder_v2.get_votes_v2", lambda _: mock_votes)
+    monkeypatch.setattr("reporter.voters.get_votes", lambda _: mock_votes)
     monkeypatch.setattr(
-        "reporter.db_builder_v2.get_delegates_v2",
+        "reporter.voters.get_delegates",
         lambda: parse_obj_as(list[Delegate], mock_delegates),
     )
 
@@ -72,7 +87,7 @@ def init_mocks(monkeypatch):
 def test_get_stakers(monkeypatch, config):
     init_mocks(monkeypatch)
 
-    stakers = get_stakers_v2(config)
+    stakers = get_stakers(config)
 
     assert all(to_checksum_address(s.id) == s.id for s in stakers)
 
@@ -81,7 +96,7 @@ def test_get_voters(monkeypatch, config):
     with open("reporter/test/stubs/snapshot-votes.json") as j:
         mock_votes = json.load(j)
 
-    monkeypatch.setattr("reporter.db_builder_v2.get_votes_v2", lambda _: mock_votes)
+    monkeypatch.setattr("reporter.voters.get_votes", lambda _: mock_votes)
 
     voters = parse_votes(config)
     assert len(voters) == len(mock_votes)
@@ -116,7 +131,7 @@ def test_get_voters_and_non_voters():
     stakers = parse_obj_as(list[Staker], mock_stakers)
     delegates = parse_obj_as(list[Delegate], mock_delegates)
 
-    (voted, non_voted) = get_voters_v2(votes, stakers, delegates)
+    (voted, non_voted) = get_voters(votes, stakers, delegates)
 
     assert set(voted) == set(voters + [delegated_voter])
     assert set(non_voted) == set(
@@ -129,9 +144,8 @@ def test_get_vote_data(config, monkeypatch):
     # don't filter proposals based on user input
     monkeypatch.setattr("builtins.input", lambda _: False)
 
-    mocks = init_mocks(monkeypatch)
-    delegates = mocks[2]
-    stakers = get_stakers_v2(config)
+    init_mocks(monkeypatch)
+    stakers = get_stakers(config)
     (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
     voter_ids = [v.voter for v in votes]
 
@@ -145,11 +159,10 @@ def test_init_accounts(config, monkeypatch):
     # don't filter proposals based on user input
     monkeypatch.setattr("builtins.input", lambda _: False)
 
-    mocks = init_mocks(monkeypatch)
-    delegates = mocks[2]
-    stakers = get_stakers_v2(config)
-    (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
-    accounts = init_accounts_v2(stakers, voters)
+    init_mocks(monkeypatch)
+    stakers = get_stakers(config)
+    (_, __, voters, non_voters) = get_vote_data(config, stakers)
+    accounts = init_account_rewards(stakers, voters)
 
     slashed = [a for a in accounts if a.state == AccountState.SLASHED]
     active = [a for a in accounts if a.state == AccountState.ACTIVE]
@@ -170,10 +183,10 @@ def test_compute_distribution(config: Config, monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: False)
 
     mocks = init_mocks(monkeypatch)
-    stakers = get_stakers_v2(config)
+    stakers = get_stakers(config)
     (_, __, voters, ___) = get_vote_data(config, stakers)
-    accounts = init_accounts_v2(stakers, voters)
-    (distribution, reward_summaries, _) = compute_distribution_v2(config, accounts)
+    accounts = init_account_rewards(stakers, voters)
+    (distribution, reward_summaries, _) = distribute(config, accounts)
 
     for r in config.rewards:
         total_rewards = Decimal(r.amount)
@@ -197,17 +210,17 @@ def test_build(config: Config, monkeypatch):
 
     getcontext().prec = 42
 
-    db = get_db("reports/2026-2", drop=True)
+    db = utils.get_db("reports/2026-2", drop=True)
 
     start_date = datetime.date.fromtimestamp(config.start_timestamp)
     end_date = datetime.date.fromtimestamp(config.end_timestamp)
     print(f"⚗ Building database from {start_date} to {end_date}...")
 
     init_mocks(monkeypatch)
-    stakers = get_stakers_v2(config)
+    stakers = get_stakers(config)
     (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
-    accounts = init_accounts_v2(stakers, voters)
-    (distribution, reward_summaries, stats) = compute_distribution_v2(config, accounts)
+    accounts = init_account_rewards(stakers, voters)
+    (distribution, reward_summaries, stats) = distribute(config, accounts)
     print(stats)
     write_accounts_and_distribution(db, accounts, distribution)
     write_governance_stats(
@@ -216,12 +229,12 @@ def test_build(config: Config, monkeypatch):
 
 
 def no_slashed_has_rewards(token: str, distribution: list[Account]) -> bool:
-    slashed = filter_state(distribution, AccountState.SLASHED)
+    slashed = utils.filter_state(distribution, AccountState.SLASHED)
     return all(int(find_reward(token, s).amount) == 0 for s in slashed)
 
 
 def all_active_have_rewards(token: str, distribution: list[Account]) -> bool:
-    slashed = filter_state(distribution, AccountState.ACTIVE)
+    slashed = utils.filter_state(distribution, AccountState.ACTIVE)
     return all(int(find_reward(token, s).amount) > 0 for s in slashed)
 
 

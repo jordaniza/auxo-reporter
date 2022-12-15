@@ -1,31 +1,34 @@
 from pathlib import Path
-from pydantic import BaseModel, parse_file_as
-from reporter.helpers import get_dates
+from pydantic import parse_file_as
 import json
-from typing import Optional
+import calendar
+import datetime
+
+from reporter.types import Config, Reward
 
 
-class RewardToken(BaseModel):
-    amount: str
-    token: str
-    decimals: int
+def get_dates():
+    """Parse an input in format `f"{date.year}-{date.month}"` to datetimes"""
+    date = input("📆 What epoch? [month-year, {1-12}-{year}]: ")
+    [month, year] = [int(token) for token in date.split("-")]
+
+    (_, n_days) = calendar.monthrange(year, month)
+
+    date = datetime.date(year, month, 1)
+    start_date = datetime.datetime(year, month, 1, 0, 0, 0)
+    end_date = datetime.datetime(year, month, n_days, 23, 59, 59)
+
+    return (date, start_date, end_date)
 
 
-class Config(BaseModel):
-    date: str
-    start_timestamp: int
-    end_timestamp: int
-    block_snapshot: int
-    distribution_window: int
-    rewards: list[RewardToken]
-
-
-def parse_rewards() -> list[RewardToken]:
+def parse_rewards() -> list[Reward]:
+    """Ingests a JSON file of rewards into a list of Reward Objects"""
     file = input("🤑 Path to the Rewards JSON file ")
-    return parse_file_as(list[RewardToken], path=file)
+    return parse_file_as(list[Reward], path=file)
 
 
 def create_conf() -> Config:
+    """Generates the base config object from user input"""
     (date, start_date, end_date) = get_dates()
     rewards = parse_rewards()
     block_snapshot = int(input("🔗 What is snapshot block? "))
@@ -42,17 +45,20 @@ def create_conf() -> Config:
 
 
 def load_conf(config_path: str) -> Config:
+    """Loads an existing config from file"""
     return parse_file_as(Config, path=f"{config_path}/epoch-conf.json")
 
 
-def gen():
+def main():
+    """Generates config file and saves in newly created directory with correct strcutre"""
     conf = create_conf()
 
+    # create directories
     path = f"reports/{conf.date}"
-
     Path(path).mkdir(parents=True, exist_ok=True)
     Path(f"{path}/csv/").mkdir(parents=True, exist_ok=True)
     Path(f"{path}/json/").mkdir(parents=True, exist_ok=True)
 
+    # write new config file
     with open(f"{path}/epoch-conf.json", "w+") as j:
         j.write(json.dumps(conf.dict(), indent=4))

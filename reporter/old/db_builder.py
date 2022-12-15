@@ -1,7 +1,7 @@
-from reporter.helpers import get_db
+from reporter.old.rebuild.helpers import get_db
 from decimal import *
-from reporter.queries import get_stakers, get_votes, get_claimed_for_window
-from reporter.account import (
+from reporter.old.rebuild.queries import get_stakers, get_votes, get_claimed_for_window
+from reporter.old.rebuild.account import (
     AccountState,
     init_account,
     update_account_with_distribution,
