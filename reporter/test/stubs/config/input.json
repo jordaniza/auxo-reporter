@@ -1,28 +1,26 @@
 {
   "year": 2022,
   "month": 11,
-  "blck_snapshot": 16086234,
+  "block_snapshot": 16086234,
+  "distribution_window": 14,
   "rewards": [
     {
+      "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       "amount": "414134000000",
-      "token": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
       "decimals": 6,
       "symbol": "USDC"
     },
     {
-      "amount": "433907000000000000000000",
       "token": "0xD533a949740bb3306d119CC777fa900bA034cd52",
+      "amount": "433907000000000000000000",
       "decimals": 18,
       "symbol": "CRV"
     },
     {
+      "token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
       "amount": "509976000000000000000000",
-      "token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
       "decimals": 18,
       "symbol": "WETH"
     }
-  ],
-  "date": "2022-11",
-  "start_timestamp": 1667246400,
-  "end_timestamp": 1669838399
+  ]
 }

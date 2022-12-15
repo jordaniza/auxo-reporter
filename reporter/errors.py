@@ -8,3 +8,7 @@ class MissingRewardException(Exception):
     """Raise if a reward token is not found in a user's list of rewards"""
 
     pass
+
+
+class BadConfigException(Exception):
+    pass

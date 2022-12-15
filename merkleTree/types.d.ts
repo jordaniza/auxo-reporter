@@ -3,7 +3,11 @@ type Address = string;
 type Bytes32 = string;
 
 type BaseReward = { token: Address; amount: string };
-type Reward = BaseReward & { decimals: number; symbol: string };
+type Reward = BaseReward & {
+  decimals: number;
+  symbol: string;
+  pro_rata: string;
+};
 
 type RecipientData = {
   rewards: BaseReward[];

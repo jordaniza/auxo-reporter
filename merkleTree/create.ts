@@ -48,17 +48,3 @@ export function createMerkleTree(
     recipients: merkleRecipients,
   };
 }
-
-// [0, 1].forEach((idx) =>
-// fs.writeFileSync(
-// `merkleTree/examples/merkle-tree-${idx}.json`,
-// JSON.stringify(createMerkleTree(generateInputData(idx)), null, 4)
-// )
-// );
-const claims = JSON.parse(
-  fs.readFileSync("reporter/test/stubs/db/claims.json", { encoding: "utf8" })
-);
-fs.writeFileSync(
-  "merkleTree/examples/merkle-tree-real.json",
-  JSON.stringify(createMerkleTree(claims), null, 4)
-);

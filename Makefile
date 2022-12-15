@@ -28,10 +28,8 @@ test :; python -m pytest -rfPs
 
 ### SCRIPTS ###
 
-# Generate the configuration file and initialise the directories
-conf :; python -m reporter.run conf
-
-report :; python -m reporter.run report
+# create the claims database
+claims :; python -m reporter.run all
 
 # Generate a merkle tree
-merkle-tree :; yarn create-merkle-tree
+tree :; yarn create-merkle-tree

@@ -182,7 +182,10 @@ def write_accounts_and_distribution(
     db.table("distribution").insert_multiple([d.dict() for d in distribution])
 
 
-def main(path: str):
+def main(path: Optional[str]):
+    if not path:
+        path = input(" Path to the config file ")
+
     conf = load_conf(path)
 
     getcontext().prec = 42

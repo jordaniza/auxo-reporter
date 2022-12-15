@@ -4,14 +4,10 @@ import json
 import calendar
 import datetime
 
-from reporter.types import Config, Reward
+from reporter.types import Config, Reward, InputConfig
 
 
-def get_dates():
-    """Parse an input in format `f"{date.year}-{date.month}"` to datetimes"""
-    date = input("📆 What epoch? [month-year, {1-12}-{year}]: ")
-    [month, year] = [int(token) for token in date.split("-")]
-
+def get_dates(month: int, year: int):
     (_, n_days) = calendar.monthrange(year, month)
 
     date = datetime.date(year, month, 1)
@@ -21,26 +17,17 @@ def get_dates():
     return (date, start_date, end_date)
 
 
-def parse_rewards() -> list[Reward]:
-    """Ingests a JSON file of rewards into a list of Reward Objects"""
-    file = input("🤑 Path to the Rewards JSON file ")
-    return parse_file_as(list[Reward], path=file)
-
-
-def create_conf() -> Config:
+def create_conf(path: str) -> Config:
     """Generates the base config object from user input"""
-    (date, start_date, end_date) = get_dates()
-    rewards = parse_rewards()
-    block_snapshot = int(input("🔗 What is snapshot block? "))
-    distribution_window = int(input("#️⃣ What is the distribution window? "))
+    base_config = parse_file_as(InputConfig, path)
+
+    (date, start_date, end_date) = get_dates(base_config.month, base_config.year)
 
     return Config(
         date=f"{date.year}-{date.month}",
         start_timestamp=int(start_date.timestamp()),
         end_timestamp=int(end_date.timestamp()),
-        block_snapshot=block_snapshot,
-        distribution_window=distribution_window,
-        rewards=rewards,
+        **base_config.dict(),
     )
 
 
@@ -49,16 +36,21 @@ def load_conf(config_path: str) -> Config:
     return parse_file_as(Config, path=f"{config_path}/epoch-conf.json")
 
 
-def main():
+def main() -> str:
     """Generates config file and saves in newly created directory with correct strcutre"""
-    conf = create_conf()
+    path_to_config_file = input(" Path to the config file ")
+    conf = create_conf(path_to_config_file)
 
     # create directories
-    path = f"reports/{conf.date}"
-    Path(path).mkdir(parents=True, exist_ok=True)
-    Path(f"{path}/csv/").mkdir(parents=True, exist_ok=True)
-    Path(f"{path}/json/").mkdir(parents=True, exist_ok=True)
+    epoch = f"reports/{conf.date}"
+    Path(epoch).mkdir(parents=True, exist_ok=True)
+    Path(f"{epoch}/csv/").mkdir(parents=True, exist_ok=True)
+    Path(f"{epoch}/json/").mkdir(parents=True, exist_ok=True)
 
     # write new config file
-    with open(f"{path}/epoch-conf.json", "w+") as j:
+    with open(f"{epoch}/epoch-conf.json", "w+") as j:
         j.write(json.dumps(conf.dict(), indent=4))
+
+    print(f"😃 Created a new epoch folder reports/{conf.date}")
+
+    return epoch

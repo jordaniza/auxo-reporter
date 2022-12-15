@@ -52,8 +52,16 @@ export function generateInputData(windowIndex: number): MerkleDistributorInput {
     return { ...prev, [address]: recipient };
   }, {} as MerkleDistributorInput["recipients"]);
 
+  const getProRata = (qty: number) => {
+    return qty / Object.entries(recipients).length;
+  };
+
   const aggregateRewards = aggregateRewardsBN.map((reward) => {
-    return { ...reward, amount: reward.amount.toString() };
+    return {
+      ...reward,
+      amount: reward.amount.toString(),
+      pro_rata: getProRata(Number(reward.amount)).toString(),
+    };
   }, {});
 
   return {

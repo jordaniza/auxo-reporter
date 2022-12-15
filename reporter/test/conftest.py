@@ -1,8 +1,8 @@
 import pytest
-from pydantic import parse_file_as
 from reporter.types import Config
+from reporter.conf_generator import load_conf
 
 
 @pytest.fixture
 def config() -> Config:
-    return parse_file_as(Config, "reporter/test/stubs/config/epoch-conf.json")
+    return load_conf("reporter/test/stubs/config")
