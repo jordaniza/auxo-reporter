@@ -1,5 +1,10 @@
 import { readFileSync, writeFileSync } from "fs";
 import { createMerkleTree } from "./create";
+import { postToIPFS } from "./ipfs";
+import * as dotenv from "dotenv";
+
+dotenv.config();
+
 const { stdin, stdout } = process;
 
 function prompt(question: string) {
@@ -19,8 +24,18 @@ async function main() {
     readFileSync(`reports/${epoch}/claims.json`, { encoding: "utf8" })
   );
   const tree = JSON.stringify(createMerkleTree(claims), null, 4);
-  writeFileSync(`reports/${epoch}/merkle-tree.json`, tree);
-  console.log("✨✨ Merkle Tree Created! ✨✨");
+  const destination = `reports/${epoch}/merkle-tree.json`;
+  writeFileSync(destination, tree);
+  console.log(`✨✨ Merkle Tree Created at ${destination} ✨✨`);
+
+  let post = (await prompt("Post to IPFS? [Y/n]\n")) as string;
+  post = String(post).toLowerCase().trim();
+  if (!post || post === "y") {
+    console.log("Posting to ipfs...");
+    await postToIPFS(destination);
+  } else {
+    console.warn("Did not post to IPFS");
+  }
 }
 
 main()

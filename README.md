@@ -101,6 +101,16 @@ make tree
 
 This will output a `merkle-tree.json` file in the reports folder for your passed epoch.
 
+You will be asked whether to post to IPFS. If you want to do this, you will need to follow the instructions below before building the merkle tree.
+
+## Posting to IPFS
+
+You can use [Web.storage](https://web3.storage/tokens/) to create an API Key.
+
+Add it to a `.env` file by copying the `.env.example` and adding your key.
+
+That's it! Just follow the instructions in the command prompt and you will automatically post to the IPFS and generate a link.
+
 ## Issues
 
 Hop on over to the AUXO discord, [or contact me on github](https://github.com/jordaniza)
