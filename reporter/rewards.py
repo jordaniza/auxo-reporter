@@ -21,10 +21,11 @@ from reporter.types import (
 )
 from reporter.voters import get_vote_data
 from reporter.queries import get_stakers
-from reporter.errors import MissingRewardException
 
 
-def init_account_rewards(stakers: list[Staker], voters: list[str]) -> list[Account]:
+def init_account_rewards(
+    stakers: list[Staker], voters: list[str], conf: Config
+) -> list[Account]:
     """
     Create the base Account object from a list of stakers.
     Rewards will be added later based on the account state.
@@ -36,7 +37,7 @@ def init_account_rewards(stakers: list[Staker], voters: list[str]) -> list[Accou
             address=staker.id,
             vetoken_balance=staker.accountVeTokenBalance,
             state=AccountState.ACTIVE if staker.id in voters else AccountState.SLASHED,
-            rewards=[],
+            rewards="0",
         )
         for staker in stakers
     ]
@@ -52,62 +53,48 @@ def distribute_rewards(account: Account, pro_rata: Decimal, reward: Reward) -> A
     Slashed accounts will be appended a reward entry with an amount equal to zero
     """
 
-    account_reward = 0
     if account.state == AccountState.ACTIVE:
         account_reward = int(
             pro_rata * Decimal(account.vetoken_balance) / Decimal(10**reward.decimals)
         )
+        account.rewards = str(account_reward)
 
-    account.rewards.append(BaseReward(token=reward.token, amount=account_reward))
     return account
 
 
-def find_reward(token: str, account: Account) -> BaseReward:
-    """Scans the account for a reward token. Raises exception if not found"""
-    found_token = next(filter(lambda r: r.token == token, account.rewards))
-    if not found_token:
-        raise MissingRewardException(
-            f"Could not find {token=} for user {account.address}"
-        )
-    return found_token
-
-
 def compute_rewards(
-    total_rewards: list[Reward], total_active_vetokens: Decimal, accounts: list[Account]
-) -> list[RewardSummary]:
+    reward: Reward, total_active_vetokens: Decimal, accounts: list[Account]
+) -> RewardSummary:
     """
-    For a list of reward tokens, add the rewards per user
-    :param `total_rewards`: list of rewards tokens with total quantities to distribute amongst stakers
+
+    Add the rewards per user
+    :param `total_rewards`: rewards token with total quantities to distribute amongst stakers
     :param `total_active_vetokens`: vetokens belonging to non-slashed stakers
     :param `accounts`: base array of Account objects that have yet to have rewards added
     """
 
-    distribution_rewards: list[RewardSummary] = []
-    for reward in total_rewards:
+    # compute rewards per veToken held, for the given reward token
+    pro_rata = (Decimal(reward.amount) / total_active_vetokens) * Decimal(
+        10**reward.decimals
+    )
 
-        # compute rewards per veToken held, for the given reward token
-        pro_rata = (Decimal(reward.amount) / total_active_vetokens) * Decimal(
-            10**reward.decimals
+    # append rewards to existing accounts for this token
+    accounts = list(
+        map(
+            distribute_rewards,
+            accounts,
+            itertools.repeat(pro_rata),
+            itertools.repeat(reward),
         )
+    )
 
-        # append rewards to existing accounts for this token
-        accounts = list(
-            map(
-                distribute_rewards,
-                accounts,
-                itertools.repeat(pro_rata),
-                itertools.repeat(reward),
-            )
-        )
+    # add to summary
+    distribution_rewards = RewardSummary(
+        **reward.dict(),
+        pro_rata=str(pro_rata),
+    )
 
-        # add to summary
-        distribution_rewards.append(
-            RewardSummary(
-                **reward.dict(),
-                pro_rata=str(pro_rata),
-            )
-        )
-        # TODO remainder?
+    # TODO remainder?
     return distribution_rewards
 
 
@@ -141,7 +128,7 @@ def compute_veToken_stats(accounts: list[Account]) -> VeTokenStats:
 
 def distribute(
     conf: Config, accounts: list[Account]
-) -> Tuple[list[Account], list[RewardSummary], VeTokenStats]:
+) -> Tuple[list[Account], RewardSummary, VeTokenStats]:
     """Compute the distribution for all accounts, and summarize the data"""
 
     veToken_stats = compute_veToken_stats(accounts)
@@ -159,7 +146,7 @@ def write_governance_stats(
     proposals: list[Proposal],
     voters: list[str],
     non_voters: list[str],
-    rewards: list[RewardSummary],
+    rewards: RewardSummary,
     veTokenStats: VeTokenStats,
 ):
     db.table("governance_stats").insert(
@@ -169,7 +156,7 @@ def write_governance_stats(
             "proposals": [p.dict() for p in proposals],
             "voters": voters,
             "non_voters": non_voters,
-            "rewards": [r.dict() for r in rewards],
+            "rewards": rewards.dict(),
             "veTokenStats": veTokenStats.dict(),
         },
     )
@@ -200,7 +187,7 @@ def main(path: Optional[str]):
 
     (votes, proposals, voters, non_voters) = get_vote_data(conf, stakers)
 
-    accounts = init_account_rewards(stakers, voters)
+    accounts = init_account_rewards(stakers, voters, conf)
     (distribution, reward_summaries, vetoken_stats) = distribute(conf, accounts)
     write_accounts_and_distribution(db, accounts, distribution)
     write_governance_stats(

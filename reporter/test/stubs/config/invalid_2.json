@@ -1,5 +1,5 @@
 {
-  "year": 2022,
+  "year": 2023,
   "month": 11,
   "blck_snapshot": 16086234,
   "rewards": [
@@ -22,7 +22,7 @@
       "symbol": "WETH"
     }
   ],
-  "date": "2022-11",
+  "date": "2023-11",
   "start_timestamp": 1667246400,
   "end_timestamp": 1669838399
 }

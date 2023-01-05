@@ -2,7 +2,6 @@ import functools
 import pytest
 import json
 import datetime
-from pprint import pprint
 from eth_utils import to_checksum_address
 from dataclasses import dataclass
 from typing import Any
@@ -12,14 +11,13 @@ from decimal import Decimal, getcontext
 from reporter import utils
 from reporter.rewards import (
     get_vote_data,
-    find_reward,
     init_account_rewards,
     distribute,
     write_accounts_and_distribution,
     write_governance_stats,
 )
 from reporter.voters import parse_votes, get_voters
-from reporter.queries import get_stakers, get_delegates
+from reporter.queries import get_stakers
 from reporter.types import AccountState, Config, Delegate, Account, Vote, Staker
 
 
@@ -135,7 +133,7 @@ def test_init_accounts(config, monkeypatch):
     init_mocks(monkeypatch)
     stakers = get_stakers(config)
     (_, __, voters, non_voters) = get_vote_data(config, stakers)
-    accounts = init_account_rewards(stakers, voters)
+    accounts = init_account_rewards(stakers, voters, config)
 
     slashed = [a for a in accounts if a.state == AccountState.SLASHED]
     active = [a for a in accounts if a.state == AccountState.ACTIVE]
@@ -154,23 +152,22 @@ def test_compute_distribution(config: Config, monkeypatch):
     init_mocks(monkeypatch)
     stakers = get_stakers(config)
     (_, __, voters, ___) = get_vote_data(config, stakers)
-    accounts = init_account_rewards(stakers, voters)
+    accounts = init_account_rewards(stakers, voters, config)
+
     (distribution, reward_summaries, _) = distribute(config, accounts)
+    total_rewards = Decimal(config.rewards.amount)
+    aggregated_rewards = sum_totals(distribution)
 
-    for r in config.rewards:
-        total_rewards = Decimal(r.amount)
-        aggregated_rewards = sum_totals(r.token, distribution)
+    diff = aggregated_rewards - total_rewards
 
-        diff = aggregated_rewards - total_rewards
+    # 0.0001% of total is lost to rounding error
+    # this is $1 per $1_000_000 across all users
+    assert diff < total_rewards * Decimal(0.000001)
 
-        # 0.0001% of total is lost to rounding error
-        # this is $1 per $1_000_000 across all users
-        assert diff < total_rewards * Decimal(0.000001)
+    assert no_slashed_has_rewards(distribution)
+    assert all_active_have_rewards(distribution)
 
-        assert no_slashed_has_rewards(r.token, distribution)
-        assert all_active_have_rewards(r.token, distribution)
-
-    pprint([json.dumps(r.dict()) for r in reward_summaries], indent=4)
+    json.dumps(reward_summaries.dict(), indent=4)
 
 
 def test_build(config: Config, monkeypatch):
@@ -185,7 +182,7 @@ def test_build(config: Config, monkeypatch):
     init_mocks(monkeypatch)
     stakers = get_stakers(config)
     (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
-    accounts = init_account_rewards(stakers, voters)
+    accounts = init_account_rewards(stakers, voters, config)
     (distribution, reward_summaries, stats) = distribute(config, accounts)
     print(stats)
     write_accounts_and_distribution(db, accounts, distribution)
@@ -194,18 +191,18 @@ def test_build(config: Config, monkeypatch):
     )
 
 
-def no_slashed_has_rewards(token: str, distribution: list[Account]) -> bool:
+def no_slashed_has_rewards(distribution: list[Account]) -> bool:
     slashed = utils.filter_state(distribution, AccountState.SLASHED)
-    return all(int(find_reward(token, s).amount) == 0 for s in slashed)
+    return all(int(s.rewards) == 0 for s in slashed)
 
 
-def all_active_have_rewards(token: str, distribution: list[Account]) -> bool:
+def all_active_have_rewards(distribution: list[Account]) -> bool:
     slashed = utils.filter_state(distribution, AccountState.ACTIVE)
-    return all(int(find_reward(token, s).amount) > 0 for s in slashed)
+    return all(int(s.rewards) > 0 for s in slashed)
 
 
-def sum_totals(token: str, distribution: list[Account]) -> Decimal:
-    account_rewards = [find_reward(token, a) for a in distribution]
+def sum_totals(distribution: list[Account]) -> Decimal:
+    account_rewards = [a.rewards for a in distribution]
     return functools.reduce(
-        lambda acc, curr: acc + Decimal(curr.amount), account_rewards, Decimal(0)
+        lambda acc, curr: acc + Decimal(curr), account_rewards, Decimal(0)
     )
