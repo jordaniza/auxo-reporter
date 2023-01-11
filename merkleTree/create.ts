@@ -1,6 +1,5 @@
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { generateInputData } from "./sample";
-import * as fs from "fs";
 
 type RecipientAddress = keyof ReturnType<
   typeof generateInputData
@@ -24,7 +23,7 @@ export function createMerkleTree(
     "address claimant",
     "uint256 accountIndex",
     "uint256 windowIndex",
-    "tuple(uint256 amount, address token)[] rewards",
+    "uint256 rewards",
   ]);
 
   // add proofs to each recipient

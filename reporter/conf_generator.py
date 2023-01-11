@@ -4,7 +4,7 @@ import json
 import calendar
 import datetime
 
-from reporter.types import Config, Reward, InputConfig
+from reporter.types import Config, InputConfig
 
 
 def get_dates(month: int, year: int):

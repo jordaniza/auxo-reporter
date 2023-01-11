@@ -2,7 +2,7 @@
   "ts-node": {
     "files": true
   },
-  "files": ["merkleTree/definitions.ts"],
+  "files": ["merkleTree/types.d.ts"],
   "include": ["."],
   "compilerOptions": {
     "target": "ESNEXT",

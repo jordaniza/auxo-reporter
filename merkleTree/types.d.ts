@@ -10,7 +10,7 @@ type Reward = BaseReward & {
 };
 
 type RecipientData = {
-  rewards: BaseReward[];
+  rewards: string;
   windowIndex: number;
   accountIndex: number;
 };
@@ -25,7 +25,7 @@ type MRecipient = {
 
 type MerkleDistributorInput = {
   chainId: number;
-  aggregateRewards: Reward[];
+  aggregateRewards: Reward;
   windowIndex: number;
   recipients: Recipient;
 };

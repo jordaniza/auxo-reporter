@@ -2,11 +2,11 @@ import { BigNumber, ethers } from "ethers";
 
 /// This script will generate a fake merkle tree from randomised data
 
-const TOKENS: [Address, number, string][] = [
-  ["0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", 6, "USDC"],
-  ["0xD533a949740bb3306d119CC777fa900bA034cd52", 18, "CRV"],
-  ["0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", 18, "WETH"],
-];
+const REWARD = {
+  token: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+  decimals: 18,
+  symbol: "WETH",
+};
 
 const ADDRESSES = [
   "0xbecfc9f37bdd8ca3d35b53edc72fc8ea89d3584b",
@@ -22,47 +22,33 @@ const ADDRESSES = [
 ];
 
 export function generateInputData(windowIndex: number): MerkleDistributorInput {
-  let aggregateRewardsBN = TOKENS.map(([token, decimals, symbol]) => ({
-    token,
+  let aggregateRewardsBN = {
+    ...REWARD,
     amount: BigNumber.from(0),
-    decimals,
-    symbol,
-  }));
+  };
 
   const recipients = ADDRESSES.reduce((prev, address, idx) => {
-    const rewards: BaseReward[] = TOKENS.map(([token, decimals]) => {
-      const rewardQty = Math.round(Math.random() * 100_000).toString();
-      const bnReward = ethers.utils.parseUnits(rewardQty, decimals);
+    const rewardQty = Math.round(Math.random() * 100_000).toString();
+    const bnReward = ethers.utils.parseUnits(rewardQty, REWARD.decimals);
 
-      aggregateRewardsBN.find((t) => t.token === token)!.amount =
-        aggregateRewardsBN.find((t) => t.token === token)!.amount.add(bnReward);
-
-      return {
-        token,
-        amount: bnReward.toString(),
-      };
-    });
+    aggregateRewardsBN.amount = aggregateRewardsBN.amount.add(bnReward);
 
     const recipient: RecipientData = {
       windowIndex,
       accountIndex: idx,
-      rewards,
+      rewards: bnReward.toString(),
     };
 
     return { ...prev, [address]: recipient };
   }, {} as MerkleDistributorInput["recipients"]);
 
-  const getProRata = (qty: number) => {
-    return qty / Object.entries(recipients).length;
+  const aggregateRewards = {
+    ...aggregateRewardsBN,
+    amount: aggregateRewardsBN.amount.toString(),
+    pro_rata: String(
+      Number(aggregateRewardsBN.amount) / Object.entries(recipients).length
+    ),
   };
-
-  const aggregateRewards = aggregateRewardsBN.map((reward) => {
-    return {
-      ...reward,
-      amount: reward.amount.toString(),
-      pro_rata: getProRata(Number(reward.amount)).toString(),
-    };
-  }, {});
 
   return {
     aggregateRewards,

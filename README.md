@@ -47,31 +47,18 @@ Everything is built from a single config file:
 
 ```json
 {
-  "year": 2022, // must be YYYY
-  "month": 11, // must be MM
+  "year": 2023, // must be YYYY
+  "month": 1, // must be MM or M
   "block_snapshot": 16086234, // block to check stakers
   "distribution_window": 14, // increment previous window by 1
-  "rewards": [
+  "rewards":
     // total rewards to distribute to all stakers
-    {
-      "token": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-      "amount": "414134000000",
-      "decimals": 6,
-      "symbol": "USDC"
-    },
-    {
-      "token": "0xD533a949740bb3306d119CC777fa900bA034cd52",
-      "amount": "433907000000000000000000",
-      "decimals": 18,
-      "symbol": "CRV"
-    },
     {
       "token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
       "amount": "509976000000000000000000",
       "decimals": 18,
       "symbol": "WETH"
     }
-  ]
 }
 ```
 

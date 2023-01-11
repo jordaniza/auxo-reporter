@@ -32,13 +32,9 @@ def report_governance(db: TinyDB, path: str):
 def report_rewards(db: TinyDB, path: str):
     accounts = db.table("accounts").all()
 
-    reward_keys = [r["token"] for r in accounts[0]["rewards"]]
-    rewards = [
-        {"address": a["address"], **{r["token"]: r["amount"] for r in a["rewards"]}}
-        for a in accounts
-    ]
+    rewards = [{"address": a["address"], "rewards": a["rewards"]} for a in accounts]
 
-    utils.write_csv(rewards, f"{path}/csv/rewards.csv", ["address"] + reward_keys)
+    utils.write_csv(rewards, f"{path}/csv/rewards.csv", ["address", "rewards"])
     utils.write_json(rewards, f"{path}/json/rewards.json")
 
 

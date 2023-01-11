@@ -31,7 +31,7 @@ class Reward(BaseReward):
 class RewardSummary(Reward):
     """
     Extends the Reward object by giving the `pro_rata` reward per veToken
-    Example: 0.02 USDC per veToken
+    Example: 1000 Wei per veToken
 
     Note: because veTokens and reward tokens may have different decimal values, it can be tricky to display.
     For fractional reward tokens, we preserve the fraction up to 18 decimal points.
@@ -62,7 +62,7 @@ class InputConfig(BaseModel):
     month: int
     block_snapshot: int
     distribution_window: int
-    rewards: list[Reward]
+    rewards: Reward
 
     @validator("month")
     @classmethod
@@ -74,8 +74,8 @@ class InputConfig(BaseModel):
     @validator("year")
     @classmethod
     def validate_year(cls, _year):
-        if _year > 2022 or _year > 2024:
-            raise BadConfigException("Year is likely incorrect")
+        if _year < 2023 or _year > 2025:
+            raise BadConfigException(f"Year is likely incorrect, adjust in {__file__}")
         return int(_year)
 
 
@@ -192,7 +192,7 @@ class Account(BaseModel):
 
     address: EthereumAddress
     vetoken_balance: BigNumber
-    rewards: list[BaseReward]
+    rewards: BigNumber
     state: AccountState
 
 
@@ -219,7 +219,7 @@ class ClaimsRecipient(BaseModel):
 
     windowIndex: int
     accountIndex: int
-    rewards: list[BaseReward]
+    rewards: BigNumber
 
 
 class ClaimsWindow(BaseModel):
@@ -230,5 +230,5 @@ class ClaimsWindow(BaseModel):
 
     windowIndex: int
     chainId: int
-    aggregateRewards: list[RewardSummary]
+    aggregateRewards: RewardSummary
     recipients: dict[EthereumAddress, ClaimsRecipient]
