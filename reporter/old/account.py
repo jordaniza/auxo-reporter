@@ -7,7 +7,7 @@ Account = Query()
 class AccountState(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
-    SLASHED = "slashed"
+    SLASHED = "inactive"
 
 
 def to_staker(staker):

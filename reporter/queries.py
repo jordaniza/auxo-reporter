@@ -1,16 +1,28 @@
 import requests
+import os
 from dataclasses import dataclass
 from typing import TypeVar, Any, TypedDict
 from pydantic import parse_obj_as
+from dotenv import load_dotenv
 
 from reporter.errors import EmptyQueryError
-from reporter.types import Config, Staker, Delegate
+from reporter.types import Config, Staker, Delegate, OnChainVote, OnChainProposal
+from utils import env_var
+
+
+SNAPSHOT_SPACE_ID = env_var("SNAPSHOT_SPACE_ID")
+GOVERNOR_ADDRESS = env_var("GOVERNOR_ADDRESS")
 
 
 @dataclass
 class SUBGRAPHS:
-    VEDOUGH = "https://api.thegraph.com/subgraphs/name/pie-dao/vedough"
+    GRAPH_URL = "https://api.thegraph.com/subgraphs/name"
     SNAPSHOT = "https://hub.snapshot.org/graphql"
+    VEDOUGH = GRAPH_URL + "/pie-dao/vedough"
+
+    # prototype - absolutely no guarantees of uptime or api consistency
+    AUXO_TOKEN_GOERLI = GRAPH_URL + "/jordaniza/auxo-tokens-v2"
+    AUXO_GOV_GOERLI = GRAPH_URL + "/jordaniza/auxo-gov-goerli-1"
 
 
 class GraphQLConfig(TypedDict):
@@ -27,6 +39,8 @@ class GraphQLConfig(TypedDict):
 # python insantiates generics separate to function definition
 T = TypeVar("T")
 
+from pprint import pprint
+
 
 def graphql_iterate_query(url: str, accessor: str, params: GraphQLConfig) -> list[T]:
     """
@@ -42,6 +56,7 @@ def graphql_iterate_query(url: str, accessor: str, params: GraphQLConfig) -> lis
 
     results: list[T] = res["data"][accessor]
     container = results
+    # WARNING: Mocking requests.post here will result in an infinite loop
     while len(container) > 0:
         params["variables"]["skip"] = len(container)
         res = requests.post(url, json=params).json()
@@ -85,7 +100,7 @@ def get_votes(conf: Config):
 
     variables = {
         "skip": 0,
-        "space": "piedao.eth",
+        "space": SNAPSHOT_SPACE_ID,
         "created_gte": conf.start_timestamp,
         "created_lte": conf.end_timestamp,
     }
@@ -103,3 +118,102 @@ def get_delegates() -> list[Delegate]:
     delegates = requests.post(SUBGRAPHS.VEDOUGH, json={"query": query})
     delegate_data = delegates.json().get("data")
     return parse_obj_as(list[Delegate], delegate_data.get("delegates"))
+
+
+def get_on_chain_votes(conf: Config):
+    """
+    Grab vote proposals and votes from OZ Governor
+    """
+
+    votes_query = """
+    query($governor: String, $timestamp_gt: Int, $timestamp_lte: Int, $skip: Int) {
+        voteCasts(
+            first: 1000
+            skip: $skip
+            where: { 
+                timestamp_gt: $timestamp_gt,
+                timestamp_lte: $timestamp_lte,
+                governor: $governor
+            }
+        ) {
+            id
+            receipt {
+                reason
+            }
+            support {
+                support
+            }
+            proposal {
+                description
+                canceled
+                executed
+                id
+                endBlock
+                startBlock
+                proposer {
+                    id
+                }
+            }
+            governor {
+                id
+            }
+            voter {
+                id
+            }
+            timestamp
+        }     
+    }
+    """
+
+    variables = {
+        "skip": 0,
+        "governor": GOVERNOR_ADDRESS,
+        "timestamp_gt": conf.start_timestamp,
+        "timestamp_lte": conf.end_timestamp,
+    }
+    votes: list[Any] = graphql_iterate_query(
+        SUBGRAPHS.AUXO_GOV_GOERLI,
+        "voteCasts",
+        dict(query=votes_query, variables=variables),
+    )
+    return votes
+
+
+def to_proposal(proposal_data) -> OnChainProposal:
+    return parse_obj_as(OnChainProposal, proposal_data)
+
+
+def on_chain_votes_to_votes(data_in: list[Any]) -> list[OnChainVote]:
+    return parse_obj_as(list[OnChainVote], data_in)
+
+
+def get_token_holders():
+    """
+    All the holders of all the tokens.
+    This can and will be optimized.
+    """
+    query = """
+        query($skip: Int) {
+            accounts(
+                first: 1000, 
+                skip: $skip, 
+                where: {ERC20balances_: {valueExact_gt: "0"}}
+            ) {
+                id
+                ERC20balances {
+                    value
+                    contract {
+                        name
+                        symbol
+                        id
+                    }
+                    valueExact
+                }
+            }
+        }
+    """
+    return graphql_iterate_query(
+        SUBGRAPHS.AUXO_TOKEN_GOERLI,
+        "accounts",
+        dict(query=query, variables={"skip": 0}),
+    )

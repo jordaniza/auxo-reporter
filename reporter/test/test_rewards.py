@@ -19,14 +19,7 @@ from reporter.rewards import (
 from reporter.voters import parse_votes, get_voters
 from reporter.queries import get_stakers
 from reporter.types import AccountState, Config, Delegate, Account, Vote, Staker
-
-
-@dataclass
-class MockResponse:
-    res: dict[str, Any]
-
-    def json(self):
-        return self.res
+from .conftest import MockResponse
 
 
 @pytest.fixture(autouse=True)
@@ -135,7 +128,7 @@ def test_init_accounts(config, monkeypatch):
     (_, __, voters, non_voters) = get_vote_data(config, stakers)
     accounts = init_account_rewards(stakers, voters, config)
 
-    slashed = [a for a in accounts if a.state == AccountState.SLASHED]
+    slashed = [a for a in accounts if a.state == AccountState.INACTIVE]
     active = [a for a in accounts if a.state == AccountState.ACTIVE]
 
     assert len(non_voters) == len(slashed)
@@ -192,7 +185,7 @@ def test_build(config: Config, monkeypatch):
 
 
 def no_slashed_has_rewards(distribution: list[Account]) -> bool:
-    slashed = utils.filter_state(distribution, AccountState.SLASHED)
+    slashed = utils.filter_state(distribution, AccountState.INACTIVE)
     return all(int(s.rewards) == 0 for s in slashed)
 
 

@@ -1,10 +1,23 @@
-import csv, json
+import csv, json, os
 from typing import TypeVar, Any
 from tinydb import TinyDB
+from dotenv import load_dotenv
+
 from reporter.types import Account, AccountState
+from errors import MissingEnvironmentVariableException
+
 
 # python insantiates generics separate to function definition
 T = TypeVar("T")
+
+
+def env_var(accessor: str) -> str:
+    load_dotenv()
+
+    var = os.environ.get(accessor)
+    if not var:
+        raise MissingEnvironmentVariableException(accessor)
+    return var
 
 
 def unique(ls: list[T]) -> list[T]:

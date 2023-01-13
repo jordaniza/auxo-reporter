@@ -1,12 +1,16 @@
 from pydantic import BaseModel, validator
 import eth_utils as eth
 from enum import Enum
+from typing import Optional, Literal, TypeVar
 
 from reporter.errors import BadConfigException
 
 # type aliases for clarity
 EthereumAddress = str
 BigNumber = str
+IDAddressDict = dict[Literal["id"], EthereumAddress]
+
+T = TypeVar("T")
 
 
 class BaseReward(BaseModel):
@@ -123,7 +127,7 @@ class Proposal(BaseModel):
     created: int
     start: int
     end: int
-    choices: list[str]
+    choices: Optional[list[str]]
 
     @validator("author")
     @classmethod
@@ -139,6 +143,7 @@ class Vote(BaseModel):
     :param `voter`: checksummed eth address on read
     :param `choice`: will correspond to choice options in the proposal
     :param `proposal`: the proposal voted on
+    :param `created`: when the vote was created
     """
 
     voter: EthereumAddress
@@ -150,6 +155,59 @@ class Vote(BaseModel):
     @classmethod
     def checksum_id(cls, _voter: str) -> str:
         return eth.to_checksum_address(_voter)
+
+
+class OnChainProposal(BaseModel):
+    """
+    Parsing utility for GraphQL Data fetching on chain Proposals
+    """
+
+    description: str
+    canceled: bool
+    executed: bool
+    id: str
+    endBlock: int
+    startBlock: int
+    proposer: IDAddressDict
+
+    @validator("proposer")
+    @classmethod
+    def checksum_id(cls, _proposerDict: IDAddressDict) -> str:
+        return eth.to_checksum_address(_proposerDict["id"])
+
+
+class OnChainVote(BaseModel):
+    """
+    Parsing utility for GraphQL Data fetching on chain Votes
+    """
+
+    id: str
+    receipt: dict[str, str]
+    support: dict[str, int]
+    governor: IDAddressDict
+    voter: IDAddressDict
+    proposal: OnChainProposal
+    timestamp: int
+
+    @validator("receipt")
+    @classmethod
+    def flatten_receipt(cls, receipt: dict[str, str]) -> str:
+        return receipt["reason"]
+
+    @validator("support")
+    @classmethod
+    def flatten_support(cls, support: dict[str, int]) -> int:
+        return support["support"]
+
+    @validator("governor")
+    @classmethod
+    def flatten_governor(cls, governor: IDAddressDict) -> EthereumAddress:
+        return eth.to_checksum_address(governor["id"])
+
+    @validator("voter")
+    @classmethod
+    def flatten_voter(cls, voter: IDAddressDict) -> EthereumAddress:
+        return eth.to_checksum_address(voter["id"])
 
 
 class Delegate(BaseModel):
@@ -175,11 +233,11 @@ class Delegate(BaseModel):
 class AccountState(str, Enum):
     """
     :state ACTIVE: the account voted this month
-    :state SLASHED: the account failed to vote this month and rewards are zero
+    :state INACTIVE: the account failed to vote this month and rewards are zero
     """
 
     ACTIVE = "active"
-    SLASHED = "slashed"
+    INACTIVE = "inactive"
 
 
 class Account(BaseModel):
@@ -196,17 +254,17 @@ class Account(BaseModel):
     state: AccountState
 
 
-class VeTokenStats(BaseModel):
+class TokenSummaryStats(BaseModel):
     """
-    Summarizes veToken positions for active and slashed status
-    :param `total`: total veTokens in circulation at block number
-    :param `active`: total veTokens belonging to users that voted/eligible for rewards
-    :param `slahed`: total veTokens belonging to user that did not vote. Their rewards will be redistributed.
+    Summarizes Token positions for active and inactive statuses
+    :param `total`: total Tokens in circulation at block number
+    :param `active`: total Tokens belonging to users that voted/eligible for rewards
+    :param `inactive`: total Tokens belonging to user that did not vote. Their rewards will be redistributed.
     """
 
     total: BigNumber
     active: BigNumber
-    slashed: BigNumber
+    inactive: BigNumber
 
 
 class ClaimsRecipient(BaseModel):

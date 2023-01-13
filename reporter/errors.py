@@ -12,3 +12,7 @@ class MissingRewardException(Exception):
 
 class BadConfigException(Exception):
     pass
+
+
+class MissingEnvironmentVariableException(Exception):
+    pass

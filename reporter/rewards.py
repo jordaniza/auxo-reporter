@@ -15,7 +15,7 @@ from reporter.types import (
     AccountState,
     Config,
     Reward,
-    VeTokenStats,
+    TokenSummaryStats,
     RewardSummary,
     BaseReward,
 )
@@ -36,7 +36,7 @@ def init_account_rewards(
         Account(
             address=staker.id,
             vetoken_balance=staker.accountVeTokenBalance,
-            state=AccountState.ACTIVE if staker.id in voters else AccountState.SLASHED,
+            state=AccountState.ACTIVE if staker.id in voters else AccountState.INACTIVE,
             rewards="0",
         )
         for staker in stakers
@@ -112,23 +112,23 @@ def vetokens_by_status(
     )
 
 
-def compute_veToken_stats(accounts: list[Account]) -> VeTokenStats:
+def compute_veToken_stats(accounts: list[Account]) -> TokenSummaryStats:
     """Summarize veToken balances for storage in the DB"""
     total_active_vetokens = vetokens_by_status(accounts, AccountState.ACTIVE)
-    total_slashed_vetokens = vetokens_by_status(accounts, AccountState.SLASHED)
+    total_slashed_vetokens = vetokens_by_status(accounts, AccountState.INACTIVE)
     total_vetokens = vetokens_by_status(accounts, None)
 
-    veTokenStats = VeTokenStats(
+    veTokenStats = TokenSummaryStats(
         total=str(int(total_vetokens)),
         active=str(int(total_active_vetokens)),
-        slashed=str(int(total_slashed_vetokens)),
+        inactive=str(int(total_slashed_vetokens)),
     )
     return veTokenStats
 
 
 def distribute(
     conf: Config, accounts: list[Account]
-) -> Tuple[list[Account], RewardSummary, VeTokenStats]:
+) -> Tuple[list[Account], RewardSummary, TokenSummaryStats]:
     """Compute the distribution for all accounts, and summarize the data"""
 
     veToken_stats = compute_veToken_stats(accounts)
@@ -147,7 +147,7 @@ def write_governance_stats(
     voters: list[str],
     non_voters: list[str],
     rewards: RewardSummary,
-    veTokenStats: VeTokenStats,
+    veTokenStats: TokenSummaryStats,
 ):
     db.table("governance_stats").insert(
         {
