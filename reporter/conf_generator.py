@@ -5,6 +5,21 @@ import calendar
 import datetime
 
 from reporter.types import Config, InputConfig
+from reporter.utils import env_var
+
+
+SNAPSHOT_SPACE_ID = env_var("SNAPSHOT_SPACE_ID")
+
+# we could fetch these from the graph
+GOVERNOR_ADDRESS = env_var("GOVERNOR_ADDRESS")
+XAUXO_ADDRESS = env_var("XAUXO_ADDRESS")
+VEAUXO_ADDRESS = env_var("VEAUXO_ADDRESS")
+XAUXO_STAKER = env_var("XAUXO_STAKER")
+
+RPC_URL = env_var("RPC_URL")
+
+X_AUXO_HAIRCUT_PERCENT = float(env_var("X_AUXO_HAIRCUT_PERCENT"))
+STAKING_MANAGER_ADDRESS = env_var("STAKING_MANAGER_ADDRESS")
 
 
 def get_dates(month: int, year: int):

@@ -3,9 +3,13 @@ import functools
 from tinydb import Query, TinyDB
 from reporter import utils
 from reporter.conf_generator import load_conf
-from reporter.types import AccountState, Config, ClaimsRecipient, ClaimsWindow
-
-Account = Query()
+from reporter.types import (
+    AccountState,
+    Config,
+    ClaimsRecipient,
+    ClaimsWindow,
+    AUXO_TOKEN_NAMES,
+)
 
 
 def report_governance(db: TinyDB, path: str):
@@ -29,8 +33,8 @@ def report_governance(db: TinyDB, path: str):
     )
 
 
-def report_rewards(db: TinyDB, path: str):
-    accounts = db.table("accounts").all()
+def report_rewards(db: TinyDB, path: str, token_name: AUXO_TOKEN_NAMES = "veAUXO"):
+    accounts = db.table(f"{token_name}_holders").all()
 
     rewards = [{"address": a["address"], "rewards": a["rewards"]} for a in accounts]
 
@@ -38,9 +42,17 @@ def report_rewards(db: TinyDB, path: str):
     utils.write_json(rewards, f"{path}/json/rewards.json")
 
 
-def build_claims(conf: Config, db: TinyDB, path: str):
-    accounts = db.table("accounts").search(Account.state == AccountState.ACTIVE.value)
-    rewards = db.table("governance_stats").all()[0]["rewards"]
+from tinydb import where
+
+
+def build_claims(
+    conf: Config, db: TinyDB, path: str, token_name: AUXO_TOKEN_NAMES = "veAUXO"
+):
+    accounts = db.table(f"{token_name}_holders").search(where("rewards").map(int) > 0)
+
+    print(accounts)
+
+    rewards = db.table(f"{token_name}_stats").all()[0]["rewards"]
 
     recipients = {
         a["address"]: ClaimsRecipient(
@@ -51,16 +63,16 @@ def build_claims(conf: Config, db: TinyDB, path: str):
         for idx, a in enumerate(accounts)
     }
 
-    reward_window = ClaimsWindow(
-        windowIndex=conf.distribution_window,
-        chainId=1,
-        aggregateRewards=rewards,
-        recipients=recipients,
-    )
+    reward_window = {
+        "windowIndex": conf.distribution_window,
+        "chainId": 1,
+        "aggregateRewards": rewards,
+        "recipients": recipients,
+    }
 
-    utils.write_json(reward_window.dict(), f"{path}/claims.json")
+    utils.write_json(reward_window, f"{path}/claims-{token_name}.json")
     print(
-        "🚀🚀🚀 Successfully created the claims database, check it and generate the merkle tree"
+        f"🚀🚀🚀 Successfully created the {token_name} claims database, check it and generate the merkle tree"
     )
 
 
@@ -68,7 +80,7 @@ def main(path: str):
     if not path:
         path = input(" Path to the config file ")
     conf = load_conf(path)
-    db = utils.get_db(path)
+    db = utils.get_db(path)  # loads the reporter-db.json
 
     build_claims(conf, db, path)
     report_rewards(db, path)

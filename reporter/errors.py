@@ -16,3 +16,11 @@ class BadConfigException(Exception):
 
 class MissingEnvironmentVariableException(Exception):
     pass
+
+
+class InvalidXAUXOHaircutPercentageException(Exception):
+    pass
+
+
+class MissingStakingManagerAddressError(Exception):
+    pass

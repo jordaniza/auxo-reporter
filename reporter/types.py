@@ -1,7 +1,7 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, Field
 import eth_utils as eth
 from enum import Enum
-from typing import Optional, Literal, TypeVar
+from typing import Optional, Literal, TypeVar, Any, Union
 
 from reporter.errors import BadConfigException
 
@@ -9,35 +9,54 @@ from reporter.errors import BadConfigException
 EthereumAddress = str
 BigNumber = str
 IDAddressDict = dict[Literal["id"], EthereumAddress]
+GraphQL_Response = dict[Literal["data"], Any]
 
+# Literal unions
+AUXO_TOKEN_NAMES = Union[Literal["veAUXO"], Literal["xAUXO"]]
+
+# python boilerpate for generics
 T = TypeVar("T")
 
+"""
+Types here are instantiated as subclasses of pydantic's `BaseModel`.
+This means we get runtime deserialization and validation for free just by using type declarations
+and a couple of pydantic helpers.
 
-class BaseReward(BaseModel):
-    """Grouped data about a particular token in rewards"""
+Use these in your code as python objects, then serialize to json by converting to a dict with `.dict()`
+"""
+
+
+class BaseERC20Holding(BaseModel):
+    """
+    Grouped data about a particular token for a user.
+    In the context of rewards, this is the reward token and quantity.
+
+    In the context of holdings, this represents the balance of the user
+    at the snapshot taken.
+    """
 
     amount: BigNumber
-    token: EthereumAddress
+    address: EthereumAddress
 
-    @validator("token")
+    @validator("address")
     @classmethod
-    def checksum_token(cls, _token: EthereumAddress):
-        return eth.to_checksum_address(_token)
+    def checksum_token(cls, addr: EthereumAddress):
+        return eth.to_checksum_address(addr)
 
 
-class Reward(BaseReward):
-    """Adds additional metadata about the reward"""
+class ERC20Metadata(BaseERC20Holding):
+    """Adds additional metadata about the token"""
 
     decimals: int
     symbol: str
 
 
-class RewardSummary(Reward):
+class RewardSummary(ERC20Metadata):
     """
     Extends the Reward object by giving the `pro_rata` reward per veToken
     Example: 1000 Wei per veToken
 
-    Note: because veTokens and reward tokens may have different decimal values, it can be tricky to display.
+    Note: because tokens may have different decimal values, it can be tricky to display.
     For fractional reward tokens, we preserve the fraction up to 18 decimal points.
     """
 
@@ -50,6 +69,18 @@ class RewardSummary(Reward):
             return str(int(float(p)))
         else:
             return f"{float(p):.18f}"
+
+
+class VeAuxoRewardSummary(RewardSummary):
+    to_xauxo: BigNumber = "0"
+
+
+class XAuxoRewardSummary(RewardSummary):
+    redistributed_total: BigNumber = "0"
+    redistributed_to_stakers: BigNumber = "0"
+    redistributed_transferred: BigNumber = "0"
+
+    total_haircut: BigNumber = "0"
 
 
 class InputConfig(BaseModel):
@@ -66,7 +97,7 @@ class InputConfig(BaseModel):
     month: int
     block_snapshot: int
     distribution_window: int
-    rewards: Reward
+    rewards: ERC20Metadata
 
     @validator("month")
     @classmethod
@@ -246,12 +277,14 @@ class Account(BaseModel):
     :param `address`: ethereum address. We don't checksum this because it is already validated in prior steps.
     :param `rewards`: the rewards that the account will receive this month. Will be zero if slashed
     :param `state`: whether the account was active or inactive this month
+    :param `token`: the xAUXO or veAUXO balance of the account, along with the address
     """
 
     address: EthereumAddress
-    vetoken_balance: BigNumber
+    token: BaseERC20Holding
     rewards: BigNumber
     state: AccountState
+    notes: list[str] = []
 
 
 class TokenSummaryStats(BaseModel):
@@ -288,5 +321,22 @@ class ClaimsWindow(BaseModel):
 
     windowIndex: int
     chainId: int
-    aggregateRewards: RewardSummary
+    aggregateRewards: Union[VeAuxoRewardSummary, XAuxoRewardSummary]
     recipients: dict[EthereumAddress, ClaimsRecipient]
+
+
+class Hodler(BaseModel):
+    """
+    Similar to staker and may replace staker.
+    Includes additional token metadata to better differentiate
+    between different token holdings (xAUXO vs veAUXO)
+    """
+
+    # account will be deserialized to just an Ethereum Address
+    account: IDAddressDict
+    token: ERC20Metadata
+
+    @validator("account")
+    @classmethod
+    def checksum_id(cls, input: IDAddressDict):
+        return eth.to_checksum_address(input["id"])

@@ -2,9 +2,11 @@ import csv, json, os
 from typing import TypeVar, Any
 from tinydb import TinyDB
 from dotenv import load_dotenv
+from pydantic import validator
+from typing import Callable, Dict
 
 from reporter.types import Account, AccountState
-from errors import MissingEnvironmentVariableException
+from reporter.errors import MissingEnvironmentVariableException
 
 
 # python insantiates generics separate to function definition
@@ -78,3 +80,10 @@ def write_json(data: Any, path: str) -> None:
     with open(path, "w+") as f:
         data_json = json.dumps(data, indent=4)
         f.write(data_json)
+
+
+from dataclasses import dataclass
+
+
+class InsertJSONException(Exception):
+    pass

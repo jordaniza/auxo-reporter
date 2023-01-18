@@ -3,10 +3,10 @@ import pytest
 import json
 import datetime
 from eth_utils import to_checksum_address
-from dataclasses import dataclass
-from typing import Any
 from pydantic import parse_obj_as
 from decimal import Decimal, getcontext
+
+from reporter.test.conftest import MockResponse
 
 from reporter import utils
 from reporter.rewards import (
@@ -14,12 +14,13 @@ from reporter.rewards import (
     init_account_rewards,
     distribute,
     write_accounts_and_distribution,
-    write_governance_stats,
+    write_veauxo_stats,
+    separate_staking_manager,
+    separate_xauxo_rewards,
 )
 from reporter.voters import parse_votes, get_voters
 from reporter.queries import get_stakers
 from reporter.types import AccountState, Config, Delegate, Account, Vote, Staker
-from .conftest import MockResponse
 
 
 @pytest.fixture(autouse=True)
@@ -176,11 +177,31 @@ def test_build(config: Config, monkeypatch):
     stakers = get_stakers(config)
     (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
     accounts = init_account_rewards(stakers, voters, config)
+
+    # save staking manager separately
+    (accounts, staking_manager) = separate_staking_manager(
+        accounts, accounts[1].address
+    )
+
     (distribution, reward_summaries, stats) = distribute(config, accounts)
     print(stats)
+
+    #  and remove its rewards from the veAUXO Tree
+    (reward_summaries, accounts) = separate_xauxo_rewards(
+        staking_manager, reward_summaries, accounts
+    )
+
     write_accounts_and_distribution(db, accounts, distribution)
-    write_governance_stats(
-        db, stakers, votes, proposals, voters, non_voters, reward_summaries, stats
+    write_veauxo_stats(
+        db,
+        stakers,
+        votes,
+        proposals,
+        voters,
+        non_voters,
+        reward_summaries,
+        stats,
+        staking_manager,
     )
 
 

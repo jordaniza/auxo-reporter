@@ -1,0 +1,23 @@
+{
+  "data": {
+    "erc20Contract": {
+      "decimals": 18,
+      "id": "0xe537b845b8275aa2320d24beedd586c8217b4af5",
+      "name": "xAUXO",
+      "symbol": "xAUXO",
+      "totalSupply": {
+        "value": "1",
+        "valueExact": "1000000000000000000"
+      },
+      "balances": [
+        {
+          "account": {
+            "id": "0x060cc413bc704e4fe4ba6e2eacbbfc47bf528226"
+          },
+          "value": "1",
+          "valueExact": "1000000000000000000"
+        }
+      ]
+    }
+  }
+}

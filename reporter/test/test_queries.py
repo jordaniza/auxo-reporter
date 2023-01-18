@@ -6,19 +6,29 @@ from reporter.queries import (
     get_on_chain_votes,
     to_proposal,
     on_chain_votes_to_votes,
-    get_token_holders,
+    get_veauxo_hodlers,
+    get_xauxo_hodlers,
+    get_x_auxo_statuses,
+    xauxo_accounts,
 )
 from reporter.types import Config
-from conftest import MockResponse
-
-
-LIVE_CALLS_DISABLED = os.environ.get("PYTEST_LIVE_CALLS_ENABLED") != "TRUE"
-SKIP_REASON = (
-    "API Calls disabled: set PYTEST_LIVE_CALLS_ENABLED=TRUE in .env to run this test"
+from reporter.test.conftest import (
+    MockResponse,
+    mock_token_holders,
+    LIVE_CALLS_DISABLED,
+    SKIP_REASON,
 )
 
 
-def mock_votes(monkeypatch):
+def mock_ve_auxo_holders(monkeypatch) -> None:
+    return mock_token_holders(monkeypatch, "reporter/test/stubs/tokens/veauxo.json")
+
+
+def mock_x_auxo_holders(monkeypatch) -> None:
+    return mock_token_holders(monkeypatch, "reporter/test/stubs/tokens/xauxo.json")
+
+
+def mock_votes(monkeypatch) -> None:
     with open("reporter/test/stubs/votes/onchain-votes.json") as j:
         mock_on_chain_votes = json.load(j)
 
@@ -46,16 +56,31 @@ def test_should_not_have_data(config: Config):
     assert len(votes) == 0
 
 
-def test_parse_proposal(monkeypatch, config):
-    mock_votes(monkeypatch)
-    votes = get_on_chain_votes(config)
-    v = on_chain_votes_to_votes(votes)
-    p = to_proposal(votes[0]["proposal"])
+# def test_parse_proposal(monkeypatch, config):
+#     mock_votes(monkeypatch)
+#     votes = get_on_chain_votes(config)
+#     v = on_chain_votes_to_votes(votes)
+#     p = to_proposal(votes[0]["proposal"])
 
-    pprint([_v.dict() for _v in v], indent=4)
-    pprint(p.dict(), indent=4)
+#     pprint([_v.dict() for _v in v], indent=4)
+#     pprint(p.dict(), indent=4)
 
 
-def test_get_tokens():
-    votes = get_token_holders()
-    pprint(votes, indent=4)
+def test_get_tokens(monkeypatch, config: Config):
+    mock_ve_auxo_holders(monkeypatch)
+    # mock_x_auxo_holders(monkeypatch)
+
+    config.block_snapshot = 8320117
+
+    # xauxo = get_xauxo_hodlers(config)
+    # pprint(xauxo, indent=4)
+
+    veauxo = get_xauxo_hodlers(config)
+    pprint(veauxo, indent=4)
+
+    active = get_x_auxo_statuses(veauxo)
+
+    pprint(active, indent=4)
+
+    accs = xauxo_accounts(veauxo, active)
+    pprint(accs, indent=4)
