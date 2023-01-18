@@ -44,7 +44,10 @@ def init_account_rewards(
             token=BaseERC20Holding(
                 amount=staker.accountVeTokenBalance, address=VEAUXO_ADDRESS
             ),
-            state=AccountState.ACTIVE if staker.id in voters else AccountState.INACTIVE,
+            state=AccountState.ACTIVE
+            if staker.id
+            in voters + [STAKING_MANAGER_ADDRESS]  # shorthand for appending
+            else AccountState.INACTIVE,
             rewards="0",
         )
         for staker in stakers
@@ -64,9 +67,7 @@ def distribute_rewards(
     """
 
     if account.state == AccountState.ACTIVE:
-        account_reward = int(
-            pro_rata * Decimal(account.token.amount) / Decimal(10**reward.decimals)
-        )
+        account_reward = int(pro_rata * Decimal(account.token.amount))
         account.rewards = str(Decimal(account.rewards) + account_reward)
         account.notes.append(f"active reward of {account_reward}")
 
@@ -89,9 +90,7 @@ def compute_rewards(
     """
 
     # compute rewards per veToken held, for the given reward token
-    pro_rata = (Decimal(total_rewards.amount) / total_active_tokens) * Decimal(
-        10**total_rewards.decimals
-    )
+    pro_rata = Decimal(total_rewards.amount) / total_active_tokens
 
     # append rewards to existing accounts for this token
     accounts = list(

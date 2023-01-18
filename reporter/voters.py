@@ -2,13 +2,41 @@ from pydantic import parse_obj_as
 from typing import Tuple
 
 from reporter import utils
-from reporter.queries import get_votes, get_delegates
-from reporter.types import Config, Vote, Delegate, Staker, Proposal
+from reporter.queries import get_votes, get_delegates, get_on_chain_votes
+from reporter.types import (
+    Config,
+    Vote,
+    Delegate,
+    Staker,
+    Proposal,
+    OnChainProposal,
+    OnChainVote,
+)
 
 
 def parse_votes(conf: Config) -> list[Vote]:
     """Deserialize votes fetched from API to an array of Vote objects"""
     return parse_obj_as(list[Vote], get_votes(conf))
+
+
+def parse_on_chain_votes(conf: Config) -> list[OnChainVote]:
+    return parse_obj_as(list[OnChainVote], get_on_chain_votes(conf))
+
+
+def combine_on_off_chain_proposals(
+    offchain: list[Proposal], onchain: list[OnChainProposal]
+) -> list[Proposal]:
+
+    coerced = [ocp.coerce_to_proposal() for ocp in onchain]
+    return offchain + coerced
+
+
+def combine_on_off_chain_votes(
+    offchain: list[Vote], onchain: list[OnChainVote]
+) -> list[Vote]:
+
+    coerced = [ocv.coerce_to_vote() for ocv in onchain]
+    return offchain + coerced
 
 
 def filter_votes_by_proposal(
@@ -77,7 +105,11 @@ def get_vote_data(
     """
     delegates = get_delegates()
     votes = parse_votes(conf)
-    (votes, proposals) = filter_votes_by_proposal(votes)
-    (voters, non_voters) = get_voters(votes, stakers, delegates)
 
-    return (votes, proposals, voters, non_voters)
+    on_chain_votes = parse_on_chain_votes(conf)
+    combined_votes = combine_on_off_chain_votes(votes, on_chain_votes)
+
+    (filtered_votes, proposals) = filter_votes_by_proposal(combined_votes)
+    (voters, non_voters) = get_voters(filtered_votes, stakers, delegates)
+
+    return (filtered_votes, proposals, voters, non_voters)

@@ -1,0 +1,15 @@
+{
+  "year": 2023,
+  "month": 12,
+  "block_snapshot": 16086234,
+  "distribution_window": 9999,
+  "rewards": {
+    "amount": "1000000000000000000000",
+    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "decimals": 18,
+    "symbol": "WETH"
+  },
+  "date": "2023-12",
+  "start_timestamp": 1667246400,
+  "end_timestamp": 1669838399
+}

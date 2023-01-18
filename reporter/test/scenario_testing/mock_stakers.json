@@ -1,0 +1,26 @@
+{
+    "data": {
+        "stakers": [
+            {
+                "accountVeTokenBalance": "100",
+                "id": "0x0000000000000000000000000000000000000001"
+            },
+            {
+                "accountVeTokenBalance": "100",
+                "id": "0x0000000000000000000000000000000000000002"
+            },
+            {
+                "accountVeTokenBalance": "100",
+                "id": "0x0000000000000000000000000000000000000003"
+            },
+            {
+                "accountVeTokenBalance": "100",
+                "id": "0x0000000000000000000000000000000000000004"
+            },
+            {
+                "accountVeTokenBalance": "400",
+                "id": "0x8723c6d035106a79242E8A94dD1f6770291CbDf8"
+            }
+        ]
+    }
+}

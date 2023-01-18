@@ -20,6 +20,7 @@ from reporter.rewards import (
     write_xauxo_stats,
     separate_xauxo_rewards,
 )
+from reporter.conf_generator import load_conf
 from reporter.voters import parse_votes, get_voters
 from reporter.queries import get_stakers
 from reporter.types import (
@@ -31,6 +32,7 @@ from reporter.types import (
     Staker,
     VeAuxoRewardSummary,
     XAuxoRewardSummary,
+    OnChainVote,
 )
 from reporter.queries import xauxo_accounts, get_x_auxo_statuses, get_xauxo_hodlers
 from reporter.xAuxo.rewards import (
@@ -52,7 +54,11 @@ from reporter.writer import build_claims
 from decimal import Decimal
 from reporter.errors import BadConfigException
 from reporter.types import AccountState, Config, ERC20Metadata
-from reporter.conf_generator import X_AUXO_HAIRCUT_PERCENT, XAUXO_ADDRESS
+from reporter.conf_generator import (
+    X_AUXO_HAIRCUT_PERCENT,
+    XAUXO_ADDRESS,
+    STAKING_MANAGER_ADDRESS,
+)
 from reporter.test.conftest import LIVE_CALLS_DISABLED, SKIP_REASON
 from reporter import utils
 from copy import deepcopy
@@ -65,15 +71,37 @@ def before_each(monkeypatch):
     yield
 
 
+root = "reporter/test/scenario_testing"
+
+
 def init_mocks(monkeypatch):
-    with open("reporter/test/stubs/stakers-subgraph-response.json") as j:
+    # with open("reporter/test/stubs/stakers-subgraph-response.json") as j:
+    #     mock_stakers = json.load(j)
+
+    # with open("reporter/test/stubs/votes/onchain-votes.json") as j:
+    #     mock_on_chain_votes = json.load(j)
+
+    # with open("reporter/test/stubs/snapshot-votes.json") as j:
+    #     mock_votes = json.load(j)
+
+    # with open("reporter/test/stubs/delegates.json") as j:
+    #     mock_delegates = json.load(j)
+
+    with open(f"{root}/mock_stakers.json") as j:
         mock_stakers = json.load(j)
 
-    with open("reporter/test/stubs/snapshot-votes.json") as j:
+    with open(f"{root}/votes_on.json") as j:
+        mock_on_chain_votes = json.load(j)
+
+    with open(f"{root}/votes_off.json") as j:
         mock_votes = json.load(j)
 
     with open("reporter/test/stubs/delegates.json") as j:
-        mock_delegates = json.load(j)
+        mock_delegates = []
+
+    # get_x_auxo_statuses
+    with open(f"{root}/mock_xauxo.json") as j:
+        mock_xauxo_holders = json.load(j)
 
     """
     When patching, you need to specify the file where the function is *executed*
@@ -86,6 +114,21 @@ def init_mocks(monkeypatch):
         "reporter.voters.get_delegates",
         lambda: parse_obj_as(list[Delegate], mock_delegates),
     )
+    monkeypatch.setattr(
+        "reporter.voters.parse_on_chain_votes",
+        lambda conf: parse_obj_as(
+            list[OnChainVote], mock_on_chain_votes["data"]["voteCasts"]
+        ),
+    )
+
+    monkeypatch.setattr(
+        "reporter.queries.get_token_hodlers",
+        lambda conf, XAUXO_ADDRESS: mock_xauxo_holders["data"]["erc20Contract"][
+            "balances"
+        ],
+    )
+
+    # monkeypatch.setattr("reporter.voters.get_votes", lambda _: mock_votes)
 
     return (mock_stakers, mock_votes, mock_delegates)
 
@@ -107,7 +150,8 @@ def mock_ve_auxo_holders(monkeypatch) -> None:
     return mock_token_holders(monkeypatch, "reporter/test/stubs/tokens/veauxo.json")
 
 
-def test_both(config: Config, monkeypatch):
+def test_both(monkeypatch):
+    config = load_conf("reporter/test/scenario_testing")
 
     getcontext().prec = 42
 
@@ -124,13 +168,12 @@ def test_both(config: Config, monkeypatch):
 
     # save staking manager separately
     (veauxo_accounts_out, staking_manager) = separate_staking_manager(
-        veauxo_accounts_in, veauxo_accounts_in[1].address
+        veauxo_accounts_in, STAKING_MANAGER_ADDRESS
     )
 
     (veauxo_distribution, veauxo_reward_summaries, veauxo_stats) = distribute(
         config, veauxo_accounts_out
     )
-    print(veauxo_stats)
 
     #  and remove its rewards from the veAUXO Tree
     (veauxo_reward_summaries, veauxo_accounts_out) = separate_xauxo_rewards(
@@ -157,15 +200,13 @@ def test_both(config: Config, monkeypatch):
     mock_ve_auxo_holders(monkeypatch)
 
     xauxo_holders = get_xauxo_hodlers(config)
-    xauxo_active = get_x_auxo_statuses(xauxo_holders)
+    xauxo_active = get_x_auxo_statuses(xauxo_holders, mock=True)
     xauxo_accounts_in = xauxo_accounts(xauxo_holders, xauxo_active)
 
     xauxo_rewards_total_no_haircut = deepcopy(config.rewards)
     xauxo_rewards_total_no_haircut.amount = veauxo_reward_summaries.to_xauxo
 
-    xauxo_redistributions = load_redistributions(
-        "reporter/test/stubs/config/redistributions.json"
-    )
+    xauxo_redistributions = load_redistributions(f"{root}/redistributions.json")
 
     (xauxo_rewards_total_with_haircut, xauxo_haircut) = compute_x_auxo_reward_total(
         Decimal(xauxo_rewards_total_no_haircut.amount)

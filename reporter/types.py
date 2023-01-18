@@ -129,7 +129,7 @@ class Config(InputConfig):
 
 class Staker(BaseModel):
     """
-    Staker is a users with a veToken balance
+    Staker is a user with a veToken balance
     :param `id`: the ethereum address.
 
     `id` Will be checksummed when instantiated and accessors will use the checksummed address.
@@ -200,11 +200,28 @@ class OnChainProposal(BaseModel):
     endBlock: int
     startBlock: int
     proposer: IDAddressDict
+    proposalCreated: list
 
     @validator("proposer")
     @classmethod
     def checksum_id(cls, _proposerDict: IDAddressDict) -> str:
         return eth.to_checksum_address(_proposerDict["id"])
+
+    @validator("proposalCreated")
+    @classmethod
+    def flatten_proposal(cls, created: list) -> int:
+        return created[0]["timestamp"]
+
+    def coerce_to_proposal(self) -> Proposal:
+        return Proposal(
+            id=self.id,
+            title=self.description,
+            author=self.proposer,
+            start=self.startBlock,
+            end=self.endBlock,
+            created=self.proposalCreated,
+            choices=None,
+        )
 
 
 class OnChainVote(BaseModel):
@@ -239,6 +256,14 @@ class OnChainVote(BaseModel):
     @classmethod
     def flatten_voter(cls, voter: IDAddressDict) -> EthereumAddress:
         return eth.to_checksum_address(voter["id"])
+
+    def coerce_to_vote(self) -> Vote:
+        return Vote(
+            voter=self.voter,
+            choice=self.support,
+            created=self.timestamp,
+            proposal=self.proposal.coerce_to_proposal(),
+        )
 
 
 class Delegate(BaseModel):

@@ -1,5 +1,5 @@
 import requests
-import os
+import os, json
 from dataclasses import dataclass
 from typing import TypeVar, Any, TypedDict, Literal, cast
 from pydantic import parse_obj_as
@@ -196,6 +196,9 @@ def get_on_chain_votes(conf: Config):
                 proposer {
                     id
                 }
+                proposalCreated {
+                    timestamp
+                }
             }
             governor {
                 id
@@ -224,10 +227,6 @@ def get_on_chain_votes(conf: Config):
 
 def to_proposal(proposal_data) -> OnChainProposal:
     return parse_obj_as(OnChainProposal, proposal_data)
-
-
-def on_chain_votes_to_votes(data_in: list[Any]) -> list[OnChainVote]:
-    return parse_obj_as(list[OnChainVote], data_in)
 
 
 def get_token_hodlers(conf: Config, token_address: EthereumAddress):
@@ -280,7 +279,9 @@ def get_xauxo_hodlers(conf: Config) -> list[Hodler]:
     """
     Fetch the list of xAUXO token holders at the given block number
     """
-    x_auxo: list[Any] = get_token_hodlers(conf, VEAUXO_ADDRESS)
+
+    x_auxo: list[Any] = get_token_hodlers(conf, XAUXO_ADDRESS)
+    print(x_auxo)
     x_auxo = [
         {
             "token": ERC20Metadata(
@@ -316,12 +317,19 @@ def get_veauxo_hodlers(conf: Config):
     return parse_obj_as(list[Hodler], ve_auxo)
 
 
-def get_x_auxo_statuses(holders: list[Hodler]) -> dict[EthereumAddress, bool]:
+def get_x_auxo_statuses(
+    holders: list[Hodler], mock=False
+) -> dict[EthereumAddress, bool]:
     """
     For a passed list of xAUXO holders, we make a multicall to the
     xAUXO staker contract to check if they are active in the current epoch or not.
     """
     # instantiate a basic web3 client from the environment
+    if mock:
+        with open("reporter/test/scenario_testing/xauxo_stakers.json") as j:
+            mock_multicall_response = json.load(j)
+        return mock_multicall_response
+
     w3 = Web3(Web3.HTTPProvider(RPC_URL))
 
     calls = [

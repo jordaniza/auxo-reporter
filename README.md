@@ -101,3 +101,67 @@ That's it! Just follow the instructions in the command prompt and you will autom
 ## Issues
 
 Hop on over to the AUXO discord, [or contact me on github](https://github.com/jordaniza)
+
+[] Make xAUXO redistribution only to active stakers
+[] Active/Inactive to Staked/NonStaked for XAuxo
+
+Scenario 1:
+
+- All stakers get (rewards - haircut)
+- Haircut -> DAO (just make a note of it)
+- NonStaked xAUXO gets redistributed
+  - this could go to the DAO (doesn't move)
+  - could go to someone else according to weights
+    - should we transfer or merkle distribute?
+
+eg. 20% buyback, 50% existing stakers, 30% Ops
+
+Name Changes:
+
+- Deploy contracts (maybe)
+- Test Staking xAUXO
+  - Changing Epochs
+- Generating Rewards Tree
+- Test Staking veAUXO (voting?)
+- Generating Rewards Tree
+- Deploying to a Distributor
+- Claiming
+
+Scenario
+
+4 veAUXO Stakers:
+
+1. Active on chain
+2. Active on snapshot
+3. Inactive
+4. Active on both
+
+**Setup**
+Each receive 100 AUXO and convert to 100 veAUXO
+
+We need to create a mock snapshot vote for veAUXO
+We need a mock onchain vote
+
+Then we can combine in the reporter against an expected outcome
+
+**xAUXO**
+4 more stakers each receive 100 veAUXO -> xAUXO
+
+Set the Tax/Haircut at 20%
+
+xAUXO globally has 400 veAUXO across the 4 stakers
+
+Only the first 2 are staked
+
+From the redistributions:
+All of it gets assigned to a 5th Wallet that is not related to anyone else here
+
+```json
+{
+  "weight": 1,
+  "option": "transfer",
+  "address": "0x123..."
+}
+```
+
+Assuming this works - we add the decay logic

@@ -41,7 +41,7 @@ from reporter.conf_generator import XAUXO_ADDRESS, X_AUXO_HAIRCUT_PERCENT
 
 
 class RedistributionOption(str, Enum):
-    # send to a specific address
+    # add specific address to the merkle tree
     TRANSFER = "transfer"
 
     # redistribute rewards evenly amongst active xauxo stakers
@@ -266,39 +266,3 @@ def compute_allocations(
         redistributed_to_stakers,
         redistributed_transfer,
     )
-
-
-from reporter.queries import xauxo_accounts, get_x_auxo_statuses, get_xauxo_hodlers
-from reporter.rewards import (
-    write_accounts_and_distribution,
-    write_veauxo_stats,
-    compute_rewards,
-)
-from reporter.writer import build_claims
-from copy import deepcopy
-
-
-def main(config: Config, path_redistributions: str, db: TinyDB):
-    holders = get_xauxo_hodlers(config)
-    active = get_x_auxo_statuses(holders)
-    accounts_in = xauxo_accounts(holders, active)
-
-    # "reporter/test/stubs/config/redistributions.json"
-    dist = load_redistributions(path_redistributions)
-    xauxo_stats, accounts, redistributions, stakers_rewards = compute_allocations(
-        accounts_in, config.rewards, dist
-    )
-
-    reward = deepcopy(config.rewards)
-    reward.amount = str(int(stakers_rewards))
-
-    # distribution_rewards = compute_rewards(
-    #     reward,
-    #     Decimal(xauxo_stats.active),
-    #     accounts,
-    # )
-
-    # write the data
-
-    write_accounts_and_distribution(db, accounts, accounts, "xAUXO")
-    build_claims(config, db, "reporter/test/stubs/db", "xAUXO")
