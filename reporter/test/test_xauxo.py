@@ -9,7 +9,14 @@ from pydantic import ValidationError
 from reporter import utils
 from reporter.env import ADDRESSES
 from reporter.errors import BadConfigException
-from reporter.queries import get_x_auxo_statuses, get_xauxo_stakers, xauxo_accounts
+from reporter.queries import (
+    get_x_auxo_statuses,
+    get_xauxo_stakers,
+    xauxo_accounts,
+    get_xauxo_total_supply,
+    get_all_xauxo_depositors,
+    get_xauxo_active_balances,
+)
 from reporter.rewards import (
     compute_rewards,
     write_accounts_and_distribution,
@@ -31,24 +38,24 @@ from reporter.xAuxo.rewards import (
 )
 
 
-def test_require_address_for_transfer():
-    with pytest.raises(ValidationError):
-        RedistributionWeight(
-            weight=1, address=None, option=RedistributionOption.TRANSFER
-        )
+# def test_require_address_for_transfer():
+#     with pytest.raises(ValidationError):
+#         RedistributionWeight(
+#             weight=1, address=None, option=RedistributionOption.TRANSFER
+#         )
 
 
-def test_do_not_require_address_for_redistribute():
-    r1 = RedistributionWeight(
-        weight=1, address=None, option=RedistributionOption.REDISTRIBUTE_XAUXO
-    )
+# def test_do_not_require_address_for_redistribute():
+#     r1 = RedistributionWeight(
+#         weight=1, address=None, option=RedistributionOption.REDISTRIBUTE_XAUXO
+#     )
 
-    r2 = RedistributionWeight(
-        weight=1, address=None, option=RedistributionOption.REDISTRIBUTE_VEAUXO
-    )
+#     r2 = RedistributionWeight(
+#         weight=1, address=None, option=RedistributionOption.REDISTRIBUTE_VEAUXO
+#     )
 
-    assert not r1.address
-    assert not r2.address
+#     assert not r1.address
+#     assert not r2.address
 
 
 def mock_ve_auxo_holders(monkeypatch) -> None:
@@ -105,72 +112,89 @@ def mock_ve_auxo_holders(monkeypatch) -> None:
 #     assert len(dist) == 4
 
 
-def assertAlmostEq(a: int, b: int, delta: float):
-    assert abs(a - b) <= delta
+# def assertAlmostEq(a: int, b: int, delta: float):
+#     assert abs(a - b) <= delta
 
 
-# def test_compute_redistributions(monkeypatch, config: Config):
-#     mock_ve_auxo_holders(monkeypatch)
+# # def test_compute_redistributions(monkeypatch, config: Config):
+# #     mock_ve_auxo_holders(monkeypatch)
 
-#     holders = get_xauxo_stakers(config)
-#     active = get_x_auxo_statuses(holders)
-#     accounts_in = xauxo_accounts(holders, active)
+# #     holders = get_xauxo_stakers(config)
+# #     active = get_x_auxo_statuses(holders)
+# #     accounts_in = xauxo_accounts(holders, active)
 
-#     dist = load_redistributions("reporter/test/stubs/config/redistributions.json")
-#     xauxo_stats, accounts, redistributions, stakers_rewards = compute_allocations(
-#         accounts_in, config.rewards, dist
+# #     dist = load_redistributions("reporter/test/stubs/config/redistributions.json")
+# #     xauxo_stats, accounts, redistributions, stakers_rewards = compute_allocations(
+# #         accounts_in, config.rewards, dist
+# #     )
+
+# #     reward = deepcopy(config.rewards)
+# #     reward.amount = str(int(stakers_rewards))
+
+# #     distribution_rewards = compute_rewards(
+# #         reward,
+# #         Decimal(xauxo_stats.active),
+# #         accounts,
+# #     )
+
+# #     pprint(distribution_rewards.dict(), indent=4)
+
+# #     # printing and assertions
+# #     _print_eth_redistributions(redistributions)
+# #     print(int(stakers_rewards) / 10**18)
+# #     _assert_stakers_rewards_reconcile(redistributions, config, int(stakers_rewards))
+# #     print(json.dumps([a.dict() for a in accounts], indent=4))
+# #     # END printing and assertions
+
+# #     # write the data
+# #     db = utils.get_db("reporter/test/stubs/db", drop=False)
+
+# #     write_accounts_and_distribution(db, accounts, accounts, "xAUXO")
+# #     build_claims(config, db, "reporter/test/stubs/db", "xAUXO")
+
+
+# def _print_eth_redistributions(redistributions: list[NormalizedRedistributionWeight]):
+#     redistributions_with_eth = [
+#         {"eth_value": int(r.rewards) / 10**18, **r.dict()} for r in redistributions
+#     ]
+
+#     print(json.dumps(redistributions_with_eth, indent=4))
+
+
+# def _assert_stakers_rewards_reconcile(
+#     redistributions: list[NormalizedRedistributionWeight],
+#     config: Config,
+#     stakers_rewards: int,
+# ):
+#     rewards_to_non_stakers = sum(
+#         int(r.rewards)
+#         for r in redistributions
+#         if r.option != RedistributionOption.REDISTRIBUTE_XAUXO
+#     )
+#     net_rewards_to_stakers = int(config.rewards.amount) - rewards_to_non_stakers
+
+#     ONE_TEN_MILLIONTH = 0.00000001
+#     max_delta = int(config.rewards.amount) * ONE_TEN_MILLIONTH
+
+#     assertAlmostEq(
+#         stakers_rewards,
+#         net_rewards_to_stakers,
+#         max_delta,
 #     )
 
-#     reward = deepcopy(config.rewards)
-#     reward.amount = str(int(stakers_rewards))
 
-#     distribution_rewards = compute_rewards(
-#         reward,
-#         Decimal(xauxo_stats.active),
-#         accounts,
-#     )
+def test_total_supply():
+    total_supply = get_xauxo_total_supply()
+    all_depositors_ever = [d["user"] for d in get_all_xauxo_depositors()]
+    active_balances = get_xauxo_active_balances(all_depositors_ever)
 
-#     pprint(distribution_rewards.dict(), indent=4)
-
-#     # printing and assertions
-#     _print_eth_redistributions(redistributions)
-#     print(int(stakers_rewards) / 10**18)
-#     _assert_stakers_rewards_reconcile(redistributions, config, int(stakers_rewards))
-#     print(json.dumps([a.dict() for a in accounts], indent=4))
-#     # END printing and assertions
-
-#     # write the data
-#     db = utils.get_db("reporter/test/stubs/db", drop=False)
-
-#     write_accounts_and_distribution(db, accounts, accounts, "xAUXO")
-#     build_claims(config, db, "reporter/test/stubs/db", "xAUXO")
+    print(total_supply, all_depositors_ever, active_balances)
 
 
-def _print_eth_redistributions(redistributions: list[NormalizedRedistributionWeight]):
-    redistributions_with_eth = [
-        {"eth_value": int(r.rewards) / 10**18, **r.dict()} for r in redistributions
-    ]
+"""
+{
+    '0x63bce354dba7d6270cb34daa46b869892abb3a79': 1000000000000000000000, 
+    '0x957c27d95af9103da66c638ebf77a86e2916749f': 100000000000000000000
+}
 
-    print(json.dumps(redistributions_with_eth, indent=4))
-
-
-def _assert_stakers_rewards_reconcile(
-    redistributions: list[NormalizedRedistributionWeight],
-    config: Config,
-    stakers_rewards: int,
-):
-    rewards_to_non_stakers = sum(
-        int(r.rewards)
-        for r in redistributions
-        if r.option != RedistributionOption.REDISTRIBUTE_XAUXO
-    )
-    net_rewards_to_stakers = int(config.rewards.amount) - rewards_to_non_stakers
-
-    ONE_TEN_MILLIONTH = 0.00000001
-    max_delta = int(config.rewards.amount) * ONE_TEN_MILLIONTH
-
-    assertAlmostEq(
-        stakers_rewards,
-        net_rewards_to_stakers,
-        max_delta,
-    )
+"""

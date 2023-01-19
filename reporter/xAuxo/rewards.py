@@ -17,11 +17,11 @@ from reporter.rewards import compute_token_stats
 
 def compute_x_auxo_reward_total(
     conf: Config,
-    total_xauxo_tokens: Decimal,
+    total_xauxo_rewards: Decimal,
 ) -> Tuple[ERC20Amount, int]:
 
-    haircut_total = total_xauxo_tokens * Decimal(conf.xauxo_haircut)
-    xauxo_total = total_xauxo_tokens - haircut_total
+    haircut_total = total_xauxo_rewards * Decimal(conf.xauxo_haircut)
+    xauxo_total = total_xauxo_rewards - haircut_total
 
     return (
         ERC20Amount.xAUXO(str(xauxo_total)),
@@ -95,13 +95,25 @@ def compute_xauxo_rewards(
     return normalized_redistributions, active_rewards, redistributed_to_stakers
 
 
+def compute_xauxo_token_stats(
+    accounts: list[Account], total_supply: str
+) -> TokenSummaryStats:
+    active = sum(int(a.holding.amount) for a in accounts)
+    return TokenSummaryStats(
+        total=str(total_supply),
+        active=str(active),
+        inactive=str(int(total_supply) - active),
+    )
+
+
 def compute_allocations(
     accounts: list[Account],
     xauxo_rewards: ERC20Amount,  # or haircut here
     dist: list[RedistributionWeight],
     conf: Config,
+    total_supply: str,
 ):
-    xauxo_stats = compute_token_stats(accounts)
+    xauxo_stats = compute_xauxo_token_stats(accounts, total_supply)
 
     # we need to work out what are the xAUXO redistributions
     # we can work out xauxo rewards here

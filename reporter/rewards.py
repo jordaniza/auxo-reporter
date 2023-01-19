@@ -87,7 +87,12 @@ def compute_rewards(
     """
 
     # compute rewards per veToken held, for the given reward token
-    pro_rata = Decimal(total_rewards.amount) / total_active_tokens
+
+    pro_rata = (
+        0
+        if total_active_tokens == 0
+        else Decimal(total_rewards.amount) / total_active_tokens
+    )
 
     # append rewards to existing accounts for this token
     accounts = list(

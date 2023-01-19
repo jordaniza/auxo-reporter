@@ -1,76 +1,93 @@
 {
     "veAUXO_holders": {
         "1": {
-            "address": "0x0000000000000000000000000000000000000001",
+            "address": "0x957C27D95aF9103Da66C638EbF77a86e2916749f",
             "holding": {
-                "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                 "symbol": "veAUXO",
                 "decimals": 18,
-                "amount": "50.0",
-                "original_amount": "100"
+                "amount": "403286798191400000000",
+                "original_amount": "1000000000000000000000"
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "86956521739130434782",
+                "amount": "0",
                 "original_amount": null
             },
-            "state": "active",
-            "notes": [
-                "active reward of 86956521739130434782"
-            ]
+            "state": "inactive",
+            "notes": []
         },
         "2": {
-            "address": "0x0000000000000000000000000000000000000002",
+            "address": "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79",
             "holding": {
-                "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                 "symbol": "veAUXO",
                 "decimals": 18,
-                "amount": "75.0",
-                "original_amount": "100"
+                "amount": "403286798191400000000",
+                "original_amount": "1000000000000000000000"
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "130434782608695652173",
+                "amount": "207493098688532373757",
                 "original_amount": null
             },
             "state": "active",
             "notes": [
-                "active reward of 130434782608695652173"
+                "active reward of 207493098688532373757"
             ]
         },
         "3": {
-            "address": "0x0000000000000000000000000000000000000003",
+            "address": "0x91d1608675646b73069CaD97c88Daeb42418754f",
             "holding": {
-                "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                 "symbol": "veAUXO",
                 "decimals": 18,
-                "amount": "50.0",
-                "original_amount": "100"
+                "amount": "40328679819140000000",
+                "original_amount": "100000000000000000000"
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "86956521739130434782",
+                "amount": "0",
+                "original_amount": null
+            },
+            "state": "inactive",
+            "notes": []
+        },
+        "4": {
+            "address": "0x4A1c900Ee1042dC2BA405821F0ea13CfBADCAb7B",
+            "holding": {
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
+                "symbol": "veAUXO",
+                "decimals": 18,
+                "amount": "40328679819140000000",
+                "original_amount": "100000000000000000000"
+            },
+            "rewards": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "symbol": "WETH",
+                "decimals": 18,
+                "amount": "20749309868853237375",
                 "original_amount": null
             },
             "state": "active",
             "notes": [
-                "active reward of 86956521739130434782"
+                "active reward of 20749309868853237375"
             ]
         },
-        "4": {
-            "address": "0x0000000000000000000000000000000000000004",
+        "5": {
+            "address": "0x29Ea52B9Dca26742021E8e43935F35553eE1D142",
             "holding": {
-                "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                 "symbol": "veAUXO",
                 "decimals": 18,
-                "amount": "75.0",
-                "original_amount": "100"
+                "amount": "40328679819140000000",
+                "original_amount": "100000000000000000000"
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -85,76 +102,74 @@
     },
     "veAUXO_distribution": {
         "1": {
-            "address": "0x0000000000000000000000000000000000000001",
+            "address": "0xF17634aBF9e946B7dF3ef8a925dcE69D6Ab27D60",
             "holding": {
-                "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                 "symbol": "veAUXO",
                 "decimals": 18,
-                "amount": "50.0",
-                "original_amount": "100"
+                "amount": "1500000000000000000000",
+                "original_amount": "1500000000000000000000"
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "86956521739130434782",
+                "amount": "771757591442614388866",
                 "original_amount": null
             },
             "state": "active",
             "notes": [
-                "active reward of 86956521739130434782"
+                "active reward of 771757591442614388866"
             ]
         },
         "2": {
-            "address": "0x0000000000000000000000000000000000000002",
+            "address": "0x957C27D95aF9103Da66C638EbF77a86e2916749f",
             "holding": {
-                "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                 "symbol": "veAUXO",
                 "decimals": 18,
-                "amount": "75.0",
-                "original_amount": "100"
+                "amount": "403286798191400000000",
+                "original_amount": "1000000000000000000000"
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "130434782608695652173",
+                "amount": "0",
                 "original_amount": null
             },
-            "state": "active",
-            "notes": [
-                "active reward of 130434782608695652173"
-            ]
+            "state": "inactive",
+            "notes": []
         },
         "3": {
-            "address": "0x0000000000000000000000000000000000000003",
+            "address": "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79",
             "holding": {
-                "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                 "symbol": "veAUXO",
                 "decimals": 18,
-                "amount": "50.0",
-                "original_amount": "100"
+                "amount": "403286798191400000000",
+                "original_amount": "1000000000000000000000"
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "86956521739130434782",
+                "amount": "207493098688532373757",
                 "original_amount": null
             },
             "state": "active",
             "notes": [
-                "active reward of 86956521739130434782"
+                "active reward of 207493098688532373757"
             ]
         },
         "4": {
-            "address": "0x0000000000000000000000000000000000000004",
+            "address": "0x91d1608675646b73069CaD97c88Daeb42418754f",
             "holding": {
-                "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                 "symbol": "veAUXO",
                 "decimals": 18,
-                "amount": "75.0",
-                "original_amount": "100"
+                "amount": "40328679819140000000",
+                "original_amount": "100000000000000000000"
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
@@ -167,78 +182,107 @@
             "notes": []
         },
         "5": {
-            "address": "0x8723c6d035106a79242E8A94dD1f6770291CbDf8",
+            "address": "0x4A1c900Ee1042dC2BA405821F0ea13CfBADCAb7B",
             "holding": {
-                "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                 "symbol": "veAUXO",
                 "decimals": 18,
-                "amount": "400",
-                "original_amount": "400"
+                "amount": "40328679819140000000",
+                "original_amount": "100000000000000000000"
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "695652173913043478260",
+                "amount": "20749309868853237375",
                 "original_amount": null
             },
             "state": "active",
             "notes": [
-                "active reward of 695652173913043478260"
+                "active reward of 20749309868853237375"
             ]
+        },
+        "6": {
+            "address": "0x29Ea52B9Dca26742021E8e43935F35553eE1D142",
+            "holding": {
+                "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
+                "symbol": "veAUXO",
+                "decimals": 18,
+                "amount": "40328679819140000000",
+                "original_amount": "100000000000000000000"
+            },
+            "rewards": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "symbol": "WETH",
+                "decimals": 18,
+                "amount": "0",
+                "original_amount": null
+            },
+            "state": "inactive",
+            "notes": []
         }
     },
     "veAUXO_stats": {
         "1": {
             "stakers": [
                 {
-                    "address": "0x0000000000000000000000000000000000000001",
+                    "address": "0xF17634aBF9e946B7dF3ef8a925dcE69D6Ab27D60",
                     "holding": {
-                        "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                        "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                         "symbol": "veAUXO",
                         "decimals": 18,
-                        "amount": "50.0",
-                        "original_amount": "100"
+                        "amount": "1500000000000000000000",
+                        "original_amount": "1500000000000000000000"
                     }
                 },
                 {
-                    "address": "0x0000000000000000000000000000000000000002",
+                    "address": "0x957C27D95aF9103Da66C638EbF77a86e2916749f",
                     "holding": {
-                        "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                        "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                         "symbol": "veAUXO",
                         "decimals": 18,
-                        "amount": "75.0",
-                        "original_amount": "100"
+                        "amount": "403286798191400000000",
+                        "original_amount": "1000000000000000000000"
                     }
                 },
                 {
-                    "address": "0x0000000000000000000000000000000000000003",
+                    "address": "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79",
                     "holding": {
-                        "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                        "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                         "symbol": "veAUXO",
                         "decimals": 18,
-                        "amount": "50.0",
-                        "original_amount": "100"
+                        "amount": "403286798191400000000",
+                        "original_amount": "1000000000000000000000"
                     }
                 },
                 {
-                    "address": "0x0000000000000000000000000000000000000004",
+                    "address": "0x91d1608675646b73069CaD97c88Daeb42418754f",
                     "holding": {
-                        "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                        "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                         "symbol": "veAUXO",
                         "decimals": 18,
-                        "amount": "75.0",
-                        "original_amount": "100"
+                        "amount": "40328679819140000000",
+                        "original_amount": "100000000000000000000"
                     }
                 },
                 {
-                    "address": "0x8723c6d035106a79242E8A94dD1f6770291CbDf8",
+                    "address": "0x4A1c900Ee1042dC2BA405821F0ea13CfBADCAb7B",
                     "holding": {
-                        "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                        "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                         "symbol": "veAUXO",
                         "decimals": 18,
-                        "amount": "400",
-                        "original_amount": "400"
+                        "amount": "40328679819140000000",
+                        "original_amount": "100000000000000000000"
+                    }
+                },
+                {
+                    "address": "0x29Ea52B9Dca26742021E8e43935F35553eE1D142",
+                    "holding": {
+                        "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
+                        "symbol": "veAUXO",
+                        "decimals": 18,
+                        "amount": "40328679819140000000",
+                        "original_amount": "100000000000000000000"
                     }
                 }
             ],
@@ -333,47 +377,45 @@
                 }
             ],
             "voters": [
-                "0x0000000000000000000000000000000000000003",
-                "0x0000000000000000000000000000000000000001",
-                "0x0000000000000000000000000000000000000002"
+                "0xF17634aBF9e946B7dF3ef8a925dcE69D6Ab27D60",
+                "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79",
+                "0x4A1c900Ee1042dC2BA405821F0ea13CfBADCAb7B"
             ],
-            "non_voters": [
-                "0x0000000000000000000000000000000000000004",
-                "0x8723c6d035106a79242E8A94dD1f6770291CbDf8"
-            ],
+            "non_voters": "0",
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "304347826086956521740",
+                "amount": "228242408557385611134",
                 "original_amount": null,
-                "pro_rata": "1739130434782608640",
-                "to_xauxo": "695652173913043478260"
+                "pro_rata": "0.514505060961742977",
+                "non_active_pro_rata": null,
+                "to_xauxo": "771757591442614388866"
             },
             "token_stats": {
-                "total": "650",
-                "active": "575",
-                "inactive": "75"
+                "total": "2427559635840220000000",
+                "active": "1943615478010540000000",
+                "inactive": "483944157829680000000"
             },
             "staking_manager": {
-                "address": "0x8723c6d035106a79242E8A94dD1f6770291CbDf8",
+                "address": "0xF17634aBF9e946B7dF3ef8a925dcE69D6Ab27D60",
                 "holding": {
-                    "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                    "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                     "symbol": "veAUXO",
                     "decimals": 18,
-                    "amount": "400",
-                    "original_amount": "400"
+                    "amount": "1500000000000000000000",
+                    "original_amount": "1500000000000000000000"
                 },
                 "rewards": {
                     "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                     "symbol": "WETH",
                     "decimals": 18,
-                    "amount": "695652173913043478260",
+                    "amount": "771757591442614388866",
                     "original_amount": null
                 },
                 "state": "active",
                 "notes": [
-                    "active reward of 695652173913043478260"
+                    "active reward of 771757591442614388866"
                 ]
             }
         }
@@ -382,64 +424,24 @@
         "1": {
             "stakers": [
                 {
-                    "address": "0x0000000000000000000000000000000000000005",
+                    "address": "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79",
                     "holding": {
-                        "address": "0xe537B845B8275AA2320d24BEEDD586c8217B4aF5",
+                        "address": "0x8D9d6bd460712Ea491A06619A04743e0eF9d8278",
                         "symbol": "xAUXO",
                         "decimals": 18,
-                        "amount": "200",
+                        "amount": "1000000000000000000000",
                         "original_amount": null
                     },
                     "rewards": {
                         "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                         "symbol": "WETH",
                         "decimals": 18,
-                        "amount": "313043478260869553631",
-                        "original_amount": null
-                    },
-                    "state": "inactive",
-                    "notes": []
-                },
-                {
-                    "address": "0x0000000000000000000000000000000000000006",
-                    "holding": {
-                        "address": "0xe537B845B8275AA2320d24BEEDD586c8217B4aF5",
-                        "symbol": "xAUXO",
-                        "decimals": 18,
-                        "amount": "200",
-                        "original_amount": null
-                    },
-                    "rewards": {
-                        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-                        "symbol": "WETH",
-                        "decimals": 18,
-                        "amount": "313043478260869553631",
+                        "amount": "308703036577045744122",
                         "original_amount": null
                     },
                     "state": "active",
                     "notes": [
-                        "active reward of 313043478260869553631"
-                    ]
-                },
-                {
-                    "address": "0x0000000000000000000000000000000000000007",
-                    "holding": {
-                        "address": "0xe537B845B8275AA2320d24BEEDD586c8217B4aF5",
-                        "symbol": "xAUXO",
-                        "decimals": 18,
-                        "amount": "0",
-                        "original_amount": null
-                    },
-                    "rewards": {
-                        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-                        "symbol": "WETH",
-                        "decimals": 18,
-                        "amount": "104347826086956517877",
-                        "original_amount": null
-                    },
-                    "state": "inactive",
-                    "notes": [
-                        "Transfer of 104347826086956517877"
+                        "active reward of 308703036577045744122"
                     ]
                 }
             ],
@@ -447,165 +449,86 @@
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "417391304347826061312",
+                "amount": "463054554865568645120",
                 "original_amount": null,
-                "pro_rata": "1565217391304347648",
-                "redistributed_total": "208695652173913035754",
-                "redistributed_to_stakers": "104347826086956517877",
-                "redistributed_transferred": "104347826086956517877",
-                "total_haircut": "278260869565217406976"
+                "pro_rata": "0.308703036577045731",
+                "non_active_pro_rata": null,
+                "redistributed_total": "0",
+                "redistributed_to_stakers": "0",
+                "redistributed_transferred": "0",
+                "total_haircut": "308703036577045741568"
             },
             "token_stats": {
-                "total": "400",
-                "active": "200",
-                "inactive": "200"
+                "total": "1500000000000000000000",
+                "active": "1000000000000000000000",
+                "inactive": "500000000000000000000"
             },
             "staking_manager": {
-                "address": "0x8723c6d035106a79242E8A94dD1f6770291CbDf8",
+                "address": "0xF17634aBF9e946B7dF3ef8a925dcE69D6Ab27D60",
                 "holding": {
-                    "address": "0x4c30E0025dd25b60906803B5BD74EBFa9DE3d035",
+                    "address": "0x25d46ef3229F16846Da3F6ff616946564164Cc06",
                     "symbol": "veAUXO",
                     "decimals": 18,
-                    "amount": "400",
-                    "original_amount": "400"
+                    "amount": "1500000000000000000000",
+                    "original_amount": "1500000000000000000000"
                 },
                 "rewards": {
                     "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                     "symbol": "WETH",
                     "decimals": 18,
-                    "amount": "695652173913043478260",
+                    "amount": "771757591442614388866",
                     "original_amount": null
                 },
                 "state": "active",
                 "notes": [
-                    "active reward of 695652173913043478260"
+                    "active reward of 771757591442614388866"
                 ]
             }
         }
     },
     "xAUXO_holders": {
         "1": {
-            "address": "0x0000000000000000000000000000000000000005",
+            "address": "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79",
             "holding": {
-                "address": "0xe537B845B8275AA2320d24BEEDD586c8217B4aF5",
+                "address": "0x8D9d6bd460712Ea491A06619A04743e0eF9d8278",
                 "symbol": "xAUXO",
                 "decimals": 18,
-                "amount": "200",
+                "amount": "1000000000000000000000",
                 "original_amount": null
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "313043478260869553631",
-                "original_amount": null
-            },
-            "state": "inactive",
-            "notes": []
-        },
-        "2": {
-            "address": "0x0000000000000000000000000000000000000006",
-            "holding": {
-                "address": "0xe537B845B8275AA2320d24BEEDD586c8217B4aF5",
-                "symbol": "xAUXO",
-                "decimals": 18,
-                "amount": "200",
-                "original_amount": null
-            },
-            "rewards": {
-                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-                "symbol": "WETH",
-                "decimals": 18,
-                "amount": "313043478260869553631",
+                "amount": "308703036577045744122",
                 "original_amount": null
             },
             "state": "active",
             "notes": [
-                "active reward of 313043478260869553631"
-            ]
-        },
-        "3": {
-            "address": "0x0000000000000000000000000000000000000007",
-            "holding": {
-                "address": "0xe537B845B8275AA2320d24BEEDD586c8217B4aF5",
-                "symbol": "xAUXO",
-                "decimals": 18,
-                "amount": "0",
-                "original_amount": null
-            },
-            "rewards": {
-                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-                "symbol": "WETH",
-                "decimals": 18,
-                "amount": "104347826086956517877",
-                "original_amount": null
-            },
-            "state": "inactive",
-            "notes": [
-                "Transfer of 104347826086956517877"
+                "active reward of 308703036577045744122"
             ]
         }
     },
     "xAUXO_distribution": {
         "1": {
-            "address": "0x0000000000000000000000000000000000000005",
+            "address": "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79",
             "holding": {
-                "address": "0xe537B845B8275AA2320d24BEEDD586c8217B4aF5",
+                "address": "0x8D9d6bd460712Ea491A06619A04743e0eF9d8278",
                 "symbol": "xAUXO",
                 "decimals": 18,
-                "amount": "200",
+                "amount": "1000000000000000000000",
                 "original_amount": null
             },
             "rewards": {
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "313043478260869553631",
-                "original_amount": null
-            },
-            "state": "inactive",
-            "notes": []
-        },
-        "2": {
-            "address": "0x0000000000000000000000000000000000000006",
-            "holding": {
-                "address": "0xe537B845B8275AA2320d24BEEDD586c8217B4aF5",
-                "symbol": "xAUXO",
-                "decimals": 18,
-                "amount": "200",
-                "original_amount": null
-            },
-            "rewards": {
-                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-                "symbol": "WETH",
-                "decimals": 18,
-                "amount": "313043478260869553631",
+                "amount": "308703036577045744122",
                 "original_amount": null
             },
             "state": "active",
             "notes": [
-                "active reward of 313043478260869553631"
-            ]
-        },
-        "3": {
-            "address": "0x0000000000000000000000000000000000000007",
-            "holding": {
-                "address": "0xe537B845B8275AA2320d24BEEDD586c8217B4aF5",
-                "symbol": "xAUXO",
-                "decimals": 18,
-                "amount": "0",
-                "original_amount": null
-            },
-            "rewards": {
-                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-                "symbol": "WETH",
-                "decimals": 18,
-                "amount": "104347826086956517877",
-                "original_amount": null
-            },
-            "state": "inactive",
-            "notes": [
-                "Transfer of 104347826086956517877"
+                "active reward of 308703036577045744122"
             ]
         }
     }

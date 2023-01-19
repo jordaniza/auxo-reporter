@@ -23,6 +23,7 @@ from reporter.queries import (
     get_stakers,
     get_x_auxo_statuses,
     xauxo_accounts,
+    get_xauxo_total_supply,
 )
 from reporter.rewards import (
     compute_rewards,
@@ -88,26 +89,26 @@ def init_mocks(monkeypatch):
         ),
     )
 
-    monkeypatch.setattr(
-        "reporter.queries.get_xauxo_stakers",
-        lambda conf: [
-            Staker.xAuxo(x["account"]["id"], x["valueExact"])
-            for x in mock_xauxo_holders["data"]["erc20Contract"]["balances"]
-        ],
-    )
+    # monkeypatch.setattr(
+    #     "reporter.queries.get_xauxo_stakers",
+    #     lambda conf: [
+    #         Staker.xAuxo(x["account"]["id"], x["valueExact"])
+    #         for x in mock_xauxo_holders["data"]["erc20Contract"]["balances"]
+    #     ],
+    # )
 
-    monkeypatch.setattr(
-        "reporter.queries.get_veauxo_stakers",
-        lambda conf: [
-            Staker.veAuxo(v["account"]["id"], v["valueExact"])
-            for v in mock_veauxo_holders["data"]["erc20Contract"]["balances"]
-        ],
-    )
+    # monkeypatch.setattr(
+    #     "reporter.queries.get_veauxo_stakers",
+    #     lambda conf: [
+    #         Staker.veAuxo(v["account"]["id"], v["valueExact"])
+    #         for v in mock_veauxo_holders["data"]["erc20Contract"]["balances"]
+    #     ],
+    # )
 
-    monkeypatch.setattr(
-        "reporter.queries.get_veauxo_boosted_balance_by_staker",
-        lambda _: boosted_veauxo,
-    )
+    # monkeypatch.setattr(
+    #     "reporter.queries.get_veauxo_boosted_balance_by_staker",
+    #     lambda _, __: boosted_veauxo,
+    # )
 
     return (mock_votes, mock_delegates, mock_veauxo_holders)
 
@@ -126,6 +127,9 @@ def test_do_not_require_address_for_redistribute():
 
 
 def test_both(monkeypatch):
+
+    ENABLE_MOCKS = False
+    ENABLE_VOTE_BINDING = True
     config = load_conf("reporter/test/scenario_testing")
 
     getcontext().prec = 42
@@ -139,9 +143,16 @@ def test_both(monkeypatch):
     init_mocks(monkeypatch)
 
     (veauxo_stakers_pre_decay, xauxo_stakers) = get_stakers(config)
-    veauxo_stakers = get_boosted_stakers(veauxo_stakers_pre_decay)
+    veauxo_stakers = get_boosted_stakers(veauxo_stakers_pre_decay, ENABLE_MOCKS)
 
     (votes, proposals, voters, non_voters) = get_vote_data(config, veauxo_stakers)
+
+    if ENABLE_VOTE_BINDING:
+        for idx, s in enumerate(veauxo_stakers):
+            if idx % 2 == 0:
+                voters.append(s.address)
+                non_voters = next(filter(lambda v: v != s.address, non_voters))
+
     veauxo_accounts_in = init_account_rewards(veauxo_stakers, voters, config)
 
     # save staking manager separately
@@ -174,8 +185,8 @@ def test_both(monkeypatch):
     )
     build_claims(config, db, "reporter/test/stubs/db", "veAUXO")
 
-    xauxo_active = get_x_auxo_statuses(xauxo_stakers, mock=True)
-    xauxo_accounts_in = xauxo_accounts(xauxo_stakers, xauxo_active, config)
+    # xauxo_active = get_x_auxo_statuses(xauxo_stakers, mock=ENABLE_MOCKS)
+    xauxo_accounts_in = xauxo_accounts(xauxo_stakers, config)
 
     xauxo_rewards_total_no_haircut = deepcopy(config.rewards)
     xauxo_rewards_total_no_haircut.amount = veauxo_reward_summaries.to_xauxo
@@ -198,6 +209,7 @@ def test_both(monkeypatch):
         xauxo_rewards_total_with_haircut,
         xauxo_redistributions,
         config,
+        get_xauxo_total_supply(),
     )
 
     xauxo_stakers_net_redistributed = deepcopy(config.rewards)

@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, TypedDict, TypeVar, cast, Union
+from typing import Any, TypedDict, TypeVar, cast, Union, Literal
 
 import requests
 from multicall import Call, Multicall  # type: ignore
@@ -29,8 +29,9 @@ class SUBGRAPHS:
     VEDOUGH = GRAPH_URL + "/pie-dao/vedough"
 
     # prototype - absolutely no guarantees of uptime or api consistency
-    AUXO_TOKEN_GOERLI = GRAPH_URL + "/jordaniza/auxo-tokens-v2"
-    AUXO_GOV_GOERLI = GRAPH_URL + "/jordaniza/auxo-gov-goerli-1"
+    AUXO_TOKEN_GOERLI = GRAPH_URL + "/jordaniza/auxo-tokens-v4"
+    AUXO_GOV_GOERLI = GRAPH_URL + "/jordaniza/auxo-gov-goerli-2"
+    ROLLSTAKER_GOERLI = GRAPH_URL + "/jordaniza/rollstaker-goerli"
 
 
 class GraphQLConfig(TypedDict):
@@ -59,6 +60,7 @@ def extract_nested_graphql(res: GraphQL_Response, access_path: list[str]):
     :param `res`: api response from graphql. First key should be 'data'
     """
     deepcopy_access_path = deepcopy(access_path)
+    print(res)
     current = res["data"]
     while len(deepcopy_access_path) > 0:
         current = current[deepcopy_access_path.pop(0)]
@@ -254,8 +256,13 @@ def get_xauxo_stakers(conf: Config) -> list[Staker]:
     Fetch the list of xAUXO token holders at the given block number
     """
 
-    x_auxo: list[Any] = get_token_hodlers(conf, ADDRESSES.XAUXO)
-    return [Staker.xAuxo(x["account"]["id"], x["valueExact"]) for x in x_auxo]
+    all_depositors_ever = [d["user"] for d in get_all_xauxo_depositors()]
+    x_auxo_stakers_with_balances = get_xauxo_active_balances(all_depositors_ever)
+    return [
+        Staker.xAuxo(addr, staked)
+        for addr, staked in x_auxo_stakers_with_balances.items()
+        if int(staked) > 0
+    ]
 
 
 def get_veauxo_stakers(conf: Config):
@@ -312,15 +319,13 @@ def get_xauxo_active_state(
     return AccountState.ACTIVE if xauxo_status else AccountState.INACTIVE
 
 
-def xauxo_accounts(
-    stakers: list[Staker], statuses: dict[EthereumAddress, bool], conf: Config
-) -> list[Account]:
+def xauxo_accounts(stakers: list[Staker], conf: Config) -> list[Account]:
     empty_reward = Config.reward_token(conf)
     return [
         Account.from_staker(
             staker=staker,
             rewards=empty_reward,
-            state=get_xauxo_active_state(staker, statuses),
+            state=AccountState.ACTIVE,
         )
         for staker in stakers
     ]
@@ -381,6 +386,69 @@ def get_boosted_veauxo_balance(
     return new_stakers
 
 
-def get_boosted_stakers(stakers: list[Staker]) -> list[Staker]:
-    decay_data = get_veauxo_boosted_balance_by_staker(stakers)
+def get_boosted_stakers(stakers: list[Staker], mock=False) -> list[Staker]:
+    decay_data = get_veauxo_boosted_balance_by_staker(stakers, mock)
     return get_boosted_veauxo_balance(stakers, decay_data)
+
+
+def get_all_xauxo_depositors() -> list[dict[Literal["user"], EthereumAddress]]:
+    query = """
+    query( $skip: Int ) { 
+        depositeds(skip: $skip, first: 1000) { 
+            user 
+        } 
+    }
+    """
+    return graphql_iterate_query(
+        SUBGRAPHS.ROLLSTAKER_GOERLI,
+        ["depositeds"],
+        dict(query=query, variables={"skip": 0}),
+    )
+
+
+def get_xauxo_active_balances(
+    stakers: list[EthereumAddress],
+) -> dict[EthereumAddress, str]:
+    """
+    We don't care about xAUXO that is non-active for the purposes of rewards
+    """
+
+    # instantiate a basic web3 client from the environment
+    w3 = Web3(Web3.HTTPProvider(RPC_URL))
+
+    calls = [
+        Call(
+            # address to call:
+            ADDRESSES.XAUXO_ROLLSTAKER,
+            # signature + return value, with argument:
+            # TODO - do we need to call a specific epoch here?
+            ["getCurrentBalanceForUser(address)(uint256)", s],
+            # return in a format of {[address]: uint256}:
+            [[s, None]],
+        )
+        for s in stakers
+    ]
+
+    # Immediately execute the multicall
+    return Multicall(calls, _w3=w3)()
+
+
+def get_xauxo_total_supply() -> Union[str, int]:
+    w3 = Web3(Web3.HTTPProvider(RPC_URL))
+    abi = """
+    [{
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }]
+    """
+    XAUXO_CONTRACT = w3.eth.contract(abi=abi, address=ADDRESSES.XAUXO)
+    return XAUXO_CONTRACT.functions.totalSupply().call()

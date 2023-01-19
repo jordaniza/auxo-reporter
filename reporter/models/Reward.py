@@ -1,6 +1,7 @@
 from pydantic import validator
 from reporter.models.types import BigNumber
 from reporter.models.ERC20 import ERC20Amount
+from typing import Optional
 
 
 class RewardSummary(ERC20Amount):
@@ -13,6 +14,11 @@ class RewardSummary(ERC20Amount):
     """
 
     pro_rata: BigNumber
+    # we need to confirm:
+    # we need to have a view of rewards paid per active token
+    # and rewards paid per total tokens
+    # they are different and both need to be logged
+    non_active_pro_rata: Optional[BigNumber] = None
 
     @validator("pro_rata")
     @classmethod
