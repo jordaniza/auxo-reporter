@@ -2,10 +2,10 @@
     "windowIndex": 9999,
     "chainId": 1,
     "aggregateRewards": {
-        "amount": "428571428571428571429",
         "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-        "decimals": 18,
         "symbol": "WETH",
+        "decimals": 18,
+        "amount": "428571428571428571429",
         "pro_rata": "1428571428571428608",
         "to_xauxo": "571428571428571428571"
     },

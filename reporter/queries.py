@@ -1,38 +1,25 @@
-import requests
-import os, json
-from dataclasses import dataclass
-from typing import TypeVar, Any, TypedDict, Literal, cast
-from pydantic import parse_obj_as
-from dotenv import load_dotenv
+import json
 from copy import deepcopy
+from dataclasses import dataclass
+from typing import Any, TypedDict, TypeVar, cast
 
+import requests
+from multicall import Call, Multicall  # type: ignore
+from pydantic import parse_obj_as
+from web3 import Web3
+
+from reporter.env import ADDRESSES, RPC_URL, SNAPSHOT_SPACE_ID
 from reporter.errors import EmptyQueryError
-from reporter.types import (
+from reporter.models import (
+    Account,
+    AccountState,
     Config,
-    Staker,
     Delegate,
-    OnChainVote,
-    OnChainProposal,
     EthereumAddress,
     GraphQL_Response,
-    ERC20Metadata,
-    Hodler,
-    AccountState,
-    Account,
-    BaseERC20Holding,
+    OnChainProposal,
+    Staker,
 )
-from reporter.conf_generator import (
-    SNAPSHOT_SPACE_ID,
-    XAUXO_ADDRESS,
-    XAUXO_STAKER,
-    GOVERNOR_ADDRESS,
-    VEAUXO_ADDRESS,
-    RPC_URL,
-)
-
-
-from multicall import Call, Multicall, Signature  # type: ignore
-from web3 import Web3
 
 
 @dataclass
@@ -59,8 +46,6 @@ class GraphQLConfig(TypedDict):
 
 # python insantiates generics separate to function definition
 T = TypeVar("T")
-
-from pprint import pprint
 
 
 def extract_nested_graphql(res: GraphQL_Response, access_path: list[str]):
@@ -106,17 +91,6 @@ def graphql_iterate_query(
         container = extract_nested_graphql(res, access_path)
         results += container
     return results
-
-
-# How to fix the 'first' problem with > 1000 stakers
-def get_stakers(conf: Config) -> list[Staker]:
-    """Fetch a list of veToken stakers at a given block number"""
-
-    query = f"{{ stakers(first: 1000, block: {{number: {conf.block_snapshot}}}) {{ id, accountVeTokenBalance }} }}"
-    graphQl_response = (
-        requests.post(url=SUBGRAPHS.VEDOUGH, json={"query": query}).json().get("data")
-    )
-    return parse_obj_as(list[Staker], graphQl_response.get("stakers"))
 
 
 def get_votes(conf: Config):
@@ -213,7 +187,7 @@ def get_on_chain_votes(conf: Config):
 
     variables = {
         "skip": 0,
-        "governor": GOVERNOR_ADDRESS,
+        "governor": ADDRESSES.GOVERNOR,
         "timestamp_gt": conf.start_timestamp,
         "timestamp_lte": conf.end_timestamp,
     }
@@ -229,7 +203,7 @@ def to_proposal(proposal_data) -> OnChainProposal:
     return parse_obj_as(OnChainProposal, proposal_data)
 
 
-def get_token_hodlers(conf: Config, token_address: EthereumAddress):
+def get_token_hodlers(conf: Config, token_address: EthereumAddress) -> list:
     """
     Fetch balances of token in `token_address` at a given block number.
     """
@@ -275,100 +249,83 @@ def get_token_hodlers(conf: Config, token_address: EthereumAddress):
     )
 
 
-def get_xauxo_hodlers(conf: Config) -> list[Hodler]:
+def get_xauxo_stakers(conf: Config) -> list[Staker]:
     """
     Fetch the list of xAUXO token holders at the given block number
     """
 
-    x_auxo: list[Any] = get_token_hodlers(conf, XAUXO_ADDRESS)
-    print(x_auxo)
-    x_auxo = [
-        {
-            "token": ERC20Metadata(
-                address=XAUXO_ADDRESS,
-                symbol="xAUXO",
-                decimals=18,
-                amount=x["valueExact"],
-            ),
-            **x,
-        }
-        for x in x_auxo
-    ]
-    return parse_obj_as(list[Hodler], x_auxo)
+    x_auxo: list[Any] = get_token_hodlers(conf, ADDRESSES.XAUXO)
+    return [Staker.xAuxo(x["account"]["id"], x["valueExact"]) for x in x_auxo]
 
 
-def get_veauxo_hodlers(conf: Config):
+def get_veauxo_stakers(conf: Config):
     """
     Fetch the list of veAUXO token holders at the given block number
     """
-    ve_auxo: list[Any] = get_token_hodlers(conf, VEAUXO_ADDRESS)
-    ve_auxo = [
-        {
-            "token": ERC20Metadata(
-                address=VEAUXO_ADDRESS,
-                symbol="veAUXO",
-                decimals=18,
-                amount=v["valueExact"],
-            ),
-            **v,
-        }
-        for v in ve_auxo
-    ]
-    return parse_obj_as(list[Hodler], ve_auxo)
+    ve_auxo: list[Any] = get_token_hodlers(conf, ADDRESSES.VEAUXO)
+    return [Staker.veAuxo(v["account"]["id"], v["valueExact"]) for v in ve_auxo]
+
+
+def get_stakers(conf: Config):
+    return (get_veauxo_stakers(conf), get_xauxo_stakers(conf))
 
 
 def get_x_auxo_statuses(
-    holders: list[Hodler], mock=False
+    stakers: list[Staker], mock=False
 ) -> dict[EthereumAddress, bool]:
     """
     For a passed list of xAUXO holders, we make a multicall to the
     xAUXO staker contract to check if they are active in the current epoch or not.
     """
-    # instantiate a basic web3 client from the environment
     if mock:
         with open("reporter/test/scenario_testing/xauxo_stakers.json") as j:
             mock_multicall_response = json.load(j)
         return mock_multicall_response
 
+    # instantiate a basic web3 client from the environment
     w3 = Web3(Web3.HTTPProvider(RPC_URL))
 
     calls = [
         Call(
             # address to call:
-            XAUXO_STAKER,
+            ADDRESSES.XAUXO_ROLLSTAKER,
             # signature + return value, with argument:
             # TODO - do we need to call a specific epoch here?
-            ["userIsActive(address)(bool)", h.account],
+            ["userIsActive(address)(bool)", s.address],
             # return in a format of {[address]: bool}:
-            [[h.account, None]],
+            [[s.address, None]],
         )
-        for h in holders
+        for s in stakers
     ]
 
     # Immediately execute the multicall
     return Multicall(calls, _w3=w3)()
 
 
+# add the decay logic
+# get the veAUXO stakers and balances
+# reach out to the decay contract
+
+
 def get_xauxo_active_state(
-    holder: Hodler, statuses: dict[EthereumAddress, bool]
+    staker: Staker, statuses: dict[EthereumAddress, bool]
 ) -> AccountState:
     address = cast(
-        EthereumAddress, holder.account
+        EthereumAddress, staker.address
     )  # TODO change data model to avoid this cast
     xauxo_status: bool = statuses[address]
     return AccountState.ACTIVE if xauxo_status else AccountState.INACTIVE
 
 
-# this feels like it can be simplified
 def xauxo_accounts(
-    holders: list[Hodler], statuses: dict[EthereumAddress, bool]
+    stakers: list[Staker], statuses: dict[EthereumAddress, bool], conf: Config
 ) -> list[Account]:
+    empty_reward = Config.reward_token(conf)
     return [
-        Account(
-            address=h.account,
-            token=BaseERC20Holding(**h.token.dict()),
-            rewards=0,
-            state=get_xauxo_active_state(h, statuses),
+        Account.from_staker(
+            staker=staker,
+            rewards=empty_reward,
+            state=get_xauxo_active_state(staker, statuses),
         )
-        for h in holders
+        for staker in stakers
     ]

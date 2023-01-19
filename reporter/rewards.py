@@ -1,32 +1,32 @@
 import datetime
-import itertools
 import functools
+import itertools
 from decimal import Decimal, getcontext
-from typing import Tuple, Optional, Union, Literal
+from typing import Optional, Tuple
+
 from tinydb import TinyDB
 
 from reporter import utils
-from reporter.conf_generator import load_conf, STAKING_MANAGER_ADDRESS, VEAUXO_ADDRESS
-from reporter.types import (
-    Vote,
-    Staker,
-    Proposal,
+from reporter.conf_generator import load_conf
+from reporter.env import ADDRESSES
+from reporter.errors import MissingStakingManagerAddressError
+from reporter.models import (
     AUXO_TOKEN_NAMES,
     Account,
     AccountState,
-    EthereumAddress,
     Config,
-    ERC20Metadata,
+    ERC20Amount,
+    EthereumAddress,
+    Proposal,
+    RewardSummary,
+    Staker,
     TokenSummaryStats,
     VeAuxoRewardSummary,
-    RewardSummary,
+    Vote,
     XAuxoRewardSummary,
-    VeAuxoRewardSummary,
-    BaseERC20Holding,
 )
+from reporter.queries import get_veauxo_stakers
 from reporter.voters import get_vote_data
-from reporter.queries import get_stakers
-from reporter.errors import MissingStakingManagerAddressError
 
 
 def init_account_rewards(
@@ -35,47 +35,44 @@ def init_account_rewards(
     """
     Create the base Account object from a list of stakers.
     Rewards will be added later based on the account state.
+
+    Staking manager is always considered an active voter.
+
     :param `stakers`: all vetoken stakers
     :param `voters`: list of all accounts that voted that month
     """
     return [
-        Account(
-            address=staker.id,
-            token=BaseERC20Holding(
-                amount=staker.accountVeTokenBalance, address=VEAUXO_ADDRESS
-            ),
+        Account.from_staker(
+            staker,
             state=AccountState.ACTIVE
-            if staker.id
-            in voters + [STAKING_MANAGER_ADDRESS]  # shorthand for appending
+            if staker.address
+            in voters + [ADDRESSES.STAKING_MANAGER]  # shorthand for appending
             else AccountState.INACTIVE,
-            rewards="0",
+            rewards=conf.reward_token(),
         )
         for staker in stakers
     ]
 
 
-def distribute_rewards(
-    account: Account, pro_rata: Decimal, reward: ERC20Metadata
-) -> Account:
+def distribute_rewards(account: Account, pro_rata: Decimal) -> Account:
     """
     Add the rewards for he account, for a particular token.
     :param `account`: the account to add rewards to
-    :param `pro_rata`: quantity of reward token to be add per vetoken units held by account
-    :param `reward`: the token to be added
+    :param `pro_rata`: quantity of reward token to be add per token units held by account
 
     Slashed accounts will be appended a reward entry with an amount equal to zero
     """
 
     if account.state == AccountState.ACTIVE:
-        account_reward = int(pro_rata * Decimal(account.token.amount))
-        account.rewards = str(Decimal(account.rewards) + account_reward)
+        account_reward = int(pro_rata * Decimal(account.holding.amount))
+        account.rewards.amount = str(Decimal(account.rewards.amount) + account_reward)
         account.notes.append(f"active reward of {account_reward}")
 
     return account
 
 
 def compute_rewards(
-    total_rewards: ERC20Metadata, total_active_tokens: Decimal, accounts: list[Account]
+    total_rewards: ERC20Amount, total_active_tokens: Decimal, accounts: list[Account]
 ) -> RewardSummary:
     """
 
@@ -98,7 +95,6 @@ def compute_rewards(
             distribute_rewards,
             accounts,
             itertools.repeat(pro_rata),
-            itertools.repeat(total_rewards),
         )
     )
 
@@ -115,12 +111,12 @@ def compute_rewards(
 def tokens_by_status(
     accounts: list[Account], state: Optional[AccountState] = None
 ) -> Decimal:
-    """helper mehod to get total veTokens by active or slashed"""
+    """helper mehod to get total staked holdings by active or inactive"""
     accounts_to_summarize = accounts
     if state:
         accounts_to_summarize = utils.filter_state(accounts, state)
     return functools.reduce(
-        lambda running_total, account: running_total + Decimal(account.token.amount),
+        lambda running_total, account: running_total + Decimal(account.holding.amount),
         accounts_to_summarize,
         Decimal(0),
     )
@@ -208,7 +204,7 @@ def write_accounts_and_distribution(
 
 
 def separate_staking_manager(
-    accounts: list[Account], address: EthereumAddress = STAKING_MANAGER_ADDRESS
+    accounts: list[Account], address: EthereumAddress = ADDRESSES.STAKING_MANAGER
 ) -> Tuple[list[Account], Account]:
     """
     The staking manager handles all veAUXO deposited as a result of xAUXO.
@@ -224,7 +220,7 @@ def separate_staking_manager(
                 accounts[idx].state = AccountState.ACTIVE
 
         return accounts, staking_manager
-    except StopIteration:
+    except (StopIteration, UnboundLocalError):
         raise MissingStakingManagerAddressError(
             f"Could not find staking manager with address {address}"
         )
@@ -236,9 +232,9 @@ def separate_xauxo_rewards(
     accounts: list[Account],
 ) -> Tuple[VeAuxoRewardSummary, list[Account]]:
     reward_summaries.amount = str(
-        int(reward_summaries.amount) - int(staking_manager.rewards)
+        int(reward_summaries.amount) - int(staking_manager.rewards.amount)
     )
-    reward_summaries.to_xauxo = staking_manager.rewards
+    reward_summaries.to_xauxo = staking_manager.rewards.amount
 
     accounts = list(filter(lambda a: a.address != staking_manager.address, accounts))
 
@@ -263,7 +259,7 @@ def main(path: Optional[str]):
     end_date = datetime.date.fromtimestamp(conf.end_timestamp)
     print(f"⚗ Building database from {start_date} to {end_date}...")
 
-    stakers = get_stakers(conf)
+    stakers = get_veauxo_stakers(conf)
 
     (votes, proposals, voters, non_voters) = get_vote_data(conf, stakers)
 

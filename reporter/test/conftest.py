@@ -1,10 +1,13 @@
-import pytest
-import os, json
+import json
+import os
 from dataclasses import dataclass
-from typing import Any
-from reporter.types import Config
-from reporter.conf_generator import load_conf
 from decimal import getcontext
+from typing import Any
+
+import pytest
+
+from reporter.conf_generator import load_conf
+from reporter.models import Config
 
 getcontext().prec = 45
 

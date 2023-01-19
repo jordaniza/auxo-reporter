@@ -1,25 +1,13 @@
-import csv, json, os
-from typing import TypeVar, Any
+import csv
+import json
+from typing import Any, TypeVar
+
 from tinydb import TinyDB
-from dotenv import load_dotenv
-from pydantic import validator
-from typing import Callable, Dict
 
-from reporter.types import Account, AccountState
-from reporter.errors import MissingEnvironmentVariableException
-
+from reporter.models import Account, AccountState
 
 # python insantiates generics separate to function definition
 T = TypeVar("T")
-
-
-def env_var(accessor: str) -> str:
-    load_dotenv()
-
-    var = os.environ.get(accessor)
-    if not var:
-        raise MissingEnvironmentVariableException(accessor)
-    return var
 
 
 def unique(ls: list[T]) -> list[T]:
@@ -80,10 +68,3 @@ def write_json(data: Any, path: str) -> None:
     with open(path, "w+") as f:
         data_json = json.dumps(data, indent=4)
         f.write(data_json)
-
-
-from dataclasses import dataclass
-
-
-class InsertJSONException(Exception):
-    pass

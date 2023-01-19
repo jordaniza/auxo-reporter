@@ -1,17 +1,18 @@
-from pydantic import parse_obj_as
 from typing import Tuple
 
+from pydantic import parse_obj_as
+
 from reporter import utils
-from reporter.queries import get_votes, get_delegates, get_on_chain_votes
-from reporter.types import (
+from reporter.models import (
     Config,
-    Vote,
     Delegate,
-    Staker,
-    Proposal,
     OnChainProposal,
     OnChainVote,
+    Proposal,
+    Staker,
+    Vote,
 )
+from reporter.queries import get_delegates, get_on_chain_votes, get_votes
 
 
 def parse_votes(conf: Config) -> list[Vote]:
@@ -75,7 +76,7 @@ def get_voters(
         * Second is all addresses that have not voted
     """
     voters = set([v.voter for v in votes])
-    stakers_addrs = [s.id for s in stakers]
+    stakers_addrs = [s.address for s in stakers]
 
     stakers_addrs_no_delegators = [
         addr for addr in stakers_addrs if addr not in delegates
@@ -103,13 +104,13 @@ def get_vote_data(
         * list of addresses of active voters
         * list of addresses of inactive voters
     """
-    delegates = get_delegates()
     votes = parse_votes(conf)
-
     on_chain_votes = parse_on_chain_votes(conf)
-    combined_votes = combine_on_off_chain_votes(votes, on_chain_votes)
 
+    combined_votes = combine_on_off_chain_votes(votes, on_chain_votes)
     (filtered_votes, proposals) = filter_votes_by_proposal(combined_votes)
+
+    delegates = get_delegates()
     (voters, non_voters) = get_voters(filtered_votes, stakers, delegates)
 
     return (filtered_votes, proposals, voters, non_voters)

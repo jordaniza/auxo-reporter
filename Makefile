@@ -28,6 +28,12 @@ test :; python -m pytest -rfPs
 
 ### SCRIPTS ###
 
+# scenario testing
+scenario-setup :; python -m pytest -rfPs reporter/test/scenario_testing/create_scenario.py
+scenario-test :; python -m pytest -rfPs reporter/test/test_xauxo_veauxo.py
+scenario :; make scenario-setup && make scenario-test
+
+
 # create the claims database
 claims :; python -m reporter.run all
 

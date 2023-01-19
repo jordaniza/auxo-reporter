@@ -1,4 +1,4 @@
-from reporter.types import Config
+from reporter.models import Config
 from reporter.writer import main
 
 

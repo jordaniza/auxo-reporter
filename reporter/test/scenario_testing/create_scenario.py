@@ -3,11 +3,12 @@ Create the JSON Object for on-chain and off-chain votes, using the existing mock
 https://docs.google.com/spreadsheets/d/11-WOWGjQDJJpKAUqJN0JsxzyMGhoEhV0Pt-isW5NHxk/edit#gid=0
 """
 import json
-import functools
 from dataclasses import dataclass
-from reporter.types import OnChainVote, Vote
-from reporter.conf_generator import XAUXO_STAKER, STAKING_MANAGER_ADDRESS
-from pydantic import parse_file_as, parse_obj_as
+
+from pydantic import parse_file_as
+
+from reporter.env import ADDRESSES
+from reporter.models import Vote
 from reporter.utils import write_json
 
 
@@ -47,10 +48,16 @@ class User:
         template.voter = self.address
         return template
 
-    def create_token_holding(self):
+    def create_xauxo_holding(self):
         template = self._template_token_holding
         template["account"] = {"id": self.address}
         template["valueExact"] = self.xAUXO_amount
+        return template
+
+    def create_veauxo_holding(self):
+        template = self._template_token_holding
+        template["account"] = {"id": self.address}
+        template["valueExact"] = self.veAUXO_amount
         return template
 
 
@@ -65,7 +72,7 @@ users = [
     ),
     User("0x0000000000000000000000000000000000000004", eligible_amount="0"),
     User(
-        STAKING_MANAGER_ADDRESS,
+        ADDRESSES.STAKING_MANAGER,
         eligible_amount="0",
         veAUXO_amount="400",
     ),
@@ -90,6 +97,7 @@ def test_go():
     votes_off = []
     xauxo_stakers = {}
     xauxo_holders = []
+    veauxo_holders = []
     for u in users:
         if u.active_on_chain:
             votes_on.append(u.create_on_chain_vote())
@@ -100,7 +108,9 @@ def test_go():
         else:
             xauxo_stakers[u.address] = False
         if int(u.xAUXO_amount) > 0:
-            xauxo_holders.append(u.create_token_holding())
+            xauxo_holders.append(u.create_xauxo_holding())
+        if int(u.veAUXO_amount) > 0:
+            veauxo_holders.append(u.create_veauxo_holding())
 
     write_json(
         {"data": {"voteCasts": [v for v in votes_on]}},
@@ -111,18 +121,9 @@ def test_go():
     )
 
     write_json(
-        {
-            "data": {
-                "stakers": [
-                    {"accountVeTokenBalance": u.veAUXO_amount, "id": u.address}
-                    for u in users
-                    if int(u.veAUXO_amount) > 0
-                ]
-            }
-        },
-        "reporter/test/scenario_testing/mock_stakers.json",
+        {"data": {"erc20Contract": {"balances": [v for v in veauxo_holders]}}},
+        "reporter/test/scenario_testing/mock_veauxo.json",
     )
-
     write_json(
         {"data": {"erc20Contract": {"balances": [x for x in xauxo_holders]}}},
         "reporter/test/scenario_testing/mock_xauxo.json",

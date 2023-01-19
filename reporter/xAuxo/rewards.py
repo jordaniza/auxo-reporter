@@ -1,121 +1,30 @@
-# **Option 1: Calculate from veAUXO**
+import functools
+from decimal import Decimal
+from typing import Tuple, cast
 
-# 1. Take the total veAUXO held by the Staking Manager (representing all xAUXO deposits)
-# 2. Set total rewards *initially* allocated to xAUXO as `rewardPerActiveVeToken` * `StakingManagerVeTokenBalance`
-# 3. Remove x% of rewards as `xAUXOPremium` and save
-# 4. Calculate the quantity of inactive xAUXO tokens
-# 5. Remove these rewards from circulation (or redistribute) and save
-#     1. If redistributing:
-#         1. Get total active tokens
-#         2. Compute the xAUXOPerActiveToken
-#     2. If not
-#         1. Get rewards per token as veAUXO held by staking manager / xAUXO reward total
-
-
-# edge cases: multiple of same address, multiple types aside from transfer, transfer to existing rewards address (combine)
-from reporter.types import (
-    EthereumAddress,
+from reporter.models import (
     Account,
     AccountState,
-    ERC20Metadata,
-    TokenSummaryStats,
-    BaseERC20Holding,
     Config,
+    ERC20Amount,
+    NormalizedRedistributionWeight,
+    RedistributionOption,
+    RedistributionWeight,
+    TokenSummaryStats,
 )
-from tinydb import TinyDB
-from reporter.rewards import compute_rewards, compute_token_stats
-from pydantic import (
-    BaseModel,
-    Field,
-    validator,
-    ValidationError,
-    parse_file_as,
-    root_validator,
-)
-from typing import Optional, Tuple, cast
-from enum import Enum
-from decimal import Decimal
-import functools
-from reporter.errors import InvalidXAUXOHaircutPercentageException, BadConfigException
-from reporter.conf_generator import XAUXO_ADDRESS, X_AUXO_HAIRCUT_PERCENT
-
-
-class RedistributionOption(str, Enum):
-    # add specific address to the merkle tree
-    TRANSFER = "transfer"
-
-    # redistribute rewards evenly amongst active xauxo stakers
-    REDISTRIBUTE_XAUXO = "redistribute_xauxo"
-
-    # redistribute rewards evently amongst active veauxo stakers
-    REDISTRIBUTE_VEAUXO = "redistribute_veauxo"
-
-
-# params
-class RedistributionWeight(BaseModel):
-    # weights will be normalized
-    weight: float
-
-    # if specifying a target address, put it here
-    address: Optional[EthereumAddress]
-
-    # choose whether to redistribute to an address
-    # or return to stakers
-    option: RedistributionOption
-
-    distributed: bool = False
-    rewards: str = "0"
-
-    @validator("option")
-    @classmethod
-    def ensure_address_if_transfer(
-        cls, option: RedistributionOption, values
-    ) -> RedistributionOption:
-        if option == RedistributionOption.TRANSFER and not values["address"]:
-            raise ValidationError(
-                "Must provide a transfer address if not redistributing to stakers", cls
-            )
-        elif option != RedistributionOption.TRANSFER and values["address"]:
-            raise ValidationError(
-                f"Cannot pass an address if redistributing, passed {values['address']}",
-                cls,
-            )
-        return option
-
-
-class NormalizedRedistributionWeight(RedistributionWeight):
-    total_weights: float
-    normalized_weight: Optional[float]
-
-    @root_validator
-    @classmethod
-    def normalize_weight(cls, values: dict):
-        """
-        We use a root validator to set the value of normalized weight directly
-        """
-        values["normalized_weight"] = values["weight"] / values["total_weights"]
-        return values
+from reporter.rewards import compute_token_stats
 
 
 def compute_x_auxo_reward_total(
+    conf: Config,
     total_xauxo_tokens: Decimal,
-) -> Tuple[ERC20Metadata, int]:
-    # TODO move to env file
-    if X_AUXO_HAIRCUT_PERCENT > 1 or X_AUXO_HAIRCUT_PERCENT < 0:
-        raise InvalidXAUXOHaircutPercentageException(
-            f"xAUXO Haircut must be between 0 and 1 inclusive, received {X_AUXO_HAIRCUT_PERCENT}"
-        )
+) -> Tuple[ERC20Amount, int]:
 
-    haircut_total = total_xauxo_tokens * Decimal(X_AUXO_HAIRCUT_PERCENT)
+    haircut_total = total_xauxo_tokens * Decimal(conf.xauxo_haircut)
     xauxo_total = total_xauxo_tokens - haircut_total
 
     return (
-        ERC20Metadata(
-            decimals=18,
-            symbol="xAUXO",
-            amount=str(xauxo_total),
-            address=XAUXO_ADDRESS,
-        ),
+        ERC20Amount.xAUXO(str(xauxo_total)),
         int(float(haircut_total)),
     )
 
@@ -123,7 +32,7 @@ def compute_x_auxo_reward_total(
 def compute_xauxo_rewards(
     xauxo_stats: TokenSummaryStats,
     redistributions: list[RedistributionWeight],
-    total_rewards_for_xauxo: ERC20Metadata,  # we need to haircut this
+    total_rewards_for_xauxo: ERC20Amount,  # we need to haircut this
 ):
 
     pro_rata_rewards_per_token = (
@@ -186,41 +95,11 @@ def compute_xauxo_rewards(
     return normalized_redistributions, active_rewards, redistributed_to_stakers
 
 
-class ERROR_MESSAGES:
-    DUPLICATE_TRANSFER = "Passed Duplicate Transfer Addresses"
-    DUPLICATE_XAUXO = "Passed multiple x auxo redistributions"
-    VEAUXO_NOT_IMPLEMENTED = "veAUXO Redistribution is not supported yet"
-
-
-def load_redistributions(path: str) -> list[RedistributionWeight]:
-    """
-    Load and validate the redistributions array located at `path`
-    """
-    loaded = parse_file_as(list[RedistributionWeight], path)
-
-    addresses = [l.address for l in loaded if l.address is not None]
-    if len(set(addresses)) != len(addresses):
-        raise BadConfigException(ERROR_MESSAGES.DUPLICATE_TRANSFER)
-
-    redistribute_option_x_auxo = [
-        l.option for l in loaded if l.option == RedistributionOption.REDISTRIBUTE_XAUXO
-    ]
-    if len(redistribute_option_x_auxo) > 1:
-        raise BadConfigException(ERROR_MESSAGES.DUPLICATE_XAUXO)
-
-    redistribute_option_ve_auxo = [
-        l.option for l in loaded if l.option == RedistributionOption.REDISTRIBUTE_VEAUXO
-    ]
-    if len(redistribute_option_ve_auxo) > 0:
-        raise BadConfigException(ERROR_MESSAGES.VEAUXO_NOT_IMPLEMENTED)
-
-    return loaded
-
-
 def compute_allocations(
     accounts: list[Account],
-    xauxo_rewards: ERC20Metadata,  # or haircut here
+    xauxo_rewards: ERC20Amount,  # or haircut here
     dist: list[RedistributionWeight],
+    conf: Config,
 ):
     xauxo_stats = compute_token_stats(accounts)
 
@@ -244,17 +123,19 @@ def compute_allocations(
             for account in accounts:
                 if account.address == r.address:
                     found_account = True
-                    account.notes.append(f"Redistributed transfer of {r.rewards}")
-                    account.rewards = str(int(account.rewards) + int(r.rewards))
+                    account.notes.append(f"Transfer of {r.rewards}")
+                    account.rewards.amount = str(
+                        int(account.rewards.amount) + int(r.rewards)
+                    )
 
             if not found_account:
                 accounts.append(
                     Account(
                         address=r.address,
-                        token=BaseERC20Holding(amount=0, address=XAUXO_ADDRESS),
-                        rewards=str(r.rewards),
+                        holding=ERC20Amount.xAUXO(amount="0"),
+                        rewards=conf.reward_token(amount=str(r.rewards)),
                         state=AccountState.INACTIVE,
-                        notes=[f"Redistributed transfer of {r.rewards}"],
+                        notes=[f"Transfer of {r.rewards}"],
                     )
                 )
 

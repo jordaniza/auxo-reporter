@@ -1,67 +1,44 @@
-import functools
-import pytest
-import json
 import datetime
-from eth_utils import to_checksum_address
-from pydantic import parse_obj_as
+import json
+from copy import deepcopy
 from decimal import Decimal, getcontext
 
-from reporter.test.conftest import MockResponse
+import pytest
+from pydantic import parse_obj_as
 
 from reporter import utils
+from reporter.conf_generator import load_conf
+from reporter.env import ADDRESSES
+from reporter.models import (
+    Delegate,
+    OnChainVote,
+    RedistributionOption,
+    RedistributionWeight,
+    VeAuxoRewardSummary,
+    Staker,
+    XAuxoRewardSummary,
+)
+from reporter.queries import (
+    get_veauxo_stakers,
+    get_x_auxo_statuses,
+    get_stakers,
+    get_xauxo_stakers,
+    xauxo_accounts,
+)
 from reporter.rewards import (
+    compute_rewards,
+    distribute,
     get_vote_data,
     init_account_rewards,
-    distribute,
+    separate_staking_manager,
+    separate_xauxo_rewards,
     write_accounts_and_distribution,
     write_veauxo_stats,
-    compute_rewards,
-    separate_staking_manager,
     write_xauxo_stats,
-    separate_xauxo_rewards,
 )
-from reporter.conf_generator import load_conf
-from reporter.voters import parse_votes, get_voters
-from reporter.queries import get_stakers
-from reporter.types import (
-    AccountState,
-    Config,
-    Delegate,
-    Account,
-    Vote,
-    Staker,
-    VeAuxoRewardSummary,
-    XAuxoRewardSummary,
-    OnChainVote,
-)
-from reporter.queries import xauxo_accounts, get_x_auxo_statuses, get_xauxo_hodlers
-from reporter.xAuxo.rewards import (
-    RedistributionWeight,
-    compute_x_auxo_reward_total,
-    RedistributionOption,
-    compute_allocations,
-    compute_xauxo_rewards,
-    load_redistributions,
-    ERROR_MESSAGES,
-    NormalizedRedistributionWeight,
-    compute_token_stats,
-)
-
-from pydantic import ValidationError
+from reporter.xAuxo.rewards import compute_allocations, compute_x_auxo_reward_total
 from reporter.test.conftest import mock_token_holders
-from pprint import pprint
 from reporter.writer import build_claims
-from decimal import Decimal
-from reporter.errors import BadConfigException
-from reporter.types import AccountState, Config, ERC20Metadata
-from reporter.conf_generator import (
-    X_AUXO_HAIRCUT_PERCENT,
-    XAUXO_ADDRESS,
-    STAKING_MANAGER_ADDRESS,
-)
-from reporter.test.conftest import LIVE_CALLS_DISABLED, SKIP_REASON
-from reporter import utils
-from copy import deepcopy
 
 
 @pytest.fixture(autouse=True)
@@ -75,21 +52,6 @@ root = "reporter/test/scenario_testing"
 
 
 def init_mocks(monkeypatch):
-    # with open("reporter/test/stubs/stakers-subgraph-response.json") as j:
-    #     mock_stakers = json.load(j)
-
-    # with open("reporter/test/stubs/votes/onchain-votes.json") as j:
-    #     mock_on_chain_votes = json.load(j)
-
-    # with open("reporter/test/stubs/snapshot-votes.json") as j:
-    #     mock_votes = json.load(j)
-
-    # with open("reporter/test/stubs/delegates.json") as j:
-    #     mock_delegates = json.load(j)
-
-    with open(f"{root}/mock_stakers.json") as j:
-        mock_stakers = json.load(j)
-
     with open(f"{root}/votes_on.json") as j:
         mock_on_chain_votes = json.load(j)
 
@@ -103,12 +65,15 @@ def init_mocks(monkeypatch):
     with open(f"{root}/mock_xauxo.json") as j:
         mock_xauxo_holders = json.load(j)
 
+    # get_x_auxo_statuses
+    with open(f"{root}/mock_veauxo.json") as j:
+        mock_veauxo_holders = json.load(j)
+
     """
     When patching, you need to specify the file where the function is *executed*
     As opposed to where it was defined. See this SO answer:
     https://stackoverflow.com/questions/31306080/pytest-monkeypatch-isnt-working-on-imported-function
     """
-    monkeypatch.setattr("requests.post", lambda url, json: MockResponse(mock_stakers))
     monkeypatch.setattr("reporter.voters.get_votes", lambda _: mock_votes)
     monkeypatch.setattr(
         "reporter.voters.get_delegates",
@@ -122,15 +87,22 @@ def init_mocks(monkeypatch):
     )
 
     monkeypatch.setattr(
-        "reporter.queries.get_token_hodlers",
-        lambda conf, XAUXO_ADDRESS: mock_xauxo_holders["data"]["erc20Contract"][
-            "balances"
+        "reporter.queries.get_xauxo_stakers",
+        lambda conf: [
+            Staker.xAuxo(x["account"]["id"], x["valueExact"])
+            for x in mock_xauxo_holders["data"]["erc20Contract"]["balances"]
         ],
     )
 
-    # monkeypatch.setattr("reporter.voters.get_votes", lambda _: mock_votes)
+    monkeypatch.setattr(
+        "reporter.queries.get_veauxo_stakers",
+        lambda conf: [
+            Staker.veAuxo(v["account"]["id"], v["valueExact"])
+            for v in mock_veauxo_holders["data"]["erc20Contract"]["balances"]
+        ],
+    )
 
-    return (mock_stakers, mock_votes, mock_delegates)
+    return (mock_votes, mock_delegates, mock_veauxo_holders)
 
 
 def test_do_not_require_address_for_redistribute():
@@ -146,10 +118,6 @@ def test_do_not_require_address_for_redistribute():
     assert not r2.address
 
 
-def mock_ve_auxo_holders(monkeypatch) -> None:
-    return mock_token_holders(monkeypatch, "reporter/test/stubs/tokens/veauxo.json")
-
-
 def test_both(monkeypatch):
     config = load_conf("reporter/test/scenario_testing")
 
@@ -162,13 +130,15 @@ def test_both(monkeypatch):
     print(f"⚗ Building database from {start_date} to {end_date}...")
 
     init_mocks(monkeypatch)
-    veauxo_stakers = get_stakers(config)
+
+    (veauxo_stakers, xauxo_stakers) = get_stakers(config)
+
     (votes, proposals, voters, non_voters) = get_vote_data(config, veauxo_stakers)
     veauxo_accounts_in = init_account_rewards(veauxo_stakers, voters, config)
 
     # save staking manager separately
     (veauxo_accounts_out, staking_manager) = separate_staking_manager(
-        veauxo_accounts_in, STAKING_MANAGER_ADDRESS
+        veauxo_accounts_in, ADDRESSES.STAKING_MANAGER
     )
 
     (veauxo_distribution, veauxo_reward_summaries, veauxo_stats) = distribute(
@@ -196,31 +166,30 @@ def test_both(monkeypatch):
     )
     build_claims(config, db, "reporter/test/stubs/db", "veAUXO")
 
-    # xauxo
-    mock_ve_auxo_holders(monkeypatch)
-
-    xauxo_holders = get_xauxo_hodlers(config)
-    xauxo_active = get_x_auxo_statuses(xauxo_holders, mock=True)
-    xauxo_accounts_in = xauxo_accounts(xauxo_holders, xauxo_active)
+    xauxo_active = get_x_auxo_statuses(xauxo_stakers, mock=True)
+    xauxo_accounts_in = xauxo_accounts(xauxo_stakers, xauxo_active, config)
 
     xauxo_rewards_total_no_haircut = deepcopy(config.rewards)
     xauxo_rewards_total_no_haircut.amount = veauxo_reward_summaries.to_xauxo
 
-    xauxo_redistributions = load_redistributions(f"{root}/redistributions.json")
+    xauxo_redistributions = config.redistributions
 
     (xauxo_rewards_total_with_haircut, xauxo_haircut) = compute_x_auxo_reward_total(
-        Decimal(xauxo_rewards_total_no_haircut.amount)
+        config, Decimal(xauxo_rewards_total_no_haircut.amount)
     )
 
     (
         xauxo_stats,
         xauxo_accounts_out,
-        redistributions,
+        _,
         stakers_rewards,
         redistributed_to_stakers,
         redistributed_transfer,
     ) = compute_allocations(
-        xauxo_accounts_in, xauxo_rewards_total_with_haircut, xauxo_redistributions
+        xauxo_accounts_in,
+        xauxo_rewards_total_with_haircut,
+        xauxo_redistributions,
+        config,
     )
 
     xauxo_stakers_net_redistributed = deepcopy(config.rewards)

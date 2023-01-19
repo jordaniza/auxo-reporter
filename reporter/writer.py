@@ -1,15 +1,8 @@
-import json
-import functools
-from tinydb import Query, TinyDB
+from tinydb import TinyDB
+
 from reporter import utils
 from reporter.conf_generator import load_conf
-from reporter.types import (
-    AccountState,
-    Config,
-    ClaimsRecipient,
-    ClaimsWindow,
-    AUXO_TOKEN_NAMES,
-)
+from reporter.models import AUXO_TOKEN_NAMES, ClaimsRecipient, Config
 
 
 def report_governance(db: TinyDB, path: str):
@@ -48,17 +41,19 @@ from tinydb import where
 def build_claims(
     conf: Config, db: TinyDB, path: str, token_name: AUXO_TOKEN_NAMES = "veAUXO"
 ):
-    accounts = db.table(f"{token_name}_holders").search(where("rewards").map(int) > 0)
-
-    print(accounts)
+    accounts = db.table(f"{token_name}_holders").search(
+        where("rewards")["amount"].map(int) > 0
+    )
 
     rewards = db.table(f"{token_name}_stats").all()[0]["rewards"]
+
+    print(rewards)
 
     recipients = {
         a["address"]: ClaimsRecipient(
             windowIndex=conf.distribution_window,
             accountIndex=idx,
-            rewards=a.get("rewards"),
+            rewards=a["rewards"]["amount"],
         ).dict()
         for idx, a in enumerate(accounts)
     }

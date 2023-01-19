@@ -1,26 +1,35 @@
-import functools
-import pytest
-import json
 import datetime
-from eth_utils import to_checksum_address
-from pydantic import parse_obj_as
+import functools
+import json
 from decimal import Decimal, getcontext
 
-from reporter.test.conftest import MockResponse
+import pytest
+from eth_utils import to_checksum_address
+from pydantic import parse_obj_as
 
 from reporter import utils
+from reporter.queries import get_veauxo_stakers
 from reporter.rewards import (
+    distribute,
     get_vote_data,
     init_account_rewards,
-    distribute,
-    write_accounts_and_distribution,
-    write_veauxo_stats,
     separate_staking_manager,
     separate_xauxo_rewards,
+    write_accounts_and_distribution,
+    write_veauxo_stats,
 )
-from reporter.voters import parse_votes, get_voters
-from reporter.queries import get_stakers
-from reporter.types import AccountState, Config, Delegate, Account, Vote, Staker
+from reporter.models import (
+    Account,
+    AccountState,
+    Config,
+    OnChainVote,
+    Delegate,
+    Staker,
+    VeAuxoRewardSummary,
+    Vote,
+)
+from reporter.test.conftest import MockResponse
+from reporter.voters import get_voters, parse_votes
 
 
 @pytest.fixture(autouse=True)
@@ -31,7 +40,7 @@ def before_each(monkeypatch):
 
 
 def init_mocks(monkeypatch):
-    with open("reporter/test/stubs/stakers-subgraph-response.json") as j:
+    with open("reporter/test/stubs/tokens/veauxo.json") as j:
         mock_stakers = json.load(j)
 
     with open("reporter/test/stubs/snapshot-votes.json") as j:
@@ -40,27 +49,42 @@ def init_mocks(monkeypatch):
     with open("reporter/test/stubs/delegates.json") as j:
         mock_delegates = json.load(j)
 
+    with open("reporter/test/stubs/votes/onchain-votes.json") as j:
+        mock_on_chain_votes = json.load(j)
+
     """
     When patching, you need to specify the file where the function is *executed*
     As opposed to where it was defined. See this SO answer:
     https://stackoverflow.com/questions/31306080/pytest-monkeypatch-isnt-working-on-imported-function
     """
-    monkeypatch.setattr("requests.post", lambda url, json: MockResponse(mock_stakers))
+    monkeypatch.setattr(
+        "reporter.queries.graphql_iterate_query",
+        lambda url, access_path, params: mock_stakers["data"]["erc20Contract"][
+            "balances"
+        ],
+    )
     monkeypatch.setattr("reporter.voters.get_votes", lambda _: mock_votes)
     monkeypatch.setattr(
         "reporter.voters.get_delegates",
         lambda: parse_obj_as(list[Delegate], mock_delegates),
     )
 
+    monkeypatch.setattr(
+        "reporter.voters.parse_on_chain_votes",
+        lambda _: parse_obj_as(
+            list[OnChainVote], mock_on_chain_votes["data"]["voteCasts"]
+        ),
+    )
+
     return (mock_stakers, mock_votes, mock_delegates)
 
 
-def test_get_stakers(monkeypatch, config):
+def test_get_veauxo_stakers(monkeypatch, config):
     init_mocks(monkeypatch)
 
-    stakers = get_stakers(config)
+    stakers = get_veauxo_stakers(config)
 
-    assert all(to_checksum_address(s.id) == s.id for s in stakers)
+    assert all(to_checksum_address(s.address) == s.address for s in stakers)
 
 
 def test_get_voters(monkeypatch, config):
@@ -77,8 +101,11 @@ def test_get_voters_and_non_voters():
 
     path = "reporter/test/stubs/votes"
 
-    with open(f"{path}/stakers.json") as j:
-        mock_stakers = json.load(j)
+    with open(f"reporter/test/stubs/tokens/veauxo.json") as j:
+        mock_stakers = json.load(j)["data"]["erc20Contract"]["balances"]
+        mock_stakers = [
+            Staker.veAuxo(v["account"]["id"], v["valueExact"]) for v in mock_stakers
+        ]
 
     with open(f"{path}/votes.json") as j:
         mock_votes = json.load(j)
@@ -86,6 +113,7 @@ def test_get_voters_and_non_voters():
     with open(f"{path}/delegates.json") as j:
         mock_delegates = json.load(j)
 
+    # TODO update with latest
     non_voter = "0x002b5dfb3c71e1dc97a2e5a0a7f69f3e7b83f269"
     delegated_voter = "0xFbEA6F2B10e8Ee770F37Fff9B8C9E10d9B65741D"
     delegated_non_voter = "0xea9f2e31ad16636f4e1af0012db569900401248a"
@@ -113,7 +141,7 @@ def test_get_voters_and_non_voters():
 def test_get_vote_data(config, monkeypatch):
 
     init_mocks(monkeypatch)
-    stakers = get_stakers(config)
+    stakers = get_veauxo_stakers(config)
     (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
     voter_ids = [v.voter for v in votes]
 
@@ -125,7 +153,7 @@ def test_get_vote_data(config, monkeypatch):
 def test_init_accounts(config, monkeypatch):
 
     init_mocks(monkeypatch)
-    stakers = get_stakers(config)
+    stakers = get_veauxo_stakers(config)
     (_, __, voters, non_voters) = get_vote_data(config, stakers)
     accounts = init_account_rewards(stakers, voters, config)
 
@@ -144,7 +172,7 @@ def test_init_accounts(config, monkeypatch):
 
 def test_compute_distribution(config: Config, monkeypatch):
     init_mocks(monkeypatch)
-    stakers = get_stakers(config)
+    stakers = get_veauxo_stakers(config)
     (_, __, voters, ___) = get_vote_data(config, stakers)
     accounts = init_account_rewards(stakers, voters, config)
 
@@ -174,7 +202,7 @@ def test_build(config: Config, monkeypatch):
     print(f"⚗ Building database from {start_date} to {end_date}...")
 
     init_mocks(monkeypatch)
-    stakers = get_stakers(config)
+    stakers = get_veauxo_stakers(config)
     (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
     accounts = init_account_rewards(stakers, voters, config)
 
@@ -188,7 +216,7 @@ def test_build(config: Config, monkeypatch):
 
     #  and remove its rewards from the veAUXO Tree
     (reward_summaries, accounts) = separate_xauxo_rewards(
-        staking_manager, reward_summaries, accounts
+        staking_manager, VeAuxoRewardSummary(**reward_summaries.dict()), accounts
     )
 
     write_accounts_and_distribution(db, accounts, distribution)
@@ -207,16 +235,16 @@ def test_build(config: Config, monkeypatch):
 
 def no_slashed_has_rewards(distribution: list[Account]) -> bool:
     slashed = utils.filter_state(distribution, AccountState.INACTIVE)
-    return all(int(s.rewards) == 0 for s in slashed)
+    return all(int(s.rewards.amount) == 0 for s in slashed)
 
 
 def all_active_have_rewards(distribution: list[Account]) -> bool:
     slashed = utils.filter_state(distribution, AccountState.ACTIVE)
-    return all(int(s.rewards) > 0 for s in slashed)
+    return all(int(s.rewards.amount) > 0 for s in slashed)
 
 
 def sum_totals(distribution: list[Account]) -> Decimal:
     account_rewards = [a.rewards for a in distribution]
     return functools.reduce(
-        lambda acc, curr: acc + Decimal(curr), account_rewards, Decimal(0)
+        lambda acc, curr: acc + Decimal(curr.amount), account_rewards, Decimal(0)
     )

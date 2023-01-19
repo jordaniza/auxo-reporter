@@ -11,5 +11,17 @@
   },
   "date": "2023-12",
   "start_timestamp": 1667246400,
-  "end_timestamp": 1669838399
+  "end_timestamp": 1669838399,
+  "redistributions": [
+    {
+      "weight": 50,
+      "option": "transfer",
+      "address": "0x0000000000000000000000000000000000000007"
+    },
+    {
+      "weight": 50,
+      "option": "redistribute_xauxo"
+    }
+  ],
+  "xauxo_haircut": 0.4
 }
