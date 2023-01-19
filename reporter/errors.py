@@ -24,3 +24,7 @@ class InvalidXAUXOHaircutPercentageException(Exception):
 
 class MissingStakingManagerAddressError(Exception):
     pass
+
+
+class MissingDecayBalanceException(Exception):
+    pass

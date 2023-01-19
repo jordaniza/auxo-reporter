@@ -1,7 +1,7 @@
 import json
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, TypedDict, TypeVar, cast
+from typing import Any, TypedDict, TypeVar, cast, Union
 
 import requests
 from multicall import Call, Multicall  # type: ignore
@@ -9,7 +9,7 @@ from pydantic import parse_obj_as
 from web3 import Web3
 
 from reporter.env import ADDRESSES, RPC_URL, SNAPSHOT_SPACE_ID
-from reporter.errors import EmptyQueryError
+from reporter.errors import EmptyQueryError, MissingDecayBalanceException
 from reporter.models import (
     Account,
     AccountState,
@@ -302,11 +302,6 @@ def get_x_auxo_statuses(
     return Multicall(calls, _w3=w3)()
 
 
-# add the decay logic
-# get the veAUXO stakers and balances
-# reach out to the decay contract
-
-
 def get_xauxo_active_state(
     staker: Staker, statuses: dict[EthereumAddress, bool]
 ) -> AccountState:
@@ -329,3 +324,63 @@ def xauxo_accounts(
         )
         for staker in stakers
     ]
+
+
+MulticallReturnDecay = dict[EthereumAddress, Union[int, str]]
+
+
+def get_veauxo_boosted_balance_by_staker(
+    stakers: list[Staker], mock=False
+) -> MulticallReturnDecay:
+    if mock:
+        with open("reporter/test/scenario_testing/decay_veauxo.json") as j:
+            mock_multicall_response = json.load(j)
+        return mock_multicall_response
+
+    # instantiate a basic web3 client from the environment
+    w3 = Web3(Web3.HTTPProvider(RPC_URL))
+
+    calls = [
+        Call(
+            # address to call:
+            ADDRESSES.DECAY_ORACLE,  # this needs to be the oracle address
+            # signature + return value, with argument:
+            # TODO - do we need to call a specific epoch here?
+            ["balanceOf(address)(uint256)", s.address],
+            # return in a format of {[address]: uint}:
+            [[s.address, None]],
+        )
+        for s in stakers
+    ]
+
+    # Immediately execute the multicall
+    return Multicall(calls, _w3=w3)()
+
+
+def get_boosted_veauxo_balance(
+    stakers: list[Staker], decay_dict: MulticallReturnDecay
+) -> list[Staker]:
+
+    new_stakers: list[Staker] = []
+    for s in stakers:
+        new_s = deepcopy(s)
+        boosted_balance = decay_dict[cast(str, new_s.address)]
+        if not boosted_balance:
+            raise MissingDecayBalanceException(
+                f"Missing Decayed Balance for Staker, {new_s.address}"
+            )
+        # staking manager will never get decayed
+        if s.address == ADDRESSES.STAKING_MANAGER:
+            new_s.holding.original_amount = new_s.holding.amount
+        else:
+            # cache original amount for reference
+            new_s.holding.original_amount = new_s.holding.amount
+            new_s.holding.amount = str(boosted_balance)
+        new_stakers.append(new_s)
+
+    return new_stakers
+
+
+def get_boosted_stakers(stakers: list[Staker]) -> list[Staker]:
+    decay_data = get_veauxo_boosted_balance_by_staker(stakers)
+    return get_boosted_veauxo_balance(stakers, decay_data)

@@ -5,28 +5,29 @@
         "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         "symbol": "WETH",
         "decimals": 18,
-        "amount": "342857142857142829056",
-        "pro_rata": "1285714285714285568",
-        "redistributed_total": "171428571428571422226",
-        "redistributed_to_stakers": "85714285714285711113",
-        "redistributed_transferred": "85714285714285711113",
-        "total_haircut": "228571428571428585472"
+        "amount": "417391304347826061312",
+        "original_amount": null,
+        "pro_rata": "1565217391304347648",
+        "redistributed_total": "208695652173913035754",
+        "redistributed_to_stakers": "104347826086956517877",
+        "redistributed_transferred": "104347826086956517877",
+        "total_haircut": "278260869565217406976"
     },
     "recipients": {
         "0x0000000000000000000000000000000000000005": {
             "windowIndex": 9999,
             "accountIndex": 0,
-            "rewards": "257142857142857133340"
+            "rewards": "313043478260869553631"
         },
         "0x0000000000000000000000000000000000000006": {
             "windowIndex": 9999,
             "accountIndex": 1,
-            "rewards": "257142857142857133340"
+            "rewards": "313043478260869553631"
         },
         "0x0000000000000000000000000000000000000007": {
             "windowIndex": 9999,
             "accountIndex": 2,
-            "rewards": "85714285714285711113"
+            "rewards": "104347826086956517877"
         }
     }
 }

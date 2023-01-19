@@ -14,15 +14,14 @@ from reporter.models import (
     OnChainVote,
     RedistributionOption,
     RedistributionWeight,
-    VeAuxoRewardSummary,
     Staker,
+    VeAuxoRewardSummary,
     XAuxoRewardSummary,
 )
 from reporter.queries import (
-    get_veauxo_stakers,
-    get_x_auxo_statuses,
+    get_boosted_stakers,
     get_stakers,
-    get_xauxo_stakers,
+    get_x_auxo_statuses,
     xauxo_accounts,
 )
 from reporter.rewards import (
@@ -36,9 +35,8 @@ from reporter.rewards import (
     write_veauxo_stats,
     write_xauxo_stats,
 )
-from reporter.xAuxo.rewards import compute_allocations, compute_x_auxo_reward_total
-from reporter.test.conftest import mock_token_holders
 from reporter.writer import build_claims
+from reporter.xAuxo.rewards import compute_allocations, compute_x_auxo_reward_total
 
 
 @pytest.fixture(autouse=True)
@@ -68,6 +66,10 @@ def init_mocks(monkeypatch):
     # get_x_auxo_statuses
     with open(f"{root}/mock_veauxo.json") as j:
         mock_veauxo_holders = json.load(j)
+
+    # get_x_auxo_statuses
+    with open(f"{root}/veauxo_boosted.json") as j:
+        boosted_veauxo = json.load(j)
 
     """
     When patching, you need to specify the file where the function is *executed*
@@ -102,6 +104,11 @@ def init_mocks(monkeypatch):
         ],
     )
 
+    monkeypatch.setattr(
+        "reporter.queries.get_veauxo_boosted_balance_by_staker",
+        lambda _: boosted_veauxo,
+    )
+
     return (mock_votes, mock_delegates, mock_veauxo_holders)
 
 
@@ -131,7 +138,8 @@ def test_both(monkeypatch):
 
     init_mocks(monkeypatch)
 
-    (veauxo_stakers, xauxo_stakers) = get_stakers(config)
+    (veauxo_stakers_pre_decay, xauxo_stakers) = get_stakers(config)
+    veauxo_stakers = get_boosted_stakers(veauxo_stakers_pre_decay)
 
     (votes, proposals, voters, non_voters) = get_vote_data(config, veauxo_stakers)
     veauxo_accounts_in = init_account_rewards(veauxo_stakers, voters, config)

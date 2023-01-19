@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Literal
+from typing import Union, Literal, Optional
 import eth_utils as eth
 from pydantic import BaseModel, validator
 
@@ -38,9 +38,12 @@ class ERC20Amount(ERC20Metadata):
     Hold ERC20 data with an amount
     The significance of the amount will depend on context
     i.e. "user's balance" vs "rewards assigned"
+
+    :param original_amount: before applying decay
     """
 
     amount: BigNumber
+    original_amount: Optional[BigNumber]
 
     @staticmethod
     def xAUXO(amount: str) -> ERC20Amount:

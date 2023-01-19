@@ -47,8 +47,6 @@ def build_claims(
 
     rewards = db.table(f"{token_name}_stats").all()[0]["rewards"]
 
-    print(rewards)
-
     recipients = {
         a["address"]: ClaimsRecipient(
             windowIndex=conf.distribution_window,

@@ -11,12 +11,15 @@ from reporter.env import ADDRESSES
 from reporter.models import Vote
 from reporter.utils import write_json
 
+BASE_VEAUXO_QTY = 100
+
 
 @dataclass
 class User:
     address: str
-    veAUXO_amount: str = "100"
-    eligible_amount: str = "100"
+    veAUXO_amount: str = str(BASE_VEAUXO_QTY)
+    boosted_amount: str = str(BASE_VEAUXO_QTY)
+    eligible_amount: str = str(BASE_VEAUXO_QTY)
     active_on_chain: bool = False
     active_snapshot: bool = False
     xAUXO_amount: str = "0"
@@ -63,14 +66,27 @@ class User:
 
 # setup the users
 users = [
-    User("0x0000000000000000000000000000000000000001", active_on_chain=True),
-    User("0x0000000000000000000000000000000000000002", active_snapshot=True),
+    User(
+        "0x0000000000000000000000000000000000000001",
+        active_on_chain=True,
+        boosted_amount=str(BASE_VEAUXO_QTY / 2),
+    ),
+    User(
+        "0x0000000000000000000000000000000000000002",
+        active_snapshot=True,
+        boosted_amount=str(BASE_VEAUXO_QTY * (3 / 4)),
+    ),
     User(
         "0x0000000000000000000000000000000000000003",
         active_on_chain=True,
         active_snapshot=True,
+        boosted_amount=str(BASE_VEAUXO_QTY / 2),
     ),
-    User("0x0000000000000000000000000000000000000004", eligible_amount="0"),
+    User(
+        "0x0000000000000000000000000000000000000004",
+        eligible_amount="0",
+        boosted_amount=str(BASE_VEAUXO_QTY * (3 / 4)),
+    ),
     User(
         ADDRESSES.STAKING_MANAGER,
         eligible_amount="0",
@@ -81,6 +97,7 @@ users = [
         xAUXO_amount="200",
         veAUXO_amount="0",
         eligible_amount="0",
+        boosted_amount="0",
     ),
     User(
         "0x0000000000000000000000000000000000000006",
@@ -88,6 +105,7 @@ users = [
         eligible_amount="0",
         xAUXO_amount="200",
         staked_xAUXO=True,
+        boosted_amount="0",
     ),
 ]
 
@@ -98,6 +116,7 @@ def test_go():
     xauxo_stakers = {}
     xauxo_holders = []
     veauxo_holders = []
+    veauxo_boost_data = {}
     for u in users:
         if u.active_on_chain:
             votes_on.append(u.create_on_chain_vote())
@@ -111,6 +130,7 @@ def test_go():
             xauxo_holders.append(u.create_xauxo_holding())
         if int(u.veAUXO_amount) > 0:
             veauxo_holders.append(u.create_veauxo_holding())
+            veauxo_boost_data[u.address] = u.boosted_amount
 
     write_json(
         {"data": {"voteCasts": [v for v in votes_on]}},
@@ -130,3 +150,4 @@ def test_go():
     )
 
     write_json(xauxo_stakers, "reporter/test/scenario_testing/xauxo_stakers.json")
+    write_json(veauxo_boost_data, "reporter/test/scenario_testing/veauxo_boosted.json")
