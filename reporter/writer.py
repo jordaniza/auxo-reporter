@@ -1,7 +1,7 @@
 from tinydb import TinyDB, where
 
 from reporter import utils
-from reporter.conf_generator import load_conf
+from reporter.config import load_conf
 from reporter.models import (
     AUXO_TOKEN_NAMES,
     ClaimsRecipient,
@@ -14,6 +14,7 @@ from reporter.models import (
     VeAuxoRewardSummary,
     XAuxoRewardSummary,
 )
+from decimal import Decimal
 
 
 def write_veauxo_stats(
@@ -104,7 +105,7 @@ def build_claims(
     conf: Config, db: TinyDB, path: str, token_name: AUXO_TOKEN_NAMES = "veAUXO"
 ):
     accounts = db.table(f"{token_name}_holders").search(
-        where("rewards")["amount"].map(int) > 0
+        where("rewards")["amount"].map(Decimal) > Decimal(0)
     )
 
     rewards = db.table(f"{token_name}_stats").all()[0]["rewards"]

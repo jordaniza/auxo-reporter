@@ -12,6 +12,21 @@
   "date": "2023-1",
   "start_timestamp": 1674130000,
   "end_timestamp": 1674140000,
-  "redistributions": [],
-  "xauxo_haircut": 0.4
+  "redistributions": [
+    {
+      "weight": 33,
+      "address": "0x0000000000000000000000000000000000c0ffee",
+      "option": "transfer"
+    },
+    {
+      "weight": 33,
+      "address": "0x000000000000000000000000000000000000beef",
+      "option": "transfer"
+    },
+    {
+      "weight": 33,
+      "option": "redistribute_xauxo"
+    }
+  ],
+  "xauxo_haircut": 0.5
 }

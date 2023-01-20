@@ -25,7 +25,7 @@ class InputConfig(BaseModel):
     distribution_window: int
     rewards: ERC20Amount
     redistributions: list[RedistributionWeight] = []
-    xauxo_haircut: float = Field(ge=0, le=1, default=0)
+    xauxo_tax_percentage: float = Field(ge=0, le=1, default=0)
 
     def reward_token(self, amount: str = "0") -> ERC20Amount:
         """

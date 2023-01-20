@@ -12,6 +12,5 @@ from reporter.models.Config import *
 from reporter.models.ERC20 import *
 from reporter.models.Redistribution import *
 from reporter.models.Reward import *
-from reporter.models.Summary import *
 from reporter.models.types import *
 from reporter.models.Vote import *

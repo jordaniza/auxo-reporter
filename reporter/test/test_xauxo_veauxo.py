@@ -14,6 +14,7 @@ from reporter.models import (
     OnChainVote,
     RedistributionOption,
     RedistributionWeight,
+    Vote,
     Staker,
     VeAuxoRewardSummary,
     XAuxoRewardSummary,
@@ -24,25 +25,19 @@ from reporter.queries import (
     xauxo_accounts,
     get_xauxo_total_supply,
 )
-from reporter.rewards.veauxo import (
-    compute_rewards,
+from reporter.rewards import (
     distribute,
     get_vote_data,
     init_account_rewards,
     separate_staking_manager,
     separate_xauxo_rewards,
+    calculate_xauxo_rewards,
 )
 from reporter.writer import (
     build_claims,
     write_accounts_and_distribution,
     write_veauxo_stats,
     write_xauxo_stats,
-)
-from reporter.rewards.xauxo import (
-    compute_x_auxo_reward_total,
-    compute_xauxo_token_stats,
-    redistribute,
-    compute_xauxo_rewards,
 )
 
 
@@ -61,7 +56,7 @@ def init_mocks(monkeypatch):
         mock_on_chain_votes = json.load(j)
 
     with open(f"{root}/votes_off.json") as j:
-        mock_votes = json.load(j)
+        mock_offchain_votes = json.load(j)
 
     with open("reporter/test/stubs/delegates.json") as j:
         mock_delegates = []
@@ -83,13 +78,16 @@ def init_mocks(monkeypatch):
     As opposed to where it was defined. See this SO answer:
     https://stackoverflow.com/questions/31306080/pytest-monkeypatch-isnt-working-on-imported-function
     """
-    monkeypatch.setattr("reporter.voters.get_votes", lambda _: mock_votes)
     monkeypatch.setattr(
-        "reporter.voters.get_delegates",
+        "reporter.queries.voters.parse_offchain_votes",
+        lambda _: parse_obj_as(list[Vote], mock_offchain_votes),
+    )
+    monkeypatch.setattr(
+        "reporter.queries.get_delegates",
         lambda: parse_obj_as(list[Delegate], mock_delegates),
     )
     monkeypatch.setattr(
-        "reporter.voters.parse_on_chain_votes",
+        "reporter.queries.voters.parse_onchain_votes",
         lambda conf: parse_obj_as(
             list[OnChainVote], mock_on_chain_votes["data"]["voteCasts"]
         ),
@@ -116,7 +114,7 @@ def init_mocks(monkeypatch):
     #     lambda _, __: boosted_veauxo,
     # )
 
-    return (mock_votes, mock_delegates, mock_veauxo_holders)
+    return (mock_offchain_votes, mock_delegates, mock_veauxo_holders)
 
 
 def test_do_not_require_address_for_redistribute():
@@ -154,7 +152,7 @@ def test_both(monkeypatch):
     init_mocks(monkeypatch)
 
     #
-    (veauxo_stakers_pre_decay, xauxo_stakers) = get_stakers(config)
+    (veauxo_stakers_pre_decay, _) = get_stakers(config)
     veauxo_stakers = get_boosted_stakers(veauxo_stakers_pre_decay, ENABLE_MOCKS)
 
     (votes, proposals, voters, non_voters) = get_vote_data(config, veauxo_stakers)
@@ -197,52 +195,11 @@ def test_both(monkeypatch):
     )
     build_claims(config, db, "reporter/test/stubs/db", "veAUXO")
 
-    # xauxo_active = get_x_auxo_statuses(xauxo_stakers, mock=ENABLE_MOCKS)
-    xauxo_accounts_in = xauxo_accounts(xauxo_stakers, config)
-
-    xauxo_rewards_total_no_haircut = deepcopy(config.rewards)
-    xauxo_rewards_total_no_haircut.amount = veauxo_reward_summaries.to_xauxo
-
-    xauxo_redistributions = config.redistributions
-
-    (xauxo_rewards_total_with_haircut, xauxo_haircut) = compute_x_auxo_reward_total(
-        config, Decimal(xauxo_rewards_total_no_haircut.amount)
-    )
-
-    xauxo_stats = compute_xauxo_token_stats(xauxo_accounts_in, get_xauxo_total_supply())
     (
-        redistributions,
-        stakers_rewards,
-        redistributed_to_stakers,
-    ) = compute_xauxo_rewards(
-        xauxo_stats, xauxo_redistributions, xauxo_rewards_total_with_haircut
-    )
-    xauxo_accounts_out, redistributed_transfer = redistribute(
-        xauxo_accounts_in, redistributions, config
-    )
-
-    xauxo_stakers_net_redistributed = deepcopy(config.rewards)
-    xauxo_stakers_net_redistributed.amount = str(int(stakers_rewards))
-
-    distribution_rewards = compute_rewards(
-        xauxo_stakers_net_redistributed,
-        Decimal(xauxo_stats.active),
+        xauxo_distribution_rewards,
         xauxo_accounts_out,
-    )
-
-    xauxo_distribution_rewards = XAuxoRewardSummary.from_existing(distribution_rewards)
-    xauxo_distribution_rewards.total_haircut = str(xauxo_haircut)
-    xauxo_distribution_rewards.amount = str(
-        int(float(xauxo_rewards_total_with_haircut.amount))
-    )
-    xauxo_distribution_rewards.redistributed_to_stakers = redistributed_to_stakers
-    xauxo_distribution_rewards.redistributed_total = str(
-        int(Decimal(redistributed_to_stakers) + redistributed_transfer)
-    )
-    xauxo_distribution_rewards.redistributed_transferred = str(
-        int(redistributed_transfer)
-    )
-
+        xauxo_stats,
+    ) = calculate_xauxo_rewards(config, veauxo_reward_summaries.to_xauxo)
     write_xauxo_stats(
         db, xauxo_accounts_out, xauxo_distribution_rewards, xauxo_stats, staking_manager
     )

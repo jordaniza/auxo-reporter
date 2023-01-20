@@ -212,7 +212,6 @@ def test_build(config: Config, monkeypatch):
     )
 
     (distribution, reward_summaries, stats) = distribute(config, accounts)
-    print(stats)
 
     #  and remove its rewards from the veAUXO Tree
     (reward_summaries, accounts) = separate_xauxo_rewards(

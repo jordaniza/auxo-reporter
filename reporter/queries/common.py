@@ -50,7 +50,6 @@ def extract_nested_graphql(res: GraphQL_Response, access_path: list[str]):
     :param `res`: api response from graphql. First key should be 'data'
     """
     deepcopy_access_path = deepcopy(access_path)
-    print(res)
     current = res["data"]
     while len(deepcopy_access_path) > 0:
         current = current[deepcopy_access_path.pop(0)]

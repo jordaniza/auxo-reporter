@@ -211,10 +211,11 @@ def get_vote_data(
         * list of addresses of active voters
         * list of addresses of inactive voters
     """
-    votes = parse_offchain_votes(conf)
-    on_chain_votes = parse_onchain_votes(conf)
+    offchain_votes = parse_offchain_votes(conf)
+    onchain_votes = parse_onchain_votes(conf)
 
-    combined_votes = combine_on_off_chain_votes(votes, on_chain_votes)
+    combined_votes = combine_on_off_chain_votes(offchain_votes, onchain_votes)
+
     (filtered_votes, proposals) = filter_votes_by_proposal(combined_votes)
 
     delegates = get_delegates()
