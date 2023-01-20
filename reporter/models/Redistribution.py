@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import Optional, cast
 from enum import Enum
 from pydantic import validator, root_validator, BaseModel
+from decimal import Decimal
 
-from reporter.models.types import EthereumAddress
+from reporter.models.types import EthereumAddress, BigNumber
 from reporter.errors import BadConfigException
 
 
@@ -36,7 +37,7 @@ class RedistributionWeight(BaseModel):
     option: RedistributionOption
 
     distributed: bool = False
-    rewards: str = "0"
+    rewards: BigNumber = "0"
 
     @validator("option")
     @classmethod
@@ -66,3 +67,10 @@ class NormalizedRedistributionWeight(RedistributionWeight):
         """
         values["normalized_weight"] = values["weight"] / values["total_weights"]
         return values
+
+    def distribute_inactive(self, total_inactive_rewards: BigNumber) -> None:
+        weighted_rewards = Decimal(total_inactive_rewards) * Decimal(
+            cast(float, self.normalized_weight)
+        )
+        self.rewards = str(weighted_rewards)
+        self.distributed = True

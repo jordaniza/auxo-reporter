@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import Union, Literal, Optional
+
+from typing import Literal, Optional, Union
+
 import eth_utils as eth
 from pydantic import BaseModel, validator
 
-from reporter.models.types import EthereumAddress, BigNumber
-
-# from reporter.models.Config import Config
 from reporter.env import ADDRESSES
+from reporter.models.types import BigNumber, EthereumAddress
 
 AUXO_TOKEN_NAMES = Union[Literal["veAUXO"], Literal["xAUXO"]]
 

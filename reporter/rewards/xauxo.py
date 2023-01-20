@@ -1,6 +1,5 @@
-import functools
 from decimal import Decimal
-from typing import Tuple, cast
+from typing import Tuple
 
 from reporter.models import (
     Account,
@@ -12,7 +11,6 @@ from reporter.models import (
     RedistributionWeight,
     TokenSummaryStats,
 )
-from reporter.rewards import compute_token_stats
 
 
 def compute_x_auxo_reward_total(
@@ -55,33 +53,15 @@ def compute_xauxo_rewards(
         / Decimal(10**total_rewards_for_xauxo.decimals)
     )
 
-    print(f"Inactive xAUXO: {int(inactive_tokens)/10**18}")
-    print(f"Active xAUXO: {int(xauxo_stats.active)/10**18}")
-    print(f"Total xAUXO: {int(xauxo_stats.total)/10**18}")
-    print(
-        f"Inactive xAUXO %: {int(xauxo_stats.inactive)*100/int(xauxo_stats.total):.2f}"
-    )
-    print(f"Inactive Eth Value: {int(inactive_rewards)/10**18}")
-    print(
-        f"Inactive Eth %: {float(inactive_rewards)*100/float(total_rewards_for_xauxo.amount):.2f}"
-    )
-    print(f"Pro Rata: {int(pro_rata_rewards_per_token)/10**18}")
-    print(f"total_rewards: {float(total_rewards_for_xauxo.amount)/10**18}")
-
     # redistributions
-    total_weights = functools.reduce(
-        lambda prev, curr: curr.weight + prev, redistributions, float(0)
-    )
+    total_weights = sum(r.weight for r in redistributions)
     normalized_redistributions: list[NormalizedRedistributionWeight] = [
         NormalizedRedistributionWeight(total_weights=total_weights, **r.dict())
         for r in redistributions
     ]
 
     for n in normalized_redistributions:
-        n.rewards = str(
-            int(inactive_rewards * Decimal(cast(float, n.normalized_weight)))
-        )  # normalized is computed so is 'optional' according to pydantic, cast it to definite here
-        n.distributed = True
+        n.distribute_inactive(str(inactive_rewards))
 
     # add to the existing stakers rewards
     redistributed_to_stakers = "0"
@@ -91,7 +71,6 @@ def compute_xauxo_rewards(
             redistributed_to_stakers = n.rewards
 
     # add accounts later
-
     return normalized_redistributions, active_rewards, redistributed_to_stakers
 
 
@@ -106,29 +85,15 @@ def compute_xauxo_token_stats(
     )
 
 
-def compute_allocations(
-    accounts: list[Account],
-    xauxo_rewards: ERC20Amount,  # or haircut here
-    dist: list[RedistributionWeight],
-    conf: Config,
-    total_supply: str,
-):
-    xauxo_stats = compute_xauxo_token_stats(accounts, total_supply)
-
-    # we need to work out what are the xAUXO redistributions
-    # we can work out xauxo rewards here
-    (
-        redistributions,
-        stakers_rewards,
-        redistributed_to_stakers,
-    ) = compute_xauxo_rewards(xauxo_stats, dist, xauxo_rewards)
-
+def redistribute(
+    accounts: list[Account], redistributions: list[RedistributionWeight], conf: Config
+) -> Tuple[list[Account], Decimal]:
     redistributed_transfer = Decimal(0)
     # add any transfer addresses to rewards
     for r in redistributions:
         # Add any transfers to the stakers rewards list
         if r.option == RedistributionOption.TRANSFER:
-            redistributed_transfer = redistributed_transfer + Decimal(r.rewards)
+            redistributed_transfer += Decimal(r.rewards)
 
             # check to see if the account already is due to receive rewards
             found_account = False
@@ -150,12 +115,4 @@ def compute_allocations(
                         notes=[f"Transfer of {r.rewards}"],
                     )
                 )
-
-    return (
-        xauxo_stats,
-        accounts,
-        redistributions,
-        stakers_rewards,
-        redistributed_to_stakers,
-        redistributed_transfer,
-    )
+    return accounts, redistributed_transfer

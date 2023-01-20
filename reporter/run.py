@@ -1,9 +1,9 @@
 import fire  # type: ignore
-from reporter import conf_generator, rewards, writer
+from reporter import config, rewards, writer
 
 
 def main():
-    epoch = conf_generator.main()
+    epoch = config.main()
     rewards.main(epoch)
     writer.main(epoch)
 
@@ -11,7 +11,7 @@ def main():
 if __name__ == "__main__":
     fire.Fire(
         {
-            "conf": conf_generator.main,
+            "conf": config.main,
             "build": rewards.main,
             "report": writer.main,
             "all": main,

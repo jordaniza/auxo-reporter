@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from reporter.conf_generator import load_conf
+from reporter.config import load_conf
 from reporter.models import Config
 
 getcontext().prec = 45

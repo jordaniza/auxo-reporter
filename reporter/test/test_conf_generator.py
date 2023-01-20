@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from reporter.conf_generator import create_conf, main, load_conf
+from reporter.config import create_conf, main, load_conf
 
 PATH = "reporter/test/stubs/config/"
 

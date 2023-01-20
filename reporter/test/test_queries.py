@@ -6,7 +6,7 @@ import pytest
 
 from reporter.models import Config, Vote
 from reporter.queries import (
-    get_on_chain_votes,
+    get_onchain_votes,
     get_veauxo_stakers,
     get_x_auxo_statuses,
     get_xauxo_stakers,
@@ -73,7 +73,7 @@ def mock_votes_both(monkeypatch) -> None:
 def test_should_have_data(config: Config):
     config.start_timestamp = 1668781800 - 100
     config.end_timestamp = 1668781800 + 100
-    votes = get_on_chain_votes(config)
+    votes = get_onchain_votes(config)
 
     assert len(votes) == 1
 
@@ -82,14 +82,14 @@ def test_should_have_data(config: Config):
 def test_should_not_have_data(config: Config):
     config.start_timestamp = 0
     config.end_timestamp = 1000
-    votes = get_on_chain_votes(config)
+    votes = get_onchain_votes(config)
 
     assert len(votes) == 0
 
 
 def test_parse_proposal(monkeypatch, config):
     mock_votes_both(monkeypatch)
-    votes = get_on_chain_votes(config)
+    votes = get_onchain_votes(config)
     v = parse_on_chain_votes(votes)
     p = to_proposal(votes[0]["proposal"])
 

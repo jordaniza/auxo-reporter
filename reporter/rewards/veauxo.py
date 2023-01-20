@@ -4,29 +4,24 @@ import itertools
 from decimal import Decimal, getcontext
 from typing import Optional, Tuple
 
-from tinydb import TinyDB
-
 from reporter import utils
-from reporter.conf_generator import load_conf
+from reporter.config import load_conf
 from reporter.env import ADDRESSES
 from reporter.errors import MissingStakingManagerAddressError
 from reporter.models import (
-    AUXO_TOKEN_NAMES,
     Account,
     AccountState,
     Config,
     ERC20Amount,
     EthereumAddress,
-    Proposal,
     RewardSummary,
     Staker,
     TokenSummaryStats,
     VeAuxoRewardSummary,
-    Vote,
-    XAuxoRewardSummary,
 )
 from reporter.queries import get_veauxo_stakers
 from reporter.voters import get_vote_data
+from reporter.writer import write_accounts_and_distribution, write_veauxo_stats
 
 
 def init_account_rewards(
@@ -73,13 +68,11 @@ def distribute_rewards(account: Account, pro_rata: Decimal) -> Account:
 
 def compute_rewards(
     total_rewards: ERC20Amount, total_active_tokens: Decimal, accounts: list[Account]
-) -> RewardSummary:
+) -> tuple[list[Account], RewardSummary]:
     """
 
     Add the rewards that will be distributed across all users, including the pro-rata reward rate for each token
     Modifies the accounts object to add rewards
-
-    TODO: side-effect is a bit weird and would be better as a pure function
 
     :param `total_rewards`: rewards token with total quantities to distribute amongst stakers
     :param `total_active_tokens`: tokens belonging to active stakers (total - inactive)
@@ -94,10 +87,9 @@ def compute_rewards(
         else Decimal(total_rewards.amount) / total_active_tokens
     )
 
-    # append rewards to existing accounts for this token
-    accounts = list(
+    rewarded_accounts = list(
         map(
-            distribute_rewards,
+            distribute_rewards,  # type: ignore
             accounts,
             itertools.repeat(pro_rata),
         )
@@ -110,7 +102,7 @@ def compute_rewards(
     )
 
     # TODO remainder?
-    return distribution_rewards
+    return rewarded_accounts, distribution_rewards
 
 
 def tokens_by_status(
@@ -147,65 +139,11 @@ def distribute(
     """Compute the distribution for all accounts, and summarize the data"""
 
     token_stats = compute_token_stats(accounts)
-    distribution_rewards = compute_rewards(
+    accounts, distribution_rewards = compute_rewards(
         conf.rewards, Decimal(token_stats.active), accounts
     )
 
     return (accounts, distribution_rewards, token_stats)
-
-
-def write_veauxo_stats(
-    db: TinyDB,
-    stakers: list[Staker],
-    votes: list[Vote],
-    proposals: list[Proposal],
-    voters: list[str],
-    non_voters: list[str],
-    rewards: VeAuxoRewardSummary,
-    tokenStats: TokenSummaryStats,
-    staking_manager: Account,
-):
-    db.table("veAUXO_stats").insert(
-        {
-            "stakers": [s.dict() for s in stakers],
-            "votes": [v.dict() for v in votes],
-            "proposals": [p.dict() for p in proposals],
-            "voters": voters,
-            "non_voters": non_voters,
-            "rewards": rewards.dict(),
-            "token_stats": tokenStats.dict(),
-            "staking_manager": staking_manager.dict(),
-        },
-    )
-
-
-def write_xauxo_stats(
-    db: TinyDB,
-    accounts: list[Account],
-    rewards: XAuxoRewardSummary,
-    tokenStats: TokenSummaryStats,
-    staking_manager: Account,
-):
-    db.table("xAUXO_stats").insert(
-        {
-            "stakers": [a.dict() for a in accounts],
-            "rewards": rewards.dict(),
-            "token_stats": tokenStats.dict(),
-            "staking_manager": staking_manager.dict(),
-        },
-    )
-
-
-def write_accounts_and_distribution(
-    db: TinyDB,
-    accounts: list[Account],
-    distribution: list[Account],
-    token_name: AUXO_TOKEN_NAMES = "veAUXO",
-):
-    db.table(f"{token_name}_holders").insert_multiple([a.dict() for a in accounts])
-    db.table(f"{token_name}_distribution").insert_multiple(
-        [d.dict() for d in distribution]
-    )
 
 
 def separate_staking_manager(

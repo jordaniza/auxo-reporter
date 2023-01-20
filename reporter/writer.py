@@ -1,8 +1,73 @@
-from tinydb import TinyDB
+from tinydb import TinyDB, where
 
 from reporter import utils
 from reporter.conf_generator import load_conf
-from reporter.models import AUXO_TOKEN_NAMES, ClaimsRecipient, Config
+from reporter.models import (
+    AUXO_TOKEN_NAMES,
+    ClaimsRecipient,
+    Config,
+    Staker,
+    Vote,
+    Proposal,
+    Account,
+    TokenSummaryStats,
+    VeAuxoRewardSummary,
+    XAuxoRewardSummary,
+)
+
+
+def write_veauxo_stats(
+    db: TinyDB,
+    stakers: list[Staker],
+    votes: list[Vote],
+    proposals: list[Proposal],
+    voters: list[str],
+    non_voters: list[str],
+    rewards: VeAuxoRewardSummary,
+    tokenStats: TokenSummaryStats,
+    staking_manager: Account,
+):
+    db.table("veAUXO_stats").insert(
+        {
+            "stakers": [s.dict() for s in stakers],
+            "votes": [v.dict() for v in votes],
+            "proposals": [p.dict() for p in proposals],
+            "voters": voters,
+            "non_voters": non_voters,
+            "rewards": rewards.dict(),
+            "token_stats": tokenStats.dict(),
+            "staking_manager": staking_manager.dict(),
+        },
+    )
+
+
+def write_xauxo_stats(
+    db: TinyDB,
+    accounts: list[Account],
+    rewards: XAuxoRewardSummary,
+    tokenStats: TokenSummaryStats,
+    staking_manager: Account,
+):
+    db.table("xAUXO_stats").insert(
+        {
+            "stakers": [a.dict() for a in accounts],
+            "rewards": rewards.dict(),
+            "token_stats": tokenStats.dict(),
+            "staking_manager": staking_manager.dict(),
+        },
+    )
+
+
+def write_accounts_and_distribution(
+    db: TinyDB,
+    accounts: list[Account],
+    distribution: list[Account],
+    token_name: AUXO_TOKEN_NAMES = "veAUXO",
+):
+    db.table(f"{token_name}_holders").insert_multiple([a.dict() for a in accounts])
+    db.table(f"{token_name}_distribution").insert_multiple(
+        [d.dict() for d in distribution]
+    )
 
 
 def report_governance(db: TinyDB, path: str):
@@ -33,9 +98,6 @@ def report_rewards(db: TinyDB, path: str, token_name: AUXO_TOKEN_NAMES = "veAUXO
 
     utils.write_csv(rewards, f"{path}/csv/rewards.csv", ["address", "rewards"])
     utils.write_json(rewards, f"{path}/json/rewards.json")
-
-
-from tinydb import where
 
 
 def build_claims(

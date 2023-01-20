@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pydantic import validator
 from reporter.models.types import BigNumber
 from reporter.models.ERC20 import ERC20Amount
@@ -32,6 +33,10 @@ class RewardSummary(ERC20Amount):
 class VeAuxoRewardSummary(RewardSummary):
     to_xauxo: BigNumber = "0"
 
+    @staticmethod
+    def from_existing(summary: RewardSummary) -> VeAuxoRewardSummary:
+        return VeAuxoRewardSummary(**summary.dict())
+
 
 class XAuxoRewardSummary(RewardSummary):
     redistributed_total: BigNumber = "0"
@@ -39,3 +44,7 @@ class XAuxoRewardSummary(RewardSummary):
     redistributed_transferred: BigNumber = "0"
 
     total_haircut: BigNumber = "0"
+
+    @staticmethod
+    def from_existing(summary: RewardSummary) -> XAuxoRewardSummary:
+        return XAuxoRewardSummary(**summary.dict())

@@ -7,7 +7,7 @@ import pytest
 from pydantic import parse_obj_as
 
 from reporter import utils
-from reporter.conf_generator import load_conf
+from reporter.config import load_conf
 from reporter.env import ADDRESSES
 from reporter.models import (
     Delegate,
@@ -21,23 +21,29 @@ from reporter.models import (
 from reporter.queries import (
     get_boosted_stakers,
     get_stakers,
-    get_x_auxo_statuses,
     xauxo_accounts,
     get_xauxo_total_supply,
 )
-from reporter.rewards import (
+from reporter.rewards.veauxo import (
     compute_rewards,
     distribute,
     get_vote_data,
     init_account_rewards,
     separate_staking_manager,
     separate_xauxo_rewards,
+)
+from reporter.writer import (
+    build_claims,
     write_accounts_and_distribution,
     write_veauxo_stats,
     write_xauxo_stats,
 )
-from reporter.writer import build_claims
-from reporter.xAuxo.rewards import compute_allocations, compute_x_auxo_reward_total
+from reporter.rewards.xauxo import (
+    compute_x_auxo_reward_total,
+    compute_xauxo_token_stats,
+    redistribute,
+    compute_xauxo_rewards,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -130,18 +136,24 @@ def test_both(monkeypatch):
 
     ENABLE_MOCKS = False
     ENABLE_VOTE_BINDING = True
+
+    # load the config file
     config = load_conf("reporter/test/scenario_testing")
 
+    # set the context for decimal precision to avoid scientific notation
     getcontext().prec = 42
 
+    # instantiate a new db at the path provided
     db = utils.get_db("reporter/test/stubs/db", drop=True)
 
+    # set the timestamp boundaries on the DB
     start_date = datetime.date.fromtimestamp(config.start_timestamp)
     end_date = datetime.date.fromtimestamp(config.end_timestamp)
     print(f"⚗ Building database from {start_date} to {end_date}...")
 
     init_mocks(monkeypatch)
 
+    #
     (veauxo_stakers_pre_decay, xauxo_stakers) = get_stakers(config)
     veauxo_stakers = get_boosted_stakers(veauxo_stakers_pre_decay, ENABLE_MOCKS)
 
@@ -167,7 +179,7 @@ def test_both(monkeypatch):
     #  and remove its rewards from the veAUXO Tree
     (veauxo_reward_summaries, veauxo_accounts_out) = separate_xauxo_rewards(
         staking_manager,
-        VeAuxoRewardSummary(**veauxo_reward_summaries.dict()),
+        VeAuxoRewardSummary.from_existing(veauxo_reward_summaries),
         veauxo_accounts_out,
     )
 
@@ -197,19 +209,16 @@ def test_both(monkeypatch):
         config, Decimal(xauxo_rewards_total_no_haircut.amount)
     )
 
+    xauxo_stats = compute_xauxo_token_stats(xauxo_accounts_in, get_xauxo_total_supply())
     (
-        xauxo_stats,
-        xauxo_accounts_out,
-        _,
+        redistributions,
         stakers_rewards,
         redistributed_to_stakers,
-        redistributed_transfer,
-    ) = compute_allocations(
-        xauxo_accounts_in,
-        xauxo_rewards_total_with_haircut,
-        xauxo_redistributions,
-        config,
-        get_xauxo_total_supply(),
+    ) = compute_xauxo_rewards(
+        xauxo_stats, xauxo_redistributions, xauxo_rewards_total_with_haircut
+    )
+    xauxo_accounts_out, redistributed_transfer = redistribute(
+        xauxo_accounts_in, redistributions, config
     )
 
     xauxo_stakers_net_redistributed = deepcopy(config.rewards)
@@ -221,9 +230,7 @@ def test_both(monkeypatch):
         xauxo_accounts_out,
     )
 
-    xauxo_distribution_rewards = XAuxoRewardSummary(
-        **distribution_rewards.dict(),
-    )
+    xauxo_distribution_rewards = XAuxoRewardSummary.from_existing(distribution_rewards)
     xauxo_distribution_rewards.total_haircut = str(xauxo_haircut)
     xauxo_distribution_rewards.amount = str(
         int(float(xauxo_rewards_total_with_haircut.amount))

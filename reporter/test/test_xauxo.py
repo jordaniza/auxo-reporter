@@ -10,14 +10,13 @@ from reporter import utils
 from reporter.env import ADDRESSES
 from reporter.errors import BadConfigException
 from reporter.queries import (
-    get_x_auxo_statuses,
     get_xauxo_stakers,
     xauxo_accounts,
     get_xauxo_total_supply,
     get_all_xauxo_depositors,
-    get_xauxo_active_balances,
+    get_xauxo_staked_balances,
 )
-from reporter.rewards import (
+from reporter.rewards.veauxo import (
     compute_rewards,
     write_accounts_and_distribution,
 )
@@ -31,7 +30,7 @@ from reporter.models import (
 )
 from reporter.test.conftest import LIVE_CALLS_DISABLED, SKIP_REASON, mock_token_holders
 from reporter.writer import build_claims
-from reporter.xAuxo.rewards import (
+from reporter.rewards import (
     compute_allocations,
     compute_token_stats,
     compute_xauxo_rewards,
