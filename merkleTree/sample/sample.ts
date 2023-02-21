@@ -1,12 +1,21 @@
 import { BigNumber, ethers } from "ethers";
+import { createMerkleTree } from "../create";
 
 /// This script will generate a fake merkle tree from randomised data
 
-const REWARD = {
+const WETH = {
   token: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
   decimals: 18,
   symbol: "WETH",
 };
+
+const DAI = {
+  token: "0x6b175474e89094c44da98b954eedeac495271d0f",
+  decimals: 18,
+  symbol: "DAI",
+};
+
+const REWARD = WETH;
 
 const ADDRESSES = [
   "0xbecfc9f37bdd8ca3d35b53edc72fc8ea89d3584b",
@@ -36,6 +45,7 @@ export function generateInputData(windowIndex: number): MerkleDistributorInput {
     const recipient: RecipientData = {
       windowIndex,
       accountIndex: idx,
+      token: REWARD.token,
       rewards: bnReward.toString(),
     };
 
@@ -56,4 +66,11 @@ export function generateInputData(windowIndex: number): MerkleDistributorInput {
     windowIndex,
     chainId: 1,
   };
+}
+
+// only run if called directly
+if (require.main === module) {
+  const input = generateInputData(2);
+  const tree = JSON.stringify(createMerkleTree(input), null, 4);
+  console.log(tree);
 }

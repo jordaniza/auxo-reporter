@@ -36,6 +36,9 @@ class RewardSummary(ERC20Amount):
     # they are different and both need to be logged
     non_active_pro_rata: Optional[BigNumber] = None
 
+    # active rewards
+    # inactive rewards?
+
     @validator("pro_rata")
     @classmethod
     def transform_pro_rata(cls, p: str):
@@ -83,6 +86,6 @@ class XAuxoRewardSummary(RewardSummary):
         self.amount = calculator.after_tax
 
     def add_redistribution_data(self, to_stakers: Decimal, to_transfer: Decimal):
-        self.redistributed_to_stakers = str(to_stakers)
-        self.redistributed_transferred = str(to_transfer)
+        self.redistributed_to_stakers = str(int(to_stakers))
+        self.redistributed_transferred = str(int(to_transfer))
         self.redistributed_total = str(int(to_stakers + to_transfer))

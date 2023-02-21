@@ -11,6 +11,7 @@ type Reward = BaseReward & {
 
 type RecipientData = {
   rewards: string;
+  token: Address;
   windowIndex: number;
   accountIndex: number;
 };
