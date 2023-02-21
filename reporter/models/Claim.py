@@ -17,6 +17,7 @@ class ClaimsRecipient(BaseModel):
     windowIndex: int
     accountIndex: int
     rewards: BigNumber
+    token: EthereumAddress
 
 
 class ClaimsWindow(BaseModel):

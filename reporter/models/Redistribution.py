@@ -72,5 +72,5 @@ class NormalizedRedistributionWeight(RedistributionWeight):
         weighted_rewards = Decimal(total_inactive_rewards) * Decimal(
             cast(float, self.normalized_weight)
         )
-        self.rewards = str(weighted_rewards)
+        self.rewards = str(int(weighted_rewards))
         self.distributed = True

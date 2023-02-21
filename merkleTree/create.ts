@@ -1,9 +1,6 @@
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
-import { generateInputData } from "./sample";
 
-type RecipientAddress = keyof ReturnType<
-  typeof generateInputData
->["recipients"];
+type RecipientAddress = keyof RecipientData;
 
 export function createMerkleTree(
   input: MerkleDistributorInput
@@ -14,6 +11,7 @@ export function createMerkleTree(
     claim.accountIndex,
     claim.windowIndex,
     claim.rewards,
+    claim.token,
   ]);
 
   // The order of variables here must match those in the smart contract, or the hash will be different
@@ -24,6 +22,7 @@ export function createMerkleTree(
     "uint256 accountIndex",
     "uint256 windowIndex",
     "uint256 rewards",
+    "address token",
   ]);
 
   // add proofs to each recipient

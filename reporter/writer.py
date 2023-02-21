@@ -115,6 +115,7 @@ def build_claims(
             windowIndex=conf.distribution_window,
             accountIndex=idx,
             rewards=a["rewards"]["amount"],
+            token=a["rewards"]["address"],
         ).dict()
         for idx, a in enumerate(accounts)
     }
