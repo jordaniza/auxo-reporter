@@ -19,13 +19,18 @@
             "windowIndex": 0,
             "accountIndex": 0,
             "rewards": "514505060961742925910",
-            "token": "0x8b7e1e0817CAC96bA81c4ce2794D93920FbF35C8"
+            "proof": [
+                "0xcaa9be8c4dadcb12a9a1fd0567e8025b0b3ba7243fd5199405ea953614a7fe09"
+            ]
         },
         "0x91d1608675646b73069CaD97c88Daeb42418754f": {
             "windowIndex": 0,
             "accountIndex": 1,
             "rewards": "257252530480871462955",
-            "token": "0x8b7e1e0817CAC96bA81c4ce2794D93920FbF35C8"
+            "proof": [
+                "0x47f223b1eaee3ddfaa255b48a1d6edeeb43c5d771426b4589d0f52879a55c9a3"
+            ]
         }
-    }
+    },
+    "root": "0x868a4f4031b551b999d2a614f6b43647b92c1c253ab8fad73c564e5f1a5baa94"
 }

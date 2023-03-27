@@ -39,3 +39,4 @@ claims :; python -m reporter.run all
 
 # Generate a merkle tree
 tree :; yarn create-merkle-tree
+tree-test :; yarn ts-node merkleTree/test.ts

@@ -17,14 +17,11 @@ function prompt(question: string) {
   });
 }
 
-const destination = (token: string, epoch: unknown) =>
-  `reports/${epoch}/merkle-tree-${token}.json`;
+const destination = (token: string, epoch: unknown) => `reports/${epoch}/merkle-tree-${token}.json`;
 
 const AUXO_TOKENS = ["veAUXO", "xAUXO"];
 
-async function main() {
-  const epoch = await prompt("What is the epoch {YYYY}-{MM}? eg: 2022-11\n");
-
+export const makeTreeWithPrompt = async (epoch: unknown) => {
   // create merkle trees for both tokens
   AUXO_TOKENS.forEach((auxo_token) => {
     // fetch the claims database
@@ -40,9 +37,7 @@ async function main() {
     // write the file
     const fileDestination = destination(auxo_token, epoch);
     writeFileSync(fileDestination, tree);
-    console.log(
-      `✨✨ ${auxo_token} Merkle Tree Created at ${fileDestination} ✨✨`
-    );
+    console.log(`✨✨ ${auxo_token} Merkle Tree Created at ${fileDestination} ✨✨`);
   });
 
   let post = (await prompt("Post to IPFS? [Y/n]\n")) as string;
@@ -57,8 +52,15 @@ async function main() {
   } else {
     console.warn("Did not post to IPFS");
   }
+};
+
+async function main() {
+  const epoch = await prompt("What is the epoch {YYYY}-{MM}? eg: 2022-11\n");
+  await makeTreeWithPrompt(epoch);
 }
 
-main()
-  .catch(console.error)
-  .finally(() => process.exit(0));
+// only run if called directly
+if (require.main === module)
+  main()
+    .catch(console.error)
+    .finally(() => process.exit(0));

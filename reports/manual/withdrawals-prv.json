@@ -1,0 +1,21 @@
+{
+  "windowIndex": 0,
+  "maxAmount": "1000000000000000000000",
+  "recipients": {
+    "0x1A1087Bf077f74fb21fD838a8a25Cf9Fe0818450": {
+      "windowIndex": 0,
+      "accountIndex": 0,
+      "amount": "400000000000000000000"
+    },
+    "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79": {
+      "windowIndex": 0,
+      "accountIndex": 1,
+      "amount": "400000000000000000000"
+    },
+    "0xd18a54f89603Fe4301b29EF6a8ab11b9Ba24f139": {
+      "windowIndex": 0,
+      "accountIndex": 2,
+      "amount": "200000000000000000000"
+    }
+  }
+}

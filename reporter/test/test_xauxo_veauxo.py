@@ -200,6 +200,7 @@ def test_both(monkeypatch):
         xauxo_accounts_out,
         xauxo_stats,
     ) = calculate_xauxo_rewards(config, veauxo_reward_summaries.to_xauxo)
+
     write_xauxo_stats(
         db, xauxo_accounts_out, xauxo_distribution_rewards, xauxo_stats, staking_manager
     )

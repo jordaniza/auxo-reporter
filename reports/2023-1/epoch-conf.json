@@ -4,11 +4,13 @@
     "block_snapshot": 16086234,
     "distribution_window": 14,
     "rewards": {
-        "amount": "1000000000000000000000",
         "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
         "decimals": 18,
-        "symbol": "WETH"
+        "amount": "1000000000000000000000"
     },
+    "redistributions": [],
+    "xauxo_haircut": 0.0,
     "date": "2023-1",
     "start_timestamp": 1672516800,
     "end_timestamp": 1675195199

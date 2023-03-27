@@ -1,0 +1,29 @@
+{
+    "windowIndex": 9999,
+    "chainId": 1,
+    "aggregateRewards": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18,
+        "amount": "428571428571428571429",
+        "pro_rata": "1428571428571428608",
+        "to_xauxo": "571428571428571428571"
+    },
+    "recipients": {
+        "0x0000000000000000000000000000000000000001": {
+            "windowIndex": 9999,
+            "accountIndex": 0,
+            "rewards": "142857142857142857142"
+        },
+        "0x0000000000000000000000000000000000000002": {
+            "windowIndex": 9999,
+            "accountIndex": 1,
+            "rewards": "142857142857142857142"
+        },
+        "0x0000000000000000000000000000000000000003": {
+            "windowIndex": 9999,
+            "accountIndex": 2,
+            "rewards": "142857142857142857142"
+        }
+    }
+}

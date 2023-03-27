@@ -1,0 +1,32 @@
+{
+  "windowIndex": 0,
+  "chainId": 1,
+  "aggregateRewards": {
+    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "symbol": "WETH",
+    "decimals": 18,
+    "amount": "30000000000000000000",
+    "pro_rata": "1285714285714285568",
+    "redistributed_total": "171428571428571422226",
+    "redistributed_to_stakers": "85714285714285711113",
+    "redistributed_transferred": "85714285714285711113",
+    "total_haircut": "228571428571428585472"
+  },
+  "recipients": {
+    "0x1A1087Bf077f74fb21fD838a8a25Cf9Fe0818450": {
+      "windowIndex": 0,
+      "accountIndex": 0,
+      "rewards": "10000000000000000000"
+    },
+    "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79": {
+      "windowIndex": 0,
+      "accountIndex": 1,
+      "rewards": "5000000000000000000"
+    },
+    "0xd18a54f89603Fe4301b29EF6a8ab11b9Ba24f139": {
+      "windowIndex": 0,
+      "accountIndex": 2,
+      "rewards": "15000000000000000000"
+    }
+  }
+}

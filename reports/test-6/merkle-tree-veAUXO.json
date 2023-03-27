@@ -16,13 +16,20 @@
             "windowIndex": 0,
             "accountIndex": 0,
             "rewards": "207493098688532373757",
-            "token": "0x8b7e1e0817CAC96bA81c4ce2794D93920FbF35C8"
+            "token": "0x8b7e1e0817CAC96bA81c4ce2794D93920FbF35C8",
+            "proof": [
+                "0x6214f35fc3ebd2ac852e65d45c83f45a7ee0e4b969b503816cbbad3e63f4200b"
+            ]
         },
         "0x4A1c900Ee1042dC2BA405821F0ea13CfBADCAb7B": {
             "windowIndex": 0,
             "accountIndex": 1,
             "rewards": "20749309868853237375",
-            "token": "0x8b7e1e0817CAC96bA81c4ce2794D93920FbF35C8"
+            "token": "0x8b7e1e0817CAC96bA81c4ce2794D93920FbF35C8",
+            "proof": [
+                "0xa576a61c07fee178c1738c90cca1497cdbadcf389c2d981810e8b5079739b8b7"
+            ]
         }
-    }
+    },
+    "root": "0x586d04e7aa1f2b8d2c8216402b091ebd544ad000dfc64e4e1967cdc4b4716f7a"
 }
