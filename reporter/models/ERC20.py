@@ -8,7 +8,11 @@ from pydantic import BaseModel, validator
 from reporter.env import ADDRESSES
 from reporter.models.types import BigNumber, EthereumAddress
 
-AUXO_TOKEN_NAMES = Union[Literal["veAUXO"], Literal["xAUXO"]]
+from datetime import datetime
+
+AUXO_TOKEN_NAMES = Union[
+    Literal["veAUXO"], Literal["xAUXO"], Literal["ARV"], Literal["PRV"]
+]
 
 
 class BaseERC20(BaseModel):
@@ -33,6 +37,28 @@ veAUXO = ERC20Metadata(address=ADDRESSES.VEAUXO, symbol="veAUXO", decimals=18)
 xAUXO = ERC20Metadata(address=ADDRESSES.XAUXO, symbol="xAUXO", decimals=18)
 
 
+class Lock(BaseModel):
+    amount: BigNumber
+    lockDuration: float
+    lockedAt: float
+
+
+class ARV(ERC20Metadata):
+    """ARV token"""
+
+    # holding of ARV
+    amount: BigNumber
+
+    # decayed holding of ARV factoring in the user's lock time
+    decayed_amount: Optional[BigNumber]
+
+    # details of the Auxo Lock
+    lock: Optional[Lock]
+
+    def __init__(self, **kwargs):
+        super().__init__(decimals=18, address=ADDRESSES.VEAUXO, symbol="ARV", **kwargs)
+
+
 class ERC20Amount(ERC20Metadata):
     """
     Hold ERC20 data with an amount
@@ -43,7 +69,6 @@ class ERC20Amount(ERC20Metadata):
     """
 
     amount: BigNumber
-    original_amount: Optional[BigNumber]
 
     @staticmethod
     def xAUXO(amount: str) -> ERC20Amount:

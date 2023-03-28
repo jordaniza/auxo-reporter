@@ -1,16 +1,11 @@
-import functools
 import itertools
 from decimal import Decimal
-from typing import Optional, Tuple
 
-from reporter import utils
 from reporter.models import (
     Account,
     AccountState,
-    Config,
     ERC20Amount,
     RewardSummary,
-    TokenSummaryStats,
 )
 
 
@@ -24,7 +19,7 @@ def distribute_rewards(account: Account, pro_rata: Decimal) -> Account:
     """
 
     if account.state == AccountState.ACTIVE:
-        account_reward = int(pro_rata * Decimal(account.holding.amount))
+        account_reward = int(pro_rata * Decimal(account.token.amount))
         account.rewards.amount = str(Decimal(account.rewards.amount) + account_reward)
         account.notes.append(f"active reward of {account_reward}")
 

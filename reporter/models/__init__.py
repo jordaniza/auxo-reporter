@@ -14,3 +14,5 @@ from reporter.models.Redistribution import *
 from reporter.models.Reward import *
 from reporter.models.types import *
 from reporter.models.Vote import *
+from reporter.models.Writer import *
+from reporter.models.DB import DB

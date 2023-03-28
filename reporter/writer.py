@@ -6,38 +6,36 @@ from reporter.models import (
     AUXO_TOKEN_NAMES,
     ClaimsRecipient,
     Config,
-    Staker,
+    ARVStaker,
     Vote,
     Proposal,
     Account,
     TokenSummaryStats,
-    VeAuxoRewardSummary,
+    ARVRewardSummary,
     XAuxoRewardSummary,
 )
 from decimal import Decimal
 
 
-def write_veauxo_stats(
+def write_arv_stats(
     db: TinyDB,
-    stakers: list[Staker],
+    stakers: list[ARVStaker],
     votes: list[Vote],
     proposals: list[Proposal],
     voters: list[str],
     non_voters: list[str],
-    rewards: VeAuxoRewardSummary,
+    rewards: ARVRewardSummary,
     tokenStats: TokenSummaryStats,
-    staking_manager: Account,
 ):
-    db.table("veAUXO_stats").insert(
+    db.table("ARV_stats").insert(
         {
-            "stakers": [s.dict() for s in stakers],
-            "votes": [v.dict() for v in votes],
-            "proposals": [p.dict() for p in proposals],
-            "voters": voters,
-            "non_voters": non_voters,
+            "stakers": len([s.dict() for s in stakers]),
+            "votes": len([v.dict() for v in votes]),
+            "proposals": len([p.dict() for p in proposals]),
+            "voters": len(voters),
+            "non_voters": len(non_voters),
             "rewards": rewards.dict(),
             "token_stats": tokenStats.dict(),
-            "staking_manager": staking_manager.dict(),
         },
     )
 
@@ -61,11 +59,9 @@ def write_xauxo_stats(
 
 def write_accounts_and_distribution(
     db: TinyDB,
-    accounts: list[Account],
     distribution: list[Account],
-    token_name: AUXO_TOKEN_NAMES = "veAUXO",
+    token_name: AUXO_TOKEN_NAMES,
 ):
-    db.table(f"{token_name}_holders").insert_multiple([a.dict() for a in accounts])
     db.table(f"{token_name}_distribution").insert_multiple(
         [d.dict() for d in distribution]
     )
@@ -101,14 +97,12 @@ def report_rewards(db: TinyDB, path: str, token_name: AUXO_TOKEN_NAMES = "veAUXO
     utils.write_json(rewards, f"{path}/json/rewards.json")
 
 
-def build_claims(
-    conf: Config, db: TinyDB, path: str, token_name: AUXO_TOKEN_NAMES = "veAUXO"
-):
+def build_claims(conf: Config, db: TinyDB, path: str, token_name: AUXO_TOKEN_NAMES):
     accounts = db.table(f"{token_name}_holders").search(
         where("rewards")["amount"].map(Decimal) > Decimal(0)
     )
 
-    rewards = db.table(f"{token_name}_stats").all()[0]["rewards"]
+    rewards = db.table(f"{token_name}_distribution").all()[0]["rewards"]
 
     recipients = {
         a["address"]: ClaimsRecipient(
@@ -120,25 +114,25 @@ def build_claims(
         for idx, a in enumerate(accounts)
     }
 
-    reward_window = {
+    claims = {
         "windowIndex": conf.distribution_window,
         "chainId": 1,
         "aggregateRewards": rewards,
         "recipients": recipients,
     }
 
-    utils.write_json(reward_window, f"{path}/claims-{token_name}.json")
+    utils.write_json(claims, f"{path}/claims-{token_name}.json")
     print(
         f"🚀🚀🚀 Successfully created the {token_name} claims database, check it and generate the merkle tree"
     )
 
 
-def main(path: str):
-    if not path:
-        path = input(" Path to the config file ")
-    conf = load_conf(path)
-    db = utils.get_db(path)  # loads the reporter-db.json
+# def main(path: str):
+#     if not path:
+#         path = input(" Path to the config file ")
+#     conf = load_conf(path)
+#     db = utils.get_db(path)  # loads the reporter-db.json
 
-    build_claims(conf, db, path)
-    report_rewards(db, path)
-    report_governance(db, path)
+#     build_claims(conf, db, path)
+#     report_rewards(db, path)
+#     report_governance(db, path)

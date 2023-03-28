@@ -35,7 +35,7 @@ def get_all_xauxo_depositors() -> list[dict[Literal["user"], EthereumAddress]]:
     }
     """
     return graphql_iterate_query(
-        SUBGRAPHS.ROLLSTAKER_GOERLI,
+        SUBGRAPHS.ROLLSTAKER,
         ["depositeds"],
         dict(query=query, variables={"skip": 0}),
     )

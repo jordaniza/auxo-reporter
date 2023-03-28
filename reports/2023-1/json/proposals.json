@@ -1,0 +1,53 @@
+[
+    {
+        "id": "0x63cea594dceb8f8ffae3654a306a6791f60e15a6acae266ab4b71e8d6dff2b76",
+        "title": "DOUGH burn proposal",
+        "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+        "created": 1669643881,
+        "start": 1669644000,
+        "end": 1670248740,
+        "choices": [
+            "FOR",
+            "AGAINST",
+            "MORE INFO"
+        ]
+    },
+    {
+        "id": "0x2dad1fae87a666188558ddc79c6b782278faa1bb4a63d612b05e4b58f7fc0699",
+        "title": "[Gate 1] Auxo Migration",
+        "author": "0x0810C422E4abD05c752618B403d26cf60bB50B5C",
+        "created": 1668092207,
+        "start": 1668092159,
+        "end": 1668697200,
+        "choices": [
+            "FOR",
+            "AGAINST",
+            "DETAIL MORE"
+        ]
+    },
+    {
+        "id": "0xb138fbf9e080ede1f59676422d8472ef807a42db53d8b5f6a26c2fab6a7a99ca",
+        "title": "Dough / eDough buyback program ",
+        "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+        "created": 1667835297,
+        "start": 1667835243,
+        "end": 1668438000,
+        "choices": [
+            "FOR",
+            "AGAINST",
+            "More info neeeded"
+        ]
+    },
+    {
+        "id": "0x3053a74f97969d05498d84180c5471dc16acd1377c5b186406a72a4f1dd6fc81",
+        "title": "[Epoch-13] MerkleTree Notarization",
+        "author": "0x0810C422E4abD05c752618B403d26cf60bB50B5C",
+        "created": 1667384548,
+        "start": 1667384499,
+        "end": 1667646000,
+        "choices": [
+            "Valid",
+            "Invalid"
+        ]
+    }
+]

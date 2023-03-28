@@ -2,9 +2,10 @@ from __future__ import annotations
 from enum import Enum
 from pydantic import BaseModel, validator
 import eth_utils as eth
+from typing import Union
 
 from reporter.models.types import EthereumAddress
-from reporter.models.ERC20 import ERC20Amount, veAUXO, xAUXO
+from reporter.models.ERC20 import ERC20Amount, veAUXO, xAUXO, ARV
 
 
 class AccountState(str, Enum):
@@ -33,19 +34,29 @@ class Staker(User):
     Staker is a user with a token balance
     """
 
-    holding: ERC20Amount
+    token: Union[ERC20Amount, ARV]
 
     @staticmethod
-    def veAuxo(user: EthereumAddress, veAuxoHolding: str) -> Staker:
-        """Instatiate a staker with veAUXO"""
-        holding = ERC20Amount.veAUXO(veAuxoHolding)
-        return Staker(address=user, holding=holding)
+    def ARV(user: EthereumAddress, arv_holding: str) -> Staker:
+        """Instatiate a staker with ARV"""
+        return Staker(address=user, token=ARV(amount=arv_holding))
 
     @staticmethod
     def xAuxo(user: EthereumAddress, xAuxoHolding: str) -> Staker:
         """Instatiate a staker with xAUXO"""
-        holding = ERC20Amount.xAUXO(xAuxoHolding)
-        return Staker(address=user, holding=holding)
+        token = ERC20Amount.xAUXO(xAuxoHolding)
+        return Staker(address=user, token=token)
+
+
+class ARVStaker(User):
+    """
+    ARVStaker is a user with a token balance
+    """
+
+    token: ARV
+
+    def __init__(self, arv_holding: str, **kwargs):
+        super().__init__(token=ARV(amount=arv_holding), **kwargs)
 
 
 class Account(Staker):
@@ -63,5 +74,11 @@ class Account(Staker):
     @staticmethod
     def from_staker(
         staker: Staker, rewards: ERC20Amount, state: AccountState
+    ) -> Account:
+        return Account(**staker.dict(), rewards=rewards, state=state)
+
+    @staticmethod
+    def from_arv_staker(
+        staker: ARVStaker, rewards: ERC20Amount, state: AccountState
     ) -> Account:
         return Account(**staker.dict(), rewards=rewards, state=state)

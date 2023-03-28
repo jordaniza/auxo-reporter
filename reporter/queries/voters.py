@@ -13,6 +13,7 @@ from reporter.models import (
     OnChainProposal,
     OnChainVote,
     Staker,
+    ARVStaker,
 )
 from reporter.queries.common import SUBGRAPHS, graphql_iterate_query
 
@@ -107,7 +108,7 @@ def get_onchain_votes(conf: Config) -> list:
         "timestamp_lte": conf.end_timestamp,
     }
     votes: list[Any] = graphql_iterate_query(
-        SUBGRAPHS.AUXO_GOV_GOERLI,
+        SUBGRAPHS.AUXO_GOV,
         ["voteCasts"],
         dict(query=votes_query, variables=variables),
     )
@@ -149,7 +150,7 @@ def get_delegates() -> list[Delegate]:
 
 
 def get_voters(
-    votes: list[Vote], stakers: list[Staker], delegates: list[Delegate]
+    votes: list[Vote], stakers: list[ARVStaker]
 ) -> tuple[list[str], list[str]]:
     """
     Compare the list of `stakers` to the list of `votes` to see who has/has not voted this month.
@@ -160,6 +161,7 @@ def get_voters(
     """
     voters = set([v.voter for v in votes])
     stakers_addrs = [s.address for s in stakers]
+    delegates = get_delegates()
 
     stakers_addrs_no_delegators = [
         addr for addr in stakers_addrs if addr not in delegates
@@ -200,8 +202,20 @@ def combine_on_off_chain_votes(
     return offchain + coerced
 
 
+def get_votes(conf: Config) -> tuple[list[Vote], list[Proposal]]:
+    """
+    Fetch all votes from offchain and onchain sources and combine them
+    """
+    offchain_votes = parse_offchain_votes(conf)
+    onchain_votes = parse_onchain_votes(conf)
+
+    combined_votes = combine_on_off_chain_votes(offchain_votes, onchain_votes)
+
+    return filter_votes_by_proposal(combined_votes)
+
+
 def get_vote_data(
-    conf: Config, stakers: list[Staker]
+    conf: Config, stakers: list[ARVStaker]
 ) -> tuple[list[Vote], list[Proposal], list[str], list[str]]:
     """
     Fetch all information related to voting this month and return a tuple with required info
@@ -218,7 +232,6 @@ def get_vote_data(
 
     (filtered_votes, proposals) = filter_votes_by_proposal(combined_votes)
 
-    delegates = get_delegates()
-    (voters, non_voters) = get_voters(filtered_votes, stakers, delegates)
+    (voters, non_voters) = get_voters(filtered_votes, stakers)
 
     return (filtered_votes, proposals, voters, non_voters)

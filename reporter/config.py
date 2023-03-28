@@ -7,22 +7,44 @@ from pydantic import parse_file_as
 
 from reporter.models import Config, InputConfig
 
+from typing import NamedTuple
 
-def get_dates(month: int, year: int):
-    (_, n_days) = calendar.monthrange(year, month)
+
+class EpochBoundary(NamedTuple):
+    date: datetime.date
+    start_date: datetime.datetime
+    end_date: datetime.datetime
+
+
+def get_epoch_dates(month: int, year: int) -> EpochBoundary:
+    """Returns the start and end dates of a given month in UTC timezone.
+
+    Args:
+        month (int): The month (1-12).
+        year (int): The year (2023).
+    """
+    if month < 1 or month > 12:
+        raise ValueError("Invalid month value. Must be between 1 and 12.")
+
+    if year < 2023:
+        raise ValueError("Invalid year value. Must be a positive integer >= 2023.")
+
+    _, n_days = calendar.monthrange(year, month)
 
     date = datetime.date(year, month, 1)
-    start_date = datetime.datetime(year, month, 1, 0, 0, 0)
-    end_date = datetime.datetime(year, month, n_days, 23, 59, 59)
+    start_date = datetime.datetime(year, month, 1, tzinfo=datetime.timezone.utc)
+    end_date = datetime.datetime(
+        year, month, n_days, 23, 59, 59, tzinfo=datetime.timezone.utc
+    )
 
-    return (date, start_date, end_date)
+    return EpochBoundary(date, start_date, end_date)
 
 
 def create_conf(path: str) -> Config:
     """Generates the base config object from user input"""
     base_config = parse_file_as(InputConfig, path)
 
-    (date, start_date, end_date) = get_dates(base_config.month, base_config.year)
+    (date, start_date, end_date) = get_epoch_dates(base_config.month, base_config.year)
 
     return Config(
         date=f"{date.year}-{date.month}",

@@ -41,10 +41,17 @@ def get_db(db_path: str, drop=False) -> TinyDB:
     """
     Get or instantiate existing tinyDB instance. Pass drop to clear.
     """
-    db = TinyDB(
-        f"{db_path}/reporter-db.json",
-        indent=4,
-    )
+    try:
+        db = TinyDB(
+            f"{db_path}/reporter-db.json",
+            indent=4,
+        )
+    except FileNotFoundError:
+        db = TinyDB(
+            f"{db_path}/reporter-db.json",
+            indent=4,
+            create_dirs=True,
+        )
 
     if drop:
         db.drop_tables()
@@ -54,9 +61,14 @@ def get_db(db_path: str, drop=False) -> TinyDB:
 
 def write_csv(data: Any, path: str, fieldnames: list[str]) -> None:
     with open(path, "w+") as f:
-        writer = csv.DictWriter(f, delimiter=",", fieldnames=fieldnames)
+        writer = csv.DictWriter(
+            f, delimiter=",", fieldnames=fieldnames, extrasaction="ignore"
+        )
         writer.writeheader()
-        writer.writerows(data)
+        if isinstance(data, list):
+            writer.writerows(data)
+        else:
+            writer.writerow(data)
 
 
 def write_list_csv(data: Any, path: str, fieldname: str) -> None:

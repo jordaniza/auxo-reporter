@@ -5,23 +5,11 @@ from typing import Any, TypedDict, TypeVar, cast
 import requests
 from web3 import Web3
 
-from reporter.env import RPC_URL
-from reporter.errors import EmptyQueryError
+from reporter.env import RPC_URL, SUBGRAPHS
+from reporter.errors import EmptyQueryError, TooManyLoopsError
 from reporter.models import GraphQL_Response, Config, EthereumAddress
 
-w3 = w3 = Web3(Web3.HTTPProvider(RPC_URL))
-
-
-@dataclass
-class SUBGRAPHS:
-    GRAPH_URL = "https://api.thegraph.com/subgraphs/name"
-    SNAPSHOT = "https://hub.snapshot.org/graphql"
-    VEDOUGH = GRAPH_URL + "/pie-dao/vedough"
-
-    # prototype - absolutely no guarantees of uptime or api consistency
-    AUXO_TOKEN_GOERLI = GRAPH_URL + "/jordaniza/auxo-tokens-v4"
-    AUXO_GOV_GOERLI = GRAPH_URL + "/jordaniza/auxo-gov-goerli-2"
-    ROLLSTAKER_GOERLI = GRAPH_URL + "/jordaniza/rollstaker-goerli"
+w3 = Web3(Web3.HTTPProvider(RPC_URL))
 
 
 class GraphQLConfig(TypedDict):
@@ -57,7 +45,7 @@ def extract_nested_graphql(res: GraphQL_Response, access_path: list[str]):
 
 
 def graphql_iterate_query(
-    url: str, access_path: list[str], params: GraphQLConfig
+    url: str, access_path: list[str], params: GraphQLConfig, max_loops: int = 1000
 ) -> list[T]:
     """
     The graph allows fetching of Max 1000 results for subgraphs.
@@ -67,21 +55,27 @@ def graphql_iterate_query(
     :param `params`: GraphQL config such as the actual query and variables
     """
 
-    # bit of a wobbly cast here as errors will crash the runtime
-    res: GraphQL_Response = requests.post(url, json=params).json()
-    if not res:
+    response: GraphQL_Response = requests.post(url, json=params).json()
+    if not response:
         raise EmptyQueryError(f"No results for graph query to {url}")
+    if "errors" in response:
+        raise EmptyQueryError(
+            f"Error in graph query to {url}: {cast(dict, response)['errors']}"
+        )
 
-    results: list[T] = extract_nested_graphql(res, access_path)
+    all_results: list[T] = extract_nested_graphql(response, access_path)
 
-    container = results
-    # WARNING: Mocking requests.post here will result in an infinite loop
-    while len(container) > 0:
-        params["variables"]["skip"] = len(container)
-        res = requests.post(url, json=params).json()
-        container = extract_nested_graphql(res, access_path)
-        results += container
-    return results
+    current_batch = all_results
+    loops = 0
+    while len(current_batch) > 0:
+        if loops > max_loops:
+            raise TooManyLoopsError("graphql_iterate_query")
+        params["variables"]["skip"] = len(current_batch)
+        response = requests.post(url, json=params).json()
+        current_batch = extract_nested_graphql(response, access_path)
+        all_results += current_batch
+        loops += 1
+    return all_results
 
 
 def get_token_hodlers(conf: Config, token_address: EthereumAddress) -> list:
@@ -126,8 +120,9 @@ def get_token_hodlers(conf: Config, token_address: EthereumAddress) -> list:
         "block": conf.block_snapshot,
         "skip": 0,
     }
+
     return graphql_iterate_query(
-        SUBGRAPHS.AUXO_TOKEN_GOERLI,
+        SUBGRAPHS.AUXO_TOKEN,
         ["erc20Contract", "balances"],
         dict(query=query, variables=variables),
     )

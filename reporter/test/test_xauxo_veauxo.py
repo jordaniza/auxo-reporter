@@ -16,7 +16,7 @@ from reporter.models import (
     RedistributionWeight,
     Vote,
     Staker,
-    VeAuxoRewardSummary,
+    ARVRewardSummary,
     XAuxoRewardSummary,
 )
 from reporter.queries import (
@@ -36,7 +36,7 @@ from reporter.rewards import (
 from reporter.writer import (
     build_claims,
     write_accounts_and_distribution,
-    write_veauxo_stats,
+    write_arv_stats,
     write_xauxo_stats,
 )
 
@@ -177,12 +177,12 @@ def test_both(monkeypatch):
     #  and remove its rewards from the veAUXO Tree
     (veauxo_reward_summaries, veauxo_accounts_out) = separate_xauxo_rewards(
         staking_manager,
-        VeAuxoRewardSummary.from_existing(veauxo_reward_summaries),
+        ARVRewardSummary.from_existing(veauxo_reward_summaries),
         veauxo_accounts_out,
     )
 
     write_accounts_and_distribution(db, veauxo_accounts_out, veauxo_distribution)
-    write_veauxo_stats(
+    write_arv_stats(
         db,
         veauxo_stakers,
         votes,

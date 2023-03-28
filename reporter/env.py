@@ -27,5 +27,14 @@ class ADDRESSES:
     DECAY_ORACLE = env_var("DECAY_ORACLE")
 
 
+class SUBGRAPHS:
+    SNAPSHOT = "https://hub.snapshot.org/graphql"
+    VEDOUGH = "https://api.thegraph.com/subgraphs/name/pie-dao/vedough"
+
+    AUXO_TOKEN = env_var("SUBGRAPH_AUXO_TOKEN")
+    AUXO_GOV = env_var("SUBGRAPH_AUXO_GOV")
+    ROLLSTAKER = env_var("SUBGRAPH_ROLLSTAKER")
+
+
 SNAPSHOT_SPACE_ID = env_var("SNAPSHOT_SPACE_ID")
 RPC_URL = env_var("RPC_URL")

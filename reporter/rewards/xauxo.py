@@ -91,7 +91,7 @@ def compute_xauxo_redistributions(
 def compute_xauxo_token_stats(
     accounts: list[Account], total_supply: str
 ) -> TokenSummaryStats:
-    active = sum(int(a.holding.amount) for a in accounts)
+    active = sum(int(a.token.amount) for a in accounts)
     return TokenSummaryStats(
         total=str(total_supply),
         active=str(active),
@@ -123,7 +123,7 @@ def redistribute(
                 accounts.append(
                     Account(
                         address=r.address,
-                        holding=ERC20Amount.xAUXO(amount="0"),
+                        token=ERC20Amount.xAUXO(amount="0"),
                         rewards=conf.reward_token(amount=str(r.rewards)),
                         state=AccountState.INACTIVE,
                         notes=[f"Transfer of {r.rewards}"],

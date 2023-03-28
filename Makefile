@@ -26,6 +26,8 @@ lint :; make type-check && make format
 ### TEST ###
 test :; python -m pytest -rfPs
 
+coverage :; python -m pytest --cov=reporter --cov-report=term-missing
+
 ### SCRIPTS ###
 
 # scenario testing
@@ -35,7 +37,7 @@ scenario :; make scenario-setup && make scenario-test
 
 
 # create the claims database
-claims :; python -m reporter.run all
+claims :; python -m reporter.run
 
 # Generate a merkle tree
 tree :; yarn create-merkle-tree

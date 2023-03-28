@@ -48,12 +48,12 @@ class RewardSummary(ERC20Amount):
             return f"{float(p):.18f}"
 
 
-class VeAuxoRewardSummary(RewardSummary):
+class ARVRewardSummary(RewardSummary):
     to_xauxo: BigNumber = "0"
 
     @staticmethod
-    def from_existing(summary: RewardSummary) -> VeAuxoRewardSummary:
-        return VeAuxoRewardSummary(**summary.dict())
+    def from_existing(summary: RewardSummary) -> ARVRewardSummary:
+        return ARVRewardSummary(**summary.dict())
 
 
 @dataclass

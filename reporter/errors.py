@@ -4,6 +4,12 @@ class EmptyQueryError(Exception):
     pass
 
 
+class TooManyLoopsError(Exception):
+    """Raise if a loop runs too many times"""
+
+    pass
+
+
 class MissingRewardException(Exception):
     """Raise if a reward token is not found in a user's list of rewards"""
 
