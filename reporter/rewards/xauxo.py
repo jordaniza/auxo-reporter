@@ -1,96 +1,63 @@
 from decimal import Decimal
 from typing import Tuple
-
+from copy import deepcopy
 from reporter.models import (
     Account,
     AccountState,
     Config,
     ERC20Amount,
-    NormalizedRedistributionWeight,
+    NormalizedRedistributionWeight as NRW,
     RedistributionOption,
     RedistributionWeight,
     TokenSummaryStats,
+    RedistributionContainer,
     XAuxoRewardSummary,
     RewardSummary,
     XAuxoTaxCalculator,
 )
 
-from reporter.queries import get_xauxo_stakers, xauxo_accounts, get_xauxo_total_supply
+from reporter.queries import (
+    get_prv_stakers,
+    prv_stakers_to_accounts,
+    get_prv_total_supply,
+)
 from reporter.rewards.common import compute_rewards
 
 
-def compute_active_rewards(
-    xauxo_stats: TokenSummaryStats,
-    tax_calulator: XAuxoTaxCalculator,
-):
+def prv_active_rewards(
+    prv_stats: TokenSummaryStats,
+    total_rewards: Decimal,
+) -> tuple[Decimal, Decimal]:
     """
-    Divide xauxo rewards into 2 buckets
+    Divide PRV rewards into 2 buckets
     - active rewards are based on number of staked xauxo
     - inactive are rewards that would have accrued to stakers if they were active
 
     Inactive rewards will get redistributed according to DAO policies
     """
 
-    pro_rata_rewards_per_token = (
-        Decimal(tax_calulator.before_tax.amount) / Decimal(xauxo_stats.total)
-    ) * Decimal(10**tax_calulator.before_tax.decimals)
-
-    # reallocate based on weights
-    inactive_tokens = Decimal(xauxo_stats.inactive)
-    active_tokens = Decimal(xauxo_stats.active)
-
-    inactive_rewards = (
-        inactive_tokens
-        * pro_rata_rewards_per_token
-        / Decimal(10**tax_calulator.before_tax.decimals)
-    )
-
-    active_rewards = (
-        active_tokens
-        * pro_rata_rewards_per_token
-        / Decimal(10**tax_calulator.before_tax.decimals)
-    )
+    total_supply = Decimal(prv_stats.total)
+    pro_rata = Decimal(0) if total_supply == 0 else total_rewards / total_supply
+    inactive_rewards = Decimal(prv_stats.inactive) * pro_rata / total_supply
+    active_rewards = Decimal(prv_stats.active) * pro_rata / total_supply
 
     return active_rewards, inactive_rewards
 
 
-def compute_xauxo_redistributions(
-    redistributions: list[RedistributionWeight],
-    active_rewards: Decimal,
-    inactive_rewards: Decimal,
-):
-    """
-    Redistribute inactive rewards according to config parameters
-    Return the list of redistributions, along with the total rewards stakers will receive
-    and log the amount redistributed to said stakers
-    """
-
-    stakers_total_rewards = active_rewards
-
-    # redistributions
-    total_weights = sum(r.weight for r in redistributions)
-    normalized_redistributions: list[NormalizedRedistributionWeight] = [
-        NormalizedRedistributionWeight(total_weights=total_weights, **r.dict())
-        for r in redistributions
-    ]
-
-    for n in normalized_redistributions:
-        n.distribute_inactive(str(inactive_rewards))
-
-    # add to the existing stakers rewards
-    redistributed_to_stakers = "0"
-    for n in normalized_redistributions:
-        if n.option == RedistributionOption.REDISTRIBUTE_XAUXO:
-            stakers_total_rewards += Decimal(n.rewards)
-            redistributed_to_stakers = n.rewards
-
-    # add accounts later
-    return normalized_redistributions, stakers_total_rewards, redistributed_to_stakers
-
-
-def compute_xauxo_token_stats(
-    accounts: list[Account], total_supply: str
+def compute_prv_token_stats(
+    accounts: list[Account], total_supply: Decimal
 ) -> TokenSummaryStats:
+    """
+    Computes summary statistics for a token based on a list of accounts holding that token.
+
+    Args:
+        accounts: A list of Account objects representing the accounts holding the token.
+        total_supply: The total supply of the token.
+
+    Returns:
+        A TokenSummaryStats object containing the total, active, and inactive amounts of the token.
+
+    """
     active = sum(int(a.token.amount) for a in accounts)
     return TokenSummaryStats(
         total=str(total_supply),
@@ -99,62 +66,67 @@ def compute_xauxo_token_stats(
     )
 
 
+def transfer_redistribution(
+    accounts: list[Account], r: RedistributionWeight, conf: Config
+) -> None:
+    """
+    Redistributes rewards from a transfer to a specific account.
+    Args:
+        accounts: A list of Account objects representing the accounts that may receive the transfer.
+        r: A RedistributionWeight object specifying the account address and transfer amount.
+        conf: A Config object containing information on reward tokens.
+    """
+    # check to see if the account already is due to receive rewards
+    found_account = False
+    for account in accounts:
+        # account found, add the additional transfer
+        if account.address == r.address:
+            found_account = True
+            account.notes.append(f"Transfer of {r.rewards}")
+            account.rewards.amount = str(int(account.rewards.amount) + int(r.rewards))
+
+    # cant find the account in the list this is a new account (like a multisig)
+    # set it as inactive and add the transfer
+    if not found_account:
+        accounts.append(
+            Account(
+                address=r.address,
+                token=ERC20Amount.xAUXO(amount="0"),
+                rewards=conf.reward_token(amount=str(r.rewards)),
+                state=AccountState.INACTIVE,
+                notes=[f"Transfer of {r.rewards}"],
+            )
+        )
+
+
 def redistribute(
-    accounts: list[Account], redistributions: list[RedistributionWeight], conf: Config
-) -> Tuple[list[Account], Decimal]:
-    redistributed_transfer = Decimal(0)
-    # add any transfer addresses to rewards
-    for r in redistributions:
-        # Add any transfers to the stakers rewards list
+    _accounts: list[Account], container: RedistributionContainer, conf: Config
+) -> list[Account]:
+    """
+    Redistributes rewards to accounts based on a list of redistribution weights.
+    Args:
+        accounts: A list of Account objects representing accounts to receive rewards.
+        redistributions: A list of RedistributionWeight objects specifying the rewards to be distributed.
+        conf: A Config object containing information on reward tokens.
+    Returns:
+        the updated accounts list
+    """
+    # copy so as not to modify the original
+    accounts = deepcopy(_accounts)
+
+    # go through the accounts and make any manual transfers
+    for r in container.n_redistributions:
         if r.option == RedistributionOption.TRANSFER:
-            redistributed_transfer += Decimal(r.rewards)
-
-            # check to see if the account already is due to receive rewards
-            found_account = False
-            for account in accounts:
-                if account.address == r.address:
-                    found_account = True
-                    account.notes.append(f"Transfer of {r.rewards}")
-                    account.rewards.amount = str(
-                        int(account.rewards.amount) + int(r.rewards)
-                    )
-
-            if not found_account:
-                accounts.append(
-                    Account(
-                        address=r.address,
-                        token=ERC20Amount.xAUXO(amount="0"),
-                        rewards=conf.reward_token(amount=str(r.rewards)),
-                        state=AccountState.INACTIVE,
-                        notes=[f"Transfer of {r.rewards}"],
-                    )
-                )
-    return accounts, redistributed_transfer
+            transfer_redistribution(accounts, r, conf)
+    return accounts
 
 
-def compute_x_auxo_reward_total(
-    conf: Config,
-    total_xauxo_rewards: Decimal,
-) -> Tuple[ERC20Amount, int]:
-
-    haircut_total = total_xauxo_rewards * Decimal(conf.xauxo_tax_percentage)
-    xauxo_total = total_xauxo_rewards - haircut_total
-
-    return (
-        ERC20Amount.xAUXO(str(xauxo_total)),
-        int(float(haircut_total)),
-    )
-
-
-def create_xauxo_reward_summary(
+def create_prv_reward_summary(
     distribution_rewards: RewardSummary,
-    tax_calculator: XAuxoTaxCalculator,
-    redistributed_to_stakers: Decimal,
-    redistributed_transfer: Decimal,
+    container: RedistributionContainer,
 ) -> XAuxoRewardSummary:
     summary = XAuxoRewardSummary.from_existing(distribution_rewards)
-    summary.add_tax_data(tax_calculator)
-    summary.add_redistribution_data(redistributed_to_stakers, redistributed_transfer)
+    summary.add_redistribution_data(container.to_stakers, container.transferred)
     return summary
 
 
@@ -167,18 +139,18 @@ def calculate_xauxo_rewards(config: Config, veauxo_rewards_to_xauxo: str):
     xauxo_tax = XAuxoTaxCalculator(config.xauxo_tax_percentage, xauxo_rewards_pre_tax)
 
     # fetch the list of accounts and compute active vs. total
-    xauxo_stakers = get_xauxo_stakers()
-    xauxo_accounts_in = xauxo_accounts(xauxo_stakers, config)
-    xauxo_stats = compute_xauxo_token_stats(xauxo_accounts_in, get_xauxo_total_supply())
+    xauxo_stakers = get_prv_stakers()
+    xauxo_accounts_in = prv_stakers_to_accounts(xauxo_stakers, config)
+    xauxo_stats = compute_prv_token_stats(xauxo_accounts_in, get_prv_total_supply())
 
     # determine the split of active vs. inactive rewards,
     # and redistribute inactive rewards according to the config parameters
-    (active, inactive) = compute_active_rewards(xauxo_stats, xauxo_tax)
+    (active, inactive) = prv_active_rewards(xauxo_stats, xauxo_tax)
     (
         redistributions,
         stakers_rewards,
         redistributed_to_stakers,
-    ) = compute_xauxo_redistributions(config.redistributions, active, inactive)
+    ) = normalize_redistributions(config.redistributions, active, inactive)
     xauxo_accounts_out, redistributed_transfer = redistribute(
         xauxo_accounts_in, redistributions, config
     )
@@ -192,7 +164,7 @@ def calculate_xauxo_rewards(config: Config, veauxo_rewards_to_xauxo: str):
     )
 
     # yield the summary for reporting
-    summary = create_xauxo_reward_summary(
+    summary = create_prv_reward_summary(
         distribution_rewards,
         xauxo_tax,
         Decimal(redistributed_to_stakers),

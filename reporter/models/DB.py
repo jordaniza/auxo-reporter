@@ -1,3 +1,4 @@
+import os
 from tinydb import TinyDB, where
 from utils import write_json
 from reporter.models import (
@@ -9,36 +10,33 @@ from reporter.models import (
     ClaimsRecipient,
     Vote,
     Proposal,
+    Config,
 )
 from decimal import Decimal
 
 
 class DB(TinyDB):
-    directory: str
-    path: str
+    config: Config
 
-    def __init__(self, directory: str, drop=False, **kwargs):
-        self.directory = directory
-        self.path = f"{directory}/reporter-db.json"
-        create_dirs = False
-        try:
-            super().__init__(
-                self.path,
-                indent=4,
-                create_dirs=create_dirs,
-                **kwargs,
-            )
-        except FileNotFoundError:
-            create_dirs = True
-            super().__init__(
-                self.path,
-                indent=4,
-                create_dirs=create_dirs,
-                **kwargs,
-            )
+    def __init__(self, conf: Config, drop=False, **kwargs):
+        self.config = conf
+        path = f"reports/{conf.date}/reporter-db.json"
+
+        # check if the directory exists
+        create_dirs = self.exists(path) == False
+        super().__init__(
+            path,
+            indent=4,
+            create_dirs=create_dirs,
+            **kwargs,
+        )
 
         if drop:
             self.drop_tables()
+
+    @staticmethod
+    def exists(path: str):
+        return os.path.exists(path)
 
     def write_distribution(
         self,
@@ -71,7 +69,7 @@ class DB(TinyDB):
             },
         )
 
-    def build_claims(self, window_index: int, token_name: AUXO_TOKEN_NAMES):
+    def build_claims(self, token_name: AUXO_TOKEN_NAMES):
         distribution = self.table(f"{token_name}_distribution")
 
         rewards_accounts = distribution.search(
@@ -80,7 +78,7 @@ class DB(TinyDB):
 
         recipients = {
             ra["address"]: ClaimsRecipient(
-                windowIndex=window_index,
+                windowIndex=self.config.distribution_window,
                 accountIndex=idx,
                 rewards=ra["rewards"]["amount"],
                 token=ra["rewards"]["address"],
@@ -88,12 +86,18 @@ class DB(TinyDB):
             for idx, ra in enumerate(rewards_accounts)
         }
         claims = {
-            "windowIndex": window_index,
+            "windowIndex": self.config.distribution_window,
             "chainId": 1,
             "aggregateRewards": distribution.all()[0]["rewards"],
             "recipients": recipients,
         }
-        write_json(claims, f"{self.directory}/claims-{token_name}.json")
+        write_json(claims, f"reports/{self.config.date}/claims-{token_name}.json")
         print(
             f"🚀🚀🚀 Successfully created the {token_name} claims database, check it and generate the merkle tree"
         )
+
+    def write_claims_and_distribution(
+        self, distribution: list[Account], token_name: AUXO_TOKEN_NAMES
+    ):
+        self.write_distribution(distribution, token_name)
+        self.build_claims(token_name)

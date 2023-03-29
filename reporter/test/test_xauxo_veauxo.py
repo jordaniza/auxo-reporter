@@ -22,8 +22,8 @@ from reporter.models import (
 from reporter.queries import (
     get_boosted_stakers,
     get_stakers,
-    xauxo_accounts,
-    get_xauxo_total_supply,
+    prv_stakers_to_accounts,
+    get_prv_total_supply,
 )
 from reporter.rewards import (
     distribute,
@@ -119,11 +119,11 @@ def init_mocks(monkeypatch):
 
 def test_do_not_require_address_for_redistribute():
     r1 = RedistributionWeight(
-        weight=1, address=None, option=RedistributionOption.REDISTRIBUTE_XAUXO
+        weight=1, address=None, option=RedistributionOption.REDISTRIBUTE_PRV
     )
 
     r2 = RedistributionWeight(
-        weight=1, address=None, option=RedistributionOption.REDISTRIBUTE_VEAUXO
+        weight=1, address=None, option=RedistributionOption.REDISTRIBUTE_ARV
     )
 
     assert not r1.address
@@ -170,9 +170,11 @@ def test_both(monkeypatch):
         veauxo_accounts_in, ADDRESSES.STAKING_MANAGER
     )
 
-    (veauxo_distribution, veauxo_reward_summaries, veauxo_stats) = distribute(
-        config, veauxo_accounts_out
-    )
+    (
+        veauxo_distribution,
+        veauxo_reward_summaries,
+        veauxo_stats,
+    ) = distribute(config, veauxo_accounts_out)
 
     #  and remove its rewards from the veAUXO Tree
     (veauxo_reward_summaries, veauxo_accounts_out) = separate_xauxo_rewards(

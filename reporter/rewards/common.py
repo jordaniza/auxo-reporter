@@ -61,5 +61,4 @@ def compute_rewards(
         pro_rata=str(pro_rata),
     )
 
-    # TODO remainder?
     return rewarded_accounts, distribution_rewards

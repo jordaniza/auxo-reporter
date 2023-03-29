@@ -34,3 +34,7 @@ class MissingStakingManagerAddressError(Exception):
 
 class MissingDecayBalanceException(Exception):
     pass
+
+
+class MissingDBException(Exception):
+    pass

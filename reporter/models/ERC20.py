@@ -59,6 +59,19 @@ class ARV(ERC20Metadata):
         super().__init__(decimals=18, address=ADDRESSES.VEAUXO, symbol="ARV", **kwargs)
 
 
+class PRV(ERC20Metadata):
+    """PRV token"""
+
+    # holding of PRV in wallet
+    amount: BigNumber
+
+    # locked in RollStaker
+    staked_amount: Optional[BigNumber]
+
+    def __init__(self, **kwargs):
+        super().__init__(decimals=18, address=ADDRESSES.PRV, symbol="PRV", **kwargs)
+
+
 class ERC20Amount(ERC20Metadata):
     """
     Hold ERC20 data with an amount

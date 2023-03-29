@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, parse_obj_as, validator
-
+from decimal import Decimal
 from reporter.errors import BadConfigException
 from reporter.models.ERC20 import ERC20Amount
 from reporter.models.Redistribution import (
@@ -17,6 +17,8 @@ class InputConfig(BaseModel):
     :param `block_snapshot`: block number to fetch list of stakers at
     :param `distribution_window`: should be incrementing by +1 from last distribution
     :param `rewards`: list of reward tokens, amount and decimals to be distributed across all recipients
+    :param `redistributions`: list of redistribution options and weights
+    :param `arv_percentage`: percentage of rewards to be distributed to ARV
     """
 
     year: int
@@ -25,7 +27,7 @@ class InputConfig(BaseModel):
     distribution_window: int
     rewards: ERC20Amount
     redistributions: list[RedistributionWeight] = []
-    xauxo_tax_percentage: float = Field(ge=0, le=1, default=0)
+    arv_percentage: float = 0.7
 
     def reward_token(self, amount: str = "0") -> ERC20Amount:
         """
@@ -34,6 +36,13 @@ class InputConfig(BaseModel):
         config_token = ERC20Amount(**self.rewards.dict())
         config_token.amount = amount
         return config_token
+
+    @validator("arv_percentage")
+    @classmethod
+    def validate_arv_percentage(cls, arv_percentage):
+        if arv_percentage > 1 or arv_percentage < 0:
+            raise BadConfigException("ARV percentage out of range")
+        return arv_percentage
 
     @validator("month")
     @classmethod
@@ -68,7 +77,7 @@ class InputConfig(BaseModel):
         redistribute_option_x_auxo = [
             l.option
             for l in loaded
-            if l.option == RedistributionOption.REDISTRIBUTE_XAUXO
+            if l.option == RedistributionOption.REDISTRIBUTE_PRV
         ]
 
         if len(redistribute_option_x_auxo) > 1:
@@ -77,7 +86,7 @@ class InputConfig(BaseModel):
         redistribute_option_ve_auxo = [
             l.option
             for l in loaded
-            if l.option == RedistributionOption.REDISTRIBUTE_VEAUXO
+            if l.option == RedistributionOption.REDISTRIBUTE_ARV
         ]
 
         if len(redistribute_option_ve_auxo) > 0:
@@ -97,3 +106,11 @@ class Config(InputConfig):
     date: str
     start_timestamp: int
     end_timestamp: int
+
+    @property
+    def arv_rewards(self) -> Decimal:
+        return Decimal(self.rewards.amount) * Decimal(self.arv_percentage)
+
+    @property
+    def prv_rewards(self) -> Decimal:
+        return Decimal(self.rewards.amount) * Decimal(1 - self.arv_percentage)

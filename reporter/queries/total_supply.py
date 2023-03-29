@@ -1,3 +1,4 @@
+from decimal import Decimal
 from reporter.queries.common import w3
 from reporter.env import ADDRESSES
 
@@ -19,6 +20,7 @@ ERC20_TOTAL_SUPPLY_ABI = """
     """
 
 
-def get_xauxo_total_supply():
+def get_prv_total_supply(at="latest") -> Decimal:
     XAUXO_CONTRACT = w3.eth.contract(abi=ERC20_TOTAL_SUPPLY_ABI, address=ADDRESSES.XAUXO)  # type: ignore
-    return XAUXO_CONTRACT.functions.totalSupply().call()
+    supply = XAUXO_CONTRACT.functions.totalSupply().call(deafultBlock=at)  # type: ignore
+    return Decimal(supply)

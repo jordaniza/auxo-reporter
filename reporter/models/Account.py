@@ -5,7 +5,7 @@ import eth_utils as eth
 from typing import Union
 
 from reporter.models.types import EthereumAddress
-from reporter.models.ERC20 import ERC20Amount, veAUXO, xAUXO, ARV
+from reporter.models.ERC20 import ERC20Amount, veAUXO, xAUXO, ARV, PRV
 
 
 class AccountState(str, Enum):
@@ -57,6 +57,17 @@ class ARVStaker(User):
 
     def __init__(self, arv_holding: str, **kwargs):
         super().__init__(token=ARV(amount=arv_holding), **kwargs)
+
+
+class PRVStaker(User):
+    """
+    PRVStaker is a user with a token balance
+    """
+
+    token: PRV
+
+    def __init__(self, prv_holding: str, **kwargs):
+        super().__init__(token=ERC20Amount(amount=prv_holding), **kwargs)
 
 
 class Account(Staker):

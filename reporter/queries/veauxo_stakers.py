@@ -86,3 +86,8 @@ def get_boosted_veauxo_balance(
 def get_boosted_stakers(stakers: list[ARVStaker], mock=False) -> list[ARVStaker]:
     decay_data = get_veauxo_boosted_balance_by_staker(stakers, mock)
     return get_boosted_veauxo_balance(stakers, decay_data)
+
+
+def get_ARV_stakers(config: Config) -> list[ARVStaker]:
+    veauxo_stakers_pre_decay = get_veauxo_stakers(config)
+    return get_boosted_stakers(veauxo_stakers_pre_decay, config.block_snapshot)

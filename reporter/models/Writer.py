@@ -1,6 +1,7 @@
 import json, csv
 from pathlib import Path
 from dataclasses import dataclass
+from typing import Any
 
 from reporter.models.Config import Config
 
@@ -58,6 +59,9 @@ class Writer:
             writer.writerow(fieldnames)
 
             for row in data:
+                if not isinstance(row, dict):
+                    writer.writerow([row])
+                    continue
                 flattened_row = []
                 for _, v in row.items():
                     if isinstance(v, dict):
@@ -93,3 +97,11 @@ class Writer:
             keys = csv_data.keys()
         self.to_json(data, name)
         self.to_csv(csv_data, name, keys)
+
+    def list_to_csv_and_json(self, data, name: str) -> None:
+        self.to_csv([v for v in data], name, [name])
+        self.to_json([v for v in data], name)
+
+    def lists_to_csv_and_json(self, lists: list[tuple[str, list[Any]]]) -> None:
+        for name, ls in lists:
+            self.list_to_csv_and_json(ls, name)
