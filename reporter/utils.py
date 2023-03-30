@@ -1,9 +1,6 @@
 import csv
 import json
 from typing import Any, TypeVar
-
-from tinydb import TinyDB
-
 from reporter.models import Account, AccountState
 
 # python insantiates generics separate to function definition
@@ -35,28 +32,6 @@ def yes_or_no(question: str) -> bool:
 def filter_state(accounts: list[Account], state: AccountState) -> list[Account]:
     """Return all accounts in list of accounts with specific state"""
     return list(filter(lambda a: a.state == state, accounts))
-
-
-def get_db(db_path: str, drop=False) -> TinyDB:
-    """
-    Get or instantiate existing tinyDB instance. Pass drop to clear.
-    """
-    try:
-        db = TinyDB(
-            f"{db_path}/reporter-db.json",
-            indent=4,
-        )
-    except FileNotFoundError:
-        db = TinyDB(
-            f"{db_path}/reporter-db.json",
-            indent=4,
-            create_dirs=True,
-        )
-
-    if drop:
-        db.drop_tables()
-
-    return db
 
 
 def write_csv(data: Any, path: str, fieldnames: list[str]) -> None:

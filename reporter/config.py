@@ -2,12 +2,10 @@ import calendar
 import datetime
 import json
 from pathlib import Path
+from typing import NamedTuple
 
 from pydantic import parse_file_as
-
 from reporter.models import Config, InputConfig
-
-from typing import NamedTuple
 
 
 class EpochBoundary(NamedTuple):

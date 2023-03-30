@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pydantic import parse_file_as
 
 from reporter.env import ADDRESSES
-from reporter.models import Vote
+from reporter.models import OffChainVote
 from reporter.utils import write_json
 
 BASE_VEAUXO_QTY = 100
@@ -17,7 +17,7 @@ BASE_VEAUXO_QTY = 100
 @dataclass
 class User:
     address: str
-    veAUXO_amount: str = str(BASE_VEAUXO_QTY)
+    ARV_amount: str = str(BASE_VEAUXO_QTY)
     boosted_amount: str = str(BASE_VEAUXO_QTY)
     eligible_amount: str = str(BASE_VEAUXO_QTY)
     active_on_chain: bool = False
@@ -32,8 +32,10 @@ class User:
         return api_resp["data"]["voteCasts"][0]
 
     @property
-    def _template_off_chain(self) -> Vote:
-        return parse_file_as(list[Vote], "reporter/test/stubs/votes/votes.json")[0]
+    def _template_off_chain(self) -> OffChainVote:
+        return parse_file_as(
+            list[OffChainVote], "reporter/test/stubs/votes/votes.json"
+        )[0]
 
     @property
     def _template_token_holding(self):
@@ -46,8 +48,8 @@ class User:
         template["voter"] = {"id": self.address}
         return template
 
-    def create_off_chain_vote(self) -> Vote:
-        template: Vote = self._template_off_chain
+    def create_off_chain_vote(self) -> OffChainVote:
+        template: OffChainVote = self._template_off_chain
         template.voter = self.address
         return template
 
@@ -60,7 +62,7 @@ class User:
     def create_veauxo_holding(self):
         template = self._template_token_holding
         template["account"] = {"id": self.address}
-        template["valueExact"] = self.veAUXO_amount
+        template["valueExact"] = self.ARV_amount
         return template
 
 
@@ -90,18 +92,18 @@ users = [
     User(
         ADDRESSES.STAKING_MANAGER,
         eligible_amount="0",
-        veAUXO_amount="400",
+        ARV_amount="400",
     ),
     User(
         "0x0000000000000000000000000000000000000005",
         xAUXO_amount="200",
-        veAUXO_amount="0",
+        ARV_amount="0",
         eligible_amount="0",
         boosted_amount="0",
     ),
     User(
         "0x0000000000000000000000000000000000000006",
-        veAUXO_amount="0",
+        ARV_amount="0",
         eligible_amount="0",
         xAUXO_amount="200",
         staked_xAUXO=True,
@@ -128,7 +130,7 @@ def test_go():
             xauxo_stakers[u.address] = False
         if int(u.xAUXO_amount) > 0:
             xauxo_holders.append(u.create_xauxo_holding())
-        if int(u.veAUXO_amount) > 0:
+        if int(u.ARV_amount) > 0:
             veauxo_holders.append(u.create_veauxo_holding())
             veauxo_boost_data[u.address] = u.boosted_amount
 

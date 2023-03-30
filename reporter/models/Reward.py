@@ -1,10 +1,10 @@
 from __future__ import annotations
-from pydantic import validator, BaseModel
-from reporter.models.types import BigNumber
-from reporter.models.ERC20 import ERC20Amount
 from typing import Optional
 from decimal import Decimal
-from dataclasses import dataclass
+from pydantic import validator, BaseModel
+
+from reporter.models.types import BigNumber
+from reporter.models.ERC20 import ERC20Amount
 
 
 class TokenSummaryStats(BaseModel):
@@ -49,41 +49,21 @@ class RewardSummary(ERC20Amount):
 
 
 class ARVRewardSummary(RewardSummary):
-    to_xauxo: BigNumber = "0"
+    to_prv: BigNumber = "0"
 
     @staticmethod
     def from_existing(summary: RewardSummary) -> ARVRewardSummary:
         return ARVRewardSummary(**summary.dict())
 
 
-@dataclass
-class XAuxoTaxCalculator:
-    tax_percent: float
-    before_tax: ERC20Amount
-
-    @property
-    def tax(self) -> str:
-        return str(int(Decimal(self.tax_percent) * Decimal(self.before_tax.amount)))
-
-    @property
-    def after_tax(self) -> str:
-        return str(int(Decimal(self.before_tax.amount) - Decimal(self.tax)))
-
-
-class XAuxoRewardSummary(RewardSummary):
+class PRVRewardSummary(RewardSummary):
     redistributed_total: BigNumber = "0"
     redistributed_to_stakers: BigNumber = "0"
     redistributed_transferred: BigNumber = "0"
 
-    total_tax: BigNumber = "0"
-
     @staticmethod
-    def from_existing(summary: RewardSummary) -> XAuxoRewardSummary:
-        return XAuxoRewardSummary(**summary.dict())
-
-    def add_tax_data(self, calculator: XAuxoTaxCalculator):
-        self.total_tax = calculator.tax
-        self.amount = calculator.after_tax
+    def from_existing(summary: RewardSummary) -> PRVRewardSummary:
+        return PRVRewardSummary(**summary.dict())
 
     def add_redistribution_data(self, to_stakers: Decimal, to_transfer: Decimal):
         self.redistributed_to_stakers = str(int(to_stakers))

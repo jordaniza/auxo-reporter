@@ -1,7 +1,5 @@
 import os
-
 from dotenv import load_dotenv
-
 from reporter.errors import MissingEnvironmentVariableException
 
 load_dotenv()
@@ -20,9 +18,9 @@ def env_var(accessor: str) -> str:
 
 class ADDRESSES:
     GOVERNOR = env_var("GOVERNOR_ADDRESS")
-    XAUXO = env_var("XAUXO_ADDRESS")
-    VEAUXO = env_var("VEAUXO_ADDRESS")
-    PRV_ROLLSTAKER = env_var("XAUXO_ROLLSTAKER")
+    PRV = env_var("PRV_ADDRESS")
+    ARV = env_var("ARV_ADDRESS")
+    PRV_ROLLSTAKER = env_var("PRV_ROLLSTAKER")
     STAKING_MANAGER = env_var("STAKING_MANAGER_ADDRESS")
     DECAY_ORACLE = env_var("DECAY_ORACLE")
 

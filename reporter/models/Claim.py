@@ -2,7 +2,7 @@ from typing import Union
 
 from pydantic import BaseModel
 
-from reporter.models.Reward import ARVRewardSummary, XAuxoRewardSummary
+from reporter.models.Reward import ARVRewardSummary, PRVRewardSummary
 from reporter.models.types import BigNumber, EthereumAddress
 
 
@@ -28,5 +28,5 @@ class ClaimsWindow(BaseModel):
 
     windowIndex: int
     chainId: int
-    aggregateRewards: Union[ARVRewardSummary, XAuxoRewardSummary]
+    aggregateRewards: Union[ARVRewardSummary, PRVRewardSummary]
     recipients: dict[EthereumAddress, ClaimsRecipient]

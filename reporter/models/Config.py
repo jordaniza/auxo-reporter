@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, parse_obj_as, validator
+from pydantic import BaseModel, parse_obj_as, validator
 from decimal import Decimal
 from reporter.errors import BadConfigException
 from reporter.models.ERC20 import ERC20Amount
@@ -90,7 +90,7 @@ class InputConfig(BaseModel):
         ]
 
         if len(redistribute_option_ve_auxo) > 0:
-            raise BadConfigException(ERROR_MESSAGES.VEAUXO_NOT_IMPLEMENTED)
+            raise BadConfigException(ERROR_MESSAGES.ARV_NOT_IMPLEMENTED)
 
         return loaded
 

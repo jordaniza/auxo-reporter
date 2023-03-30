@@ -1,4 +1,3 @@
-import json
 from typing import Literal
 
 from multicall import Call, Multicall  # type: ignore
@@ -9,7 +8,6 @@ from reporter.models import (
     AccountState,
     Config,
     EthereumAddress,
-    Staker,
     PRVStaker,
 )
 from reporter.queries.common import SUBGRAPHS, graphql_iterate_query, w3
@@ -25,13 +23,13 @@ a balance of zero. We need to instead look at who is deposited, and check their 
 
 def get_all_prv_depositors() -> list[dict[Literal["user"], EthereumAddress]]:
     """
-    This function returns a simple list of every user that has ever staked xAUXO to earn rewards.
+    This function returns a simple list of every user that has ever staked PRV to earn rewards.
     This will include inactive users, or those who have unstaked.
 
     Therefore, ensure you check the user's balance to see that they actually have "actively" staked
     tokens (in the current epoch) before assigning rewards.
 
-    In future releases, we may streamline the Subgraph to properly track xAUXO balances but this approach
+    In future releases, we may streamline the Subgraph to properly track PRV balances but this approach
     should suffice for the time being.
     """
     query = """
@@ -83,13 +81,13 @@ def get_prv_stakers(conf: Config) -> list[PRVStaker]:
     all_depositors_ever = [d["user"] for d in get_all_prv_depositors()]
     prv_balances = get_prv_staked_balances(all_depositors_ever, conf)
     return [
-        Staker.xAuxo(addr, staked)
+        PRVStaker(address=addr, prv_holding=staked)
         for addr, staked in prv_balances.items()
         if int(staked) > 0
     ]
 
 
-def prv_stakers_to_accounts(stakers: list[Staker], conf: Config) -> list[Account]:
+def prv_stakers_to_accounts(stakers: list[PRVStaker], conf: Config) -> list[Account]:
     """
     Convert a list of PRV stakers into Accounts by initializing an empty reward balance
     Then setting them to ACTIVE.
@@ -98,7 +96,7 @@ def prv_stakers_to_accounts(stakers: list[Staker], conf: Config) -> list[Account
     """
     empty_reward = Config.reward_token(conf)
     return [
-        Account.from_staker(
+        Account.from_prv_staker(
             staker=staker,
             rewards=empty_reward,
             state=AccountState.ACTIVE,

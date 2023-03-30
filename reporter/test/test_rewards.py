@@ -8,7 +8,7 @@
 # from pydantic import parse_obj_as
 
 # from reporter import utils
-# from reporter.queries import get_veauxo_stakers
+# from reporter.queries import get_arv_stakers
 # from reporter.rewards import (
 #     distribute,
 #     get_vote_data,
@@ -16,7 +16,7 @@
 #     separate_staking_manager,
 #     separate_xauxo_rewards,
 #     write_accounts_and_distribution,
-#     write_veauxo_stats,
+#     write_arv_stats,
 # )
 # from reporter.models import (
 #     Account,
@@ -25,7 +25,7 @@
 #     OnChainVote,
 #     Delegate,
 #     Staker,
-#     VeAuxoRewardSummary,
+#     ARVRewardSummary,
 #     Vote,
 # )
 # from reporter.test.conftest import MockResponse
@@ -40,7 +40,7 @@
 
 
 # def init_mocks(monkeypatch):
-#     with open("reporter/test/stubs/tokens/veauxo.json") as j:
+#     with open("reporter/test/stubs/tokens/arv.json") as j:
 #         mock_stakers = json.load(j)
 
 #     with open("reporter/test/stubs/snapshot-votes.json") as j:
@@ -79,10 +79,10 @@
 #     return (mock_stakers, mock_votes, mock_delegates)
 
 
-# def test_get_veauxo_stakers(monkeypatch, config):
+# def test_get_arv_stakers(monkeypatch, config):
 #     init_mocks(monkeypatch)
 
-#     stakers = get_veauxo_stakers(config)
+#     stakers = get_arv_stakers(config)
 
 #     assert all(to_checksum_address(s.address) == s.address for s in stakers)
 
@@ -101,10 +101,10 @@
 
 #     path = "reporter/test/stubs/votes"
 
-#     with open(f"reporter/test/stubs/tokens/veauxo.json") as j:
+#     with open(f"reporter/test/stubs/tokens/arv.json") as j:
 #         mock_stakers = json.load(j)["data"]["erc20Contract"]["balances"]
 #         mock_stakers = [
-#             Staker.veAuxo(v["account"]["id"], v["valueExact"]) for v in mock_stakers
+#             Staker.aRV(v["account"]["id"], v["valueExact"]) for v in mock_stakers
 #         ]
 
 #     with open(f"{path}/votes.json") as j:
@@ -141,7 +141,7 @@
 # def test_get_vote_data(config, monkeypatch):
 
 #     init_mocks(monkeypatch)
-#     stakers = get_veauxo_stakers(config)
+#     stakers = get_arv_stakers(config)
 #     (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
 #     voter_ids = [v.voter for v in votes]
 
@@ -153,7 +153,7 @@
 # def test_init_accounts(config, monkeypatch):
 
 #     init_mocks(monkeypatch)
-#     stakers = get_veauxo_stakers(config)
+#     stakers = get_arv_stakers(config)
 #     (_, __, voters, non_voters) = get_vote_data(config, stakers)
 #     accounts = init_account_rewards(stakers, voters, config)
 
@@ -172,7 +172,7 @@
 
 # def test_compute_distribution(config: Config, monkeypatch):
 #     init_mocks(monkeypatch)
-#     stakers = get_veauxo_stakers(config)
+#     stakers = get_arv_stakers(config)
 #     (_, __, voters, ___) = get_vote_data(config, stakers)
 #     accounts = init_account_rewards(stakers, voters, config)
 
@@ -202,7 +202,7 @@
 #     print(f"⚗ Building database from {start_date} to {end_date}...")
 
 #     init_mocks(monkeypatch)
-#     stakers = get_veauxo_stakers(config)
+#     stakers = get_arv_stakers(config)
 #     (votes, proposals, voters, non_voters) = get_vote_data(config, stakers)
 #     accounts = init_account_rewards(stakers, voters, config)
 
@@ -213,13 +213,13 @@
 
 #     (distribution, reward_summaries, stats) = distribute(config, accounts)
 
-#     #  and remove its rewards from the veAUXO Tree
+#     #  and remove its rewards from the ARV Tree
 #     (reward_summaries, accounts) = separate_xauxo_rewards(
-#         staking_manager, VeAuxoRewardSummary(**reward_summaries.dict()), accounts
+#         staking_manager, ARVRewardSummary(**reward_summaries.dict()), accounts
 #     )
 
 #     write_accounts_and_distribution(db, accounts, distribution)
-#     write_veauxo_stats(
+#     write_arv_stats(
 #         db,
 #         stakers,
 #         votes,

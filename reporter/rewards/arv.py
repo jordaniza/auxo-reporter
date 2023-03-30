@@ -1,25 +1,16 @@
-import datetime
-from decimal import Decimal, getcontext
+from decimal import Decimal
 from typing import Optional, Tuple
 
 from reporter import utils
-from reporter.config import load_conf
-from reporter.env import ADDRESSES
-from reporter.errors import MissingStakingManagerAddressError
 from reporter.models import (
     Account,
     AccountState,
     Config,
     ARVStaker,
     TokenSummaryStats,
-    EthereumAddress,
     RewardSummary,
-    Staker,
-    ARVRewardSummary,
 )
-from reporter.queries import get_veauxo_stakers, get_vote_data
-from reporter.writer import write_accounts_and_distribution, write_arv_stats
-from reporter.rewards.common import compute_rewards
+from reporter.rewards import compute_rewards
 
 
 def init_account_rewards(
@@ -84,18 +75,3 @@ def distribute(
     )
 
     return (distribution, distribution_rewards, token_stats)
-
-
-def separate_xauxo_rewards(
-    staking_manager: Account,
-    reward_summaries: ARVRewardSummary,
-    accounts: list[Account],
-) -> Tuple[ARVRewardSummary, list[Account]]:
-    reward_summaries.amount = str(
-        int(reward_summaries.amount) - int(staking_manager.rewards.amount)
-    )
-    reward_summaries.to_xauxo = staking_manager.rewards.amount
-
-    accounts = list(filter(lambda a: a.address != staking_manager.address, accounts))
-
-    return reward_summaries, accounts

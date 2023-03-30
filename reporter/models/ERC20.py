@@ -8,11 +8,7 @@ from pydantic import BaseModel, validator
 from reporter.env import ADDRESSES
 from reporter.models.types import BigNumber, EthereumAddress
 
-from datetime import datetime
-
-AUXO_TOKEN_NAMES = Union[
-    Literal["veAUXO"], Literal["xAUXO"], Literal["ARV"], Literal["PRV"]
-]
+AUXO_TOKEN_NAMES = Union[Literal["ARV"], Literal["PRV"]]
 
 
 class BaseERC20(BaseModel):
@@ -33,8 +29,10 @@ class ERC20Metadata(BaseERC20):
     decimals: int
 
 
-veAUXO = ERC20Metadata(address=ADDRESSES.VEAUXO, symbol="veAUXO", decimals=18)
-xAUXO = ERC20Metadata(address=ADDRESSES.XAUXO, symbol="xAUXO", decimals=18)
+class ERC20Amount(ERC20Metadata):
+    """Adds the amount of tokens held by the user"""
+
+    amount: BigNumber
 
 
 class Lock(BaseModel):
@@ -43,11 +41,8 @@ class Lock(BaseModel):
     lockedAt: float
 
 
-class ARV(ERC20Metadata):
+class ARV(ERC20Amount):
     """ARV token"""
-
-    # holding of ARV
-    amount: BigNumber
 
     # decayed holding of ARV factoring in the user's lock time
     decayed_amount: Optional[BigNumber]
@@ -56,37 +51,14 @@ class ARV(ERC20Metadata):
     lock: Optional[Lock]
 
     def __init__(self, **kwargs):
-        super().__init__(decimals=18, address=ADDRESSES.VEAUXO, symbol="ARV", **kwargs)
+        super().__init__(decimals=18, address=ADDRESSES.ARV, symbol="ARV", **kwargs)
 
 
-class PRV(ERC20Metadata):
+class PRV(ERC20Amount):
     """PRV token"""
-
-    # holding of PRV in wallet
-    amount: BigNumber
 
     # locked in RollStaker
     staked_amount: Optional[BigNumber]
 
     def __init__(self, **kwargs):
         super().__init__(decimals=18, address=ADDRESSES.PRV, symbol="PRV", **kwargs)
-
-
-class ERC20Amount(ERC20Metadata):
-    """
-    Hold ERC20 data with an amount
-    The significance of the amount will depend on context
-    i.e. "user's balance" vs "rewards assigned"
-
-    :param original_amount: before applying decay
-    """
-
-    amount: BigNumber
-
-    @staticmethod
-    def xAUXO(amount: str) -> ERC20Amount:
-        return ERC20Amount(**xAUXO.dict(), amount=amount)
-
-    @staticmethod
-    def veAUXO(amount: str) -> ERC20Amount:
-        return ERC20Amount(**veAUXO.dict(), amount=amount)

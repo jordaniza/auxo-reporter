@@ -21,6 +21,6 @@ ERC20_TOTAL_SUPPLY_ABI = """
 
 
 def get_prv_total_supply(at="latest") -> Decimal:
-    XAUXO_CONTRACT = w3.eth.contract(abi=ERC20_TOTAL_SUPPLY_ABI, address=ADDRESSES.XAUXO)  # type: ignore
-    supply = XAUXO_CONTRACT.functions.totalSupply().call(deafultBlock=at)  # type: ignore
+    PRV_CONTRACT = w3.eth.contract(abi=ERC20_TOTAL_SUPPLY_ABI, address=ADDRESSES.PRV)  # type: ignore
+    supply = PRV_CONTRACT.functions.totalSupply().call(block_identifier=at)  # type: ignore
     return Decimal(supply)

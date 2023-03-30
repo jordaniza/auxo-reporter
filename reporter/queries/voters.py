@@ -12,7 +12,6 @@ from reporter.models import (
     Proposal,
     OnChainProposal,
     OnChainVote,
-    Staker,
     ARVStaker,
 )
 from reporter.queries.common import SUBGRAPHS, graphql_iterate_query

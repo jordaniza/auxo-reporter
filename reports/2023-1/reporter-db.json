@@ -117,12 +117,74 @@
                 "amount": "1000000000000000000000",
                 "pro_rata": "0.000000000000000000",
                 "non_active_pro_rata": null,
-                "to_xauxo": "0"
+                "to_prv": "0"
             },
             "token_stats": {
                 "total": "3800000000000000000000",
                 "active": "0",
                 "inactive": "3800000000000000000000"
+            }
+        }
+    },
+    "PRV_distribution": {
+        "1": {
+            "address": "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79",
+            "token": {
+                "address": "0x8D9d6bd460712Ea491A06619A04743e0eF9d8278",
+                "symbol": "PRV",
+                "decimals": 18,
+                "amount": "1000000000000000000000"
+            },
+            "rewards": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "symbol": "WETH",
+                "decimals": 18,
+                "amount": "0"
+            },
+            "state": "active",
+            "notes": [
+                "active reward of 0"
+            ]
+        },
+        "2": {
+            "address": "0x91d1608675646b73069CaD97c88Daeb42418754f",
+            "token": {
+                "address": "0x8D9d6bd460712Ea491A06619A04743e0eF9d8278",
+                "symbol": "PRV",
+                "decimals": 18,
+                "amount": "0",
+                "staked_amount": null
+            },
+            "rewards": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "symbol": "WETH",
+                "decimals": 18,
+                "amount": "0"
+            },
+            "state": "inactive",
+            "notes": [
+                "Transfer of 0"
+            ]
+        }
+    },
+    "PRV_stats": {
+        "1": {
+            "stakers": 1,
+            "rewards": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "symbol": "WETH",
+                "decimals": 18,
+                "amount": "0",
+                "pro_rata": "0.000000000000000000",
+                "non_active_pro_rata": null,
+                "redistributed_total": "0",
+                "redistributed_to_stakers": "0",
+                "redistributed_transferred": "0"
+            },
+            "token_stats": {
+                "total": "1500000000000000000000",
+                "active": "1000000000000000000000",
+                "inactive": "500000000000000000000"
             }
         }
     }

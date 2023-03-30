@@ -1,0 +1,2 @@
+address,token_address,token_symbol,token_decimals,token_amount,rewards_address,rewards_symbol,rewards_decimals,rewards_amount,state
+0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79,0x8D9d6bd460712Ea491A06619A04743e0eF9d8278,PRV,18,1000000000000000000000,0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,WETH,18,0,active

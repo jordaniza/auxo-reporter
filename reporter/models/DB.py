@@ -9,6 +9,7 @@ from reporter.models import (
     TokenSummaryStats,
     ClaimsRecipient,
     Vote,
+    PRVRewardSummary,
     Proposal,
     Config,
 )
@@ -67,6 +68,20 @@ class DB(TinyDB):
                 "rewards": rewards.dict(),
                 "token_stats": tokenStats.dict(),
             },
+        )
+
+    def write_prv_stats(
+        self,
+        accounts: list[Account],
+        rewards: PRVRewardSummary,
+        tokenStats: TokenSummaryStats,
+    ):
+        self.table("PRV_stats").insert(
+            {
+                "stakers": len(accounts),
+                "rewards": rewards.dict(),
+                "token_stats": tokenStats.dict(),
+            }
         )
 
     def build_claims(self, token_name: AUXO_TOKEN_NAMES):

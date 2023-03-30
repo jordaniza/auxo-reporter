@@ -1,27 +1,17 @@
 from decimal import Decimal
-from typing import Tuple
 from copy import deepcopy
 from reporter.models import (
     Account,
     AccountState,
     Config,
-    ERC20Amount,
-    NormalizedRedistributionWeight as NRW,
+    PRV,
     RedistributionOption,
     RedistributionWeight,
     TokenSummaryStats,
     RedistributionContainer,
-    XAuxoRewardSummary,
+    PRVRewardSummary,
     RewardSummary,
-    XAuxoTaxCalculator,
 )
-
-from reporter.queries import (
-    get_prv_stakers,
-    prv_stakers_to_accounts,
-    get_prv_total_supply,
-)
-from reporter.rewards.common import compute_rewards
 
 
 def prv_active_rewards(
@@ -30,7 +20,7 @@ def prv_active_rewards(
 ) -> tuple[Decimal, Decimal]:
     """
     Divide PRV rewards into 2 buckets
-    - active rewards are based on number of staked xauxo
+    - active rewards are based on number of staked PRV
     - inactive are rewards that would have accrued to stakers if they were active
 
     Inactive rewards will get redistributed according to DAO policies
@@ -91,7 +81,7 @@ def transfer_redistribution(
         accounts.append(
             Account(
                 address=r.address,
-                token=ERC20Amount.xAUXO(amount="0"),
+                token=PRV(amount="0"),
                 rewards=conf.reward_token(amount=str(r.rewards)),
                 state=AccountState.INACTIVE,
                 notes=[f"Transfer of {r.rewards}"],
@@ -124,51 +114,7 @@ def redistribute(
 def create_prv_reward_summary(
     distribution_rewards: RewardSummary,
     container: RedistributionContainer,
-) -> XAuxoRewardSummary:
-    summary = XAuxoRewardSummary.from_existing(distribution_rewards)
+) -> PRVRewardSummary:
+    summary = PRVRewardSummary.from_existing(distribution_rewards)
     summary.add_redistribution_data(container.to_stakers, container.transferred)
     return summary
-
-
-def calculate_xauxo_rewards(config: Config, veauxo_rewards_to_xauxo: str):
-
-    # apply a tax to the total xauxo rewards
-    xauxo_rewards_pre_tax = config.reward_token(
-        veauxo_rewards_to_xauxo
-    )  # veauxo_reward_summaries.to_xauxo
-    xauxo_tax = XAuxoTaxCalculator(config.xauxo_tax_percentage, xauxo_rewards_pre_tax)
-
-    # fetch the list of accounts and compute active vs. total
-    xauxo_stakers = get_prv_stakers()
-    xauxo_accounts_in = prv_stakers_to_accounts(xauxo_stakers, config)
-    xauxo_stats = compute_prv_token_stats(xauxo_accounts_in, get_prv_total_supply())
-
-    # determine the split of active vs. inactive rewards,
-    # and redistribute inactive rewards according to the config parameters
-    (active, inactive) = prv_active_rewards(xauxo_stats, xauxo_tax)
-    (
-        redistributions,
-        stakers_rewards,
-        redistributed_to_stakers,
-    ) = normalize_redistributions(config.redistributions, active, inactive)
-    xauxo_accounts_out, redistributed_transfer = redistribute(
-        xauxo_accounts_in, redistributions, config
-    )
-
-    # action the rewards distribution across xauxo stakers
-    xauxo_stakers_net_redistributed = config.reward_token(str(int(stakers_rewards)))
-    xauxo_accounts_out, distribution_rewards = compute_rewards(
-        xauxo_stakers_net_redistributed,
-        Decimal(xauxo_stats.active),
-        xauxo_accounts_out,
-    )
-
-    # yield the summary for reporting
-    summary = create_prv_reward_summary(
-        distribution_rewards,
-        xauxo_tax,
-        Decimal(redistributed_to_stakers),
-        redistributed_transfer,
-    )
-
-    return summary, xauxo_accounts_out, xauxo_stats

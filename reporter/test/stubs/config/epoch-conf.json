@@ -1,7 +1,7 @@
 {
   "year": 2023,
   "month": 1,
-  "block_snapshot": 8731947,
+  "block_snapshot": 8743599,
   "distribution_window": 14,
   "rewards": {
     "amount": "1000000000000000000000",
@@ -11,5 +11,12 @@
   },
   "date": "2023-1",
   "start_timestamp": 1667246400,
-  "end_timestamp": 1669838399
+  "end_timestamp": 1669838399,
+  "redistributions": [
+    {
+      "weight": 100,
+      "address": "0x91d1608675646b73069CaD97c88Daeb42418754f",
+      "option": "transfer"
+    }
+  ]
 }

@@ -32,7 +32,7 @@ class MissingStakingManagerAddressError(Exception):
     pass
 
 
-class MissingDecayBalanceException(Exception):
+class MissingBoostBalanceException(Exception):
     pass
 
 

@@ -14,13 +14,13 @@ from reporter.models import (
     OnChainVote,
     RedistributionOption,
     RedistributionWeight,
-    Vote,
+    OffChainVote,
     Staker,
     ARVRewardSummary,
-    XAuxoRewardSummary,
+    PRVRewardSummary,
 )
 from reporter.queries import (
-    get_boosted_stakers,
+    boost_stakers,
     get_stakers,
     prv_stakers_to_accounts,
     get_prv_total_supply,
@@ -80,7 +80,7 @@ def init_mocks(monkeypatch):
     """
     monkeypatch.setattr(
         "reporter.queries.voters.parse_offchain_votes",
-        lambda _: parse_obj_as(list[Vote], mock_offchain_votes),
+        lambda _: parse_obj_as(list[OffChainVote], mock_offchain_votes),
     )
     monkeypatch.setattr(
         "reporter.queries.get_delegates",
@@ -153,7 +153,7 @@ def test_both(monkeypatch):
 
     #
     (veauxo_stakers_pre_decay, _) = get_stakers(config)
-    veauxo_stakers = get_boosted_stakers(veauxo_stakers_pre_decay, ENABLE_MOCKS)
+    veauxo_stakers = boost_stakers(veauxo_stakers_pre_decay, ENABLE_MOCKS)
 
     (votes, proposals, voters, non_voters) = get_vote_data(config, veauxo_stakers)
 
@@ -176,7 +176,7 @@ def test_both(monkeypatch):
         veauxo_stats,
     ) = distribute(config, veauxo_accounts_out)
 
-    #  and remove its rewards from the veAUXO Tree
+    #  and remove its rewards from the ARV Tree
     (veauxo_reward_summaries, veauxo_accounts_out) = separate_xauxo_rewards(
         staking_manager,
         ARVRewardSummary.from_existing(veauxo_reward_summaries),
@@ -195,13 +195,13 @@ def test_both(monkeypatch):
         veauxo_stats,
         staking_manager,
     )
-    build_claims(config, db, "reporter/test/stubs/db", "veAUXO")
+    build_claims(config, db, "reporter/test/stubs/db", "ARV")
 
     (
         xauxo_distribution_rewards,
         xauxo_accounts_out,
         xauxo_stats,
-    ) = calculate_xauxo_rewards(config, veauxo_reward_summaries.to_xauxo)
+    ) = calculate_xauxo_rewards(config, veauxo_reward_summaries.to_prv)
 
     write_xauxo_stats(
         db, xauxo_accounts_out, xauxo_distribution_rewards, xauxo_stats, staking_manager

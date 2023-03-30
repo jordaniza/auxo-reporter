@@ -6,10 +6,11 @@ from reporter.models import (
     Writer,
 )
 from reporter.queries import (
-    get_ARV_stakers,
+    get_arv_stakers_and_boost,
     get_voters,
     get_votes,
 )
+
 from reporter.rewards import distribute
 
 
@@ -17,7 +18,7 @@ from reporter.rewards import distribute
 getcontext().prec = 42
 
 
-def main(path_to_config) -> None:
+def run_arv(path_to_config) -> None:
     """
     The main() function is the entry point of the program and is responsible
     for orchestrating the various steps of the ARV token distribution process.
@@ -33,7 +34,7 @@ def main(path_to_config) -> None:
     db = DB(config, drop=True)
 
     # fetch ARV Stakers
-    stakers = get_ARV_stakers(config)
+    stakers = get_arv_stakers_and_boost(config)
 
     # fetch votes and proposals
     votes, proposals = get_votes(config)

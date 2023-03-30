@@ -2,7 +2,6 @@ from typing import Optional, cast
 from enum import Enum
 from pydantic import validator, root_validator, BaseModel
 from decimal import Decimal
-from functools import cached_property
 
 from reporter.models.types import EthereumAddress, BigNumber
 from reporter.errors import BadConfigException
@@ -11,7 +10,7 @@ from reporter.errors import BadConfigException
 class ERROR_MESSAGES:
     DUPLICATE_TRANSFER = "Passed Duplicate Transfer Addresses"
     DUPLICATE_XAUXO = "Passed multiple PRV redistributions"
-    VEAUXO_NOT_IMPLEMENTED = "ARV Redistribution is not supported yet"
+    ARV_NOT_IMPLEMENTED = "ARV Redistribution is not supported yet"
 
 
 class RedistributionOption(str, Enum):
@@ -21,7 +20,7 @@ class RedistributionOption(str, Enum):
     # redistribute rewards evenly amongst active xauxo stakers
     REDISTRIBUTE_PRV = "redistribute_prv"
 
-    # redistribute rewards evently amongst active veauxo stakers
+    # redistribute rewards evently amongst active arv stakers
     REDISTRIBUTE_ARV = "redistribute_arv"
 
 
@@ -98,15 +97,15 @@ class RedistributionContainer(BaseModel):
     A container for redistribution weights
     """
 
-    _redistributions: list[RedistributionWeight]
+    redistributions: list[RedistributionWeight]
     total_redistributed: Decimal = Decimal(0)
     distributed: bool = False
 
-    @cached_property
+    @property
     def total_weights(self) -> float:
-        return sum(r.weight for r in self._redistributions)
+        return sum(r.weight for r in self.redistributions)
 
-    @cached_property
+    @property
     def n_redistributions(self) -> list[NormalizedRedistributionWeight]:
         """
         Normalizes redistribution weights to a total of 1.
@@ -119,7 +118,7 @@ class RedistributionContainer(BaseModel):
                 total_weights=self.total_weights,
                 **r.dict(),
             )
-            for r in self._redistributions
+            for r in self.redistributions
         ]
 
     def redistribute(self, rewards: Decimal) -> None:

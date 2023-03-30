@@ -2,7 +2,7 @@ import json
 import pytest
 from unittest.mock import Mock
 from reporter.errors import *
-from reporter.models import Config, Vote
+from reporter.models import Config, OffChainVote
 from reporter.queries import graphql_iterate_query, extract_nested_graphql
 from reporter.test.conftest import (
     LIVE_CALLS_DISABLED,
@@ -53,7 +53,7 @@ def mock_votes_both(monkeypatch) -> None:
 
 
 def mock_ve_auxo_holders(monkeypatch) -> None:
-    return mock_token_holders(monkeypatch, "reporter/test/stubs/tokens/veauxo.json")
+    return mock_token_holders(monkeypatch, "reporter/test/stubs/tokens/arv.json")
 
 
 def mock_x_auxo_holders(monkeypatch) -> None:
@@ -188,4 +188,4 @@ def test_can_combine_votes(monkeypatch, config):
     assert len(mock_on_chain_votes) > 0
     assert len(mock_off_chain_votes) > 0
     assert len(combined) == len(mock_off_chain_votes) + len(mock_on_chain_votes)
-    assert all(isinstance(c, Vote) for c in combined)
+    assert all(isinstance(c, OffChainVote) for c in combined)

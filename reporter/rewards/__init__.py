@@ -1,3 +1,3 @@
 from reporter.rewards.common import *
-from reporter.rewards.xauxo import *
-from reporter.rewards.veauxo import *
+from reporter.rewards.prv import *
+from reporter.rewards.arv import *

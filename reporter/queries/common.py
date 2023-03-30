@@ -1,5 +1,4 @@
 from copy import deepcopy
-from dataclasses import dataclass
 from typing import Any, TypedDict, TypeVar, cast
 
 import requests
@@ -81,9 +80,9 @@ def graphql_iterate_query(
 def get_token_hodlers(conf: Config, token_address: EthereumAddress) -> list:
     """
     Fetch holders along with total balances grom the graph.
-    This can be used for Auxo, veAUXO and xAUXO but bear in mind that:
-    - veAUXO balances are subject to decay (for the purposes of rewards)
-    - xAUXO balances may be deposited into the RollStaker
+    This can be used for Auxo, ARV and PRV but bear in mind that:
+    - ARV balances are subject to decay (for the purposes of rewards)
+    - PRV balances may be deposited into the RollStaker
     """
     query = """
         query($token: String, $block: Int, $skip: Int) {
