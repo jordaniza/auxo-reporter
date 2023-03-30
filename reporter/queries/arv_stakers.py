@@ -5,8 +5,8 @@ from multicall import Call, Multicall  # type: ignore
 
 from reporter.env import ADDRESSES
 from reporter.errors import MissingBoostBalanceException
-from reporter.models import Config, EthereumAddress, ARVStaker, ARV
-from reporter.queries.common import get_token_hodlers, w3
+from reporter.models import Config, EthereumAddress, ARVStaker, ARV, Lock
+from reporter.queries import get_token_hodlers, w3
 
 """
 ARV Stakers get their total balance from the DecayOracle. 
@@ -82,6 +82,55 @@ def apply_boost(
     return new_stakers
 
 
+def to_lock(lock) -> Lock:
+    return Lock(
+        amount=lock[0],
+        lockedAt=lock[1],
+        lockDuration=lock[2],
+    )
+
+
+def get_locks(
+    addresses: list[EthereumAddress], conf: Config
+) -> dict[EthereumAddress, Lock]:
+    """
+    return array of locks for a given list of stakers
+    """
+
+    calls = [
+        Call(
+            # address to call:
+            ADDRESSES.TOKEN_LOCKER,
+            # signature + return value, with argument:
+            ["lockOf(address)((uint192,uint32,uint32))", s],
+            # return in a format of {[address]: (amount, lockedAt, lockDuration))}:
+            [[s, to_lock]],
+        )
+        for s in addresses
+    ]
+
+    # Immediately execute the multicall
+    return Multicall(calls, _w3=w3, block_id=conf.block_snapshot)()
+
+
+def add_locks_to_stakers(stakers: list[ARVStaker], conf: Config) -> list[ARVStaker]:
+    """
+    For a given list of accounts, fetch the lock information from the TokenLocker contract
+    """
+
+    # get all the addresses
+    addresses = [s.address for s in stakers]
+
+    # get all the locks
+    locks = get_locks(addresses, conf)
+
+    # add the locks to the accounts
+    for s in stakers:
+        cast(ARV, s.token).lock = locks[s.address]
+
+    return stakers
+
+
 def boost_stakers(stakers: list[ARVStaker], mock=False) -> list[ARVStaker]:
     boost_data = get_boosted_lock(stakers, mock)
     return apply_boost(stakers, boost_data)
@@ -89,4 +138,5 @@ def boost_stakers(stakers: list[ARVStaker], mock=False) -> list[ARVStaker]:
 
 def get_arv_stakers_and_boost(config: Config) -> list[ARVStaker]:
     stakers = get_arv_stakers(config)
-    return boost_stakers(stakers, config.block_snapshot)
+    stakers_with_locks = add_locks_to_stakers(stakers, config)
+    return boost_stakers(stakers_with_locks, config.block_snapshot)

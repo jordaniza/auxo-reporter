@@ -62,33 +62,14 @@ class RedistributionWeight(BaseModel):
             )
         return option
 
-
-class NormalizedRedistributionWeight(RedistributionWeight):
-    """
-    This class is used to normalize the weights of redistribution weights
-    Once instantiated, the total weights can be computed and then normalised between 0 and 1
-
-    """
-
-    total_weights: float
-    normalized_weight: Optional[float]
-
-    @root_validator
-    @classmethod
-    def normalize_weight(cls, values: dict):
-        """
-        We use a root validator to set the value of normalized weight directly
-        """
-        values["normalized_weight"] = values["weight"] / values["total_weights"]
-        return values
-
-    def assign_rewards(self, rewards: Decimal) -> None:
+    def set_reward(self, reward: Decimal, total_weights: float) -> None:
         """
         Takes rewards and multiplies by the normalized weight
         Records distributed as true and sets rewards to the computed value
         """
-        weighted_rewards = rewards * Decimal(cast(float, self.normalized_weight))
-        self.rewards = str(int(weighted_rewards))
+        normalized_weight = self.weight / total_weights
+        decimal_reward = reward * Decimal(normalized_weight)
+        self.rewards = str(int(decimal_reward))
         self.distributed = True
 
 
@@ -105,41 +86,26 @@ class RedistributionContainer(BaseModel):
     def total_weights(self) -> float:
         return sum(r.weight for r in self.redistributions)
 
-    @property
-    def n_redistributions(self) -> list[NormalizedRedistributionWeight]:
-        """
-        Normalizes redistribution weights to a total of 1.
-        This essentially converts the weights to percentages.
-        Total rewards will be allocated based on these percentages.
-        """
-
-        return [
-            NormalizedRedistributionWeight(
-                total_weights=self.total_weights,
-                **r.dict(),
-            )
-            for r in self.redistributions
-        ]
-
     def redistribute(self, rewards: Decimal) -> None:
         """
         Takes inactive rewards and distributes them according to redistribution weights
+        weights will be normalized and rewards will be distributed according to the option
         """
-        for r in self.n_redistributions:
-            r.assign_rewards(rewards)
+        for r in self.redistributions:
+            r.set_reward(rewards, self.total_weights)
         self.total_redistributed = Decimal(rewards)
         self.distributed = True
 
     @property
     def transferred(self) -> Decimal:
         """
-        Computes quantity of rewards transferred to a specific address
+        Fetches quantity of rewards transferred to a specific addresses
         """
         if not self.distributed:
             return Decimal(0)
 
         transferred = Decimal(0)
-        for r in self.n_redistributions:
+        for r in self.redistributions:
             if r.option == RedistributionOption.TRANSFER:
                 transferred += Decimal(r.rewards)
         return transferred
@@ -147,13 +113,13 @@ class RedistributionContainer(BaseModel):
     @property
     def to_stakers(self) -> Decimal:
         """
-        Computes quantity of rewards transferred  evenly amongst active stakers
+        Fetches quantity of rewards transferred evenly amongst active stakers
         """
         if not self.distributed:
             return Decimal(0)
 
         to_stakers = Decimal(0)
-        for r in self.n_redistributions:
+        for r in self.redistributions:
             if r.option == RedistributionOption.REDISTRIBUTE_PRV:
                 to_stakers += Decimal(r.rewards)
         return to_stakers

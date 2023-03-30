@@ -22,8 +22,8 @@ class TokenSummaryStats(BaseModel):
 
 class RewardSummary(ERC20Amount):
     """
-    Extends the Reward object by giving the `pro_rata` reward per veToken
-    Example: 1000 Wei per veToken
+    Extends the Reward object by giving the `pro_rata` reward per token
+    Example: 1000 Wei per ARV token
 
     Note: because tokens may have different decimal values, it can be tricky to display.
     For fractional reward tokens, we preserve the fraction up to 18 decimal points.
@@ -35,9 +35,6 @@ class RewardSummary(ERC20Amount):
     # and rewards paid per total tokens
     # they are different and both need to be logged
     non_active_pro_rata: Optional[BigNumber] = None
-
-    # active rewards
-    # inactive rewards?
 
     @validator("pro_rata")
     @classmethod
@@ -52,8 +49,8 @@ class ARVRewardSummary(RewardSummary):
     to_prv: BigNumber = "0"
 
     @staticmethod
-    def from_existing(summary: RewardSummary) -> ARVRewardSummary:
-        return ARVRewardSummary(**summary.dict())
+    def from_existing(summary: RewardSummary, to_prv) -> ARVRewardSummary:
+        return ARVRewardSummary(**summary.dict(), to_prv=str(int(to_prv)))
 
 
 class PRVRewardSummary(RewardSummary):

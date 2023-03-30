@@ -1,5 +1,6 @@
-from pydantic import BaseModel, parse_obj_as, validator
+from typing import Any
 from decimal import Decimal
+from pydantic import BaseModel, parse_obj_as, validator
 from reporter.errors import BadConfigException
 from reporter.models.ERC20 import ERC20Amount
 from reporter.models.Redistribution import (
@@ -83,13 +84,13 @@ class InputConfig(BaseModel):
         if len(redistribute_option_x_auxo) > 1:
             raise BadConfigException(ERROR_MESSAGES.DUPLICATE_XAUXO)
 
-        redistribute_option_ve_auxo = [
+        redistribute_option_arv = [
             l.option
             for l in loaded
             if l.option == RedistributionOption.REDISTRIBUTE_ARV
         ]
 
-        if len(redistribute_option_ve_auxo) > 0:
+        if len(redistribute_option_arv) > 0:
             raise BadConfigException(ERROR_MESSAGES.ARV_NOT_IMPLEMENTED)
 
         return loaded
@@ -108,9 +109,9 @@ class Config(InputConfig):
     end_timestamp: int
 
     @property
-    def arv_rewards(self) -> Decimal:
-        return Decimal(self.rewards.amount) * Decimal(self.arv_percentage)
+    def arv_rewards(self) -> str:
+        return str(int(Decimal(self.rewards.amount) * Decimal(self.arv_percentage)))
 
     @property
-    def prv_rewards(self) -> Decimal:
-        return Decimal(self.rewards.amount) * Decimal(1 - self.arv_percentage)
+    def prv_rewards(self) -> str:
+        return str(int(Decimal(self.rewards.amount) * Decimal(1 - self.arv_percentage)))

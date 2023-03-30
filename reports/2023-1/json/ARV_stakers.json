@@ -7,7 +7,11 @@
             "decimals": 18,
             "amount": "1500000000000000000000",
             "decayed_amount": "604930197287100000000",
-            "lock": null
+            "lock": {
+                "amount": "1500000000000000000000",
+                "lockDuration": 94608000,
+                "lockedAt": 1674130260
+            }
         }
     },
     {
@@ -18,7 +22,11 @@
             "decimals": 18,
             "amount": "1000000000000000000000",
             "decayed_amount": "403286798191400000000",
-            "lock": null
+            "lock": {
+                "amount": "1000000000000000000000",
+                "lockDuration": 94608000,
+                "lockedAt": 1674135888
+            }
         }
     },
     {
@@ -29,7 +37,11 @@
             "decimals": 18,
             "amount": "1000000000000000000000",
             "decayed_amount": "403286798191400000000",
-            "lock": null
+            "lock": {
+                "amount": "1000000000000000000000",
+                "lockDuration": 94608000,
+                "lockedAt": 1674130260
+            }
         }
     },
     {
@@ -40,7 +52,11 @@
             "decimals": 18,
             "amount": "100000000000000000000",
             "decayed_amount": "40328679819140000000",
-            "lock": null
+            "lock": {
+                "amount": "100000000000000000000",
+                "lockDuration": 94608000,
+                "lockedAt": 1674130260
+            }
         }
     },
     {
@@ -51,7 +67,11 @@
             "decimals": 18,
             "amount": "100000000000000000000",
             "decayed_amount": "40328679819140000000",
-            "lock": null
+            "lock": {
+                "amount": "100000000000000000000",
+                "lockDuration": 94608000,
+                "lockedAt": 1674130272
+            }
         }
     },
     {
@@ -62,7 +82,11 @@
             "decimals": 18,
             "amount": "100000000000000000000",
             "decayed_amount": "40328679819140000000",
-            "lock": null
+            "lock": {
+                "amount": "100000000000000000000",
+                "lockDuration": 94608000,
+                "lockedAt": 1674130260
+            }
         }
     }
 ]

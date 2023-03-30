@@ -16,7 +16,7 @@ from reporter.models import (
 
 def prv_active_rewards(
     prv_stats: TokenSummaryStats,
-    total_rewards: Decimal,
+    config: Config,
 ) -> tuple[Decimal, Decimal]:
     """
     Divide PRV rewards into 2 buckets
@@ -26,10 +26,15 @@ def prv_active_rewards(
     Inactive rewards will get redistributed according to DAO policies
     """
 
+    total_rewards = Decimal(config.prv_rewards)
     total_supply = Decimal(prv_stats.total)
-    pro_rata = Decimal(0) if total_supply == 0 else total_rewards / total_supply
-    inactive_rewards = Decimal(prv_stats.inactive) * pro_rata / total_supply
-    active_rewards = Decimal(prv_stats.active) * pro_rata / total_supply
+
+    if total_rewards == Decimal(0) or total_supply == Decimal(0):
+        return Decimal(0), Decimal(0)
+
+    # some division errors can occur here
+    inactive_rewards = Decimal(prv_stats.inactive) * total_rewards / total_supply
+    active_rewards = (Decimal(prv_stats.active) * total_rewards) / total_supply
 
     return active_rewards, inactive_rewards
 
@@ -105,7 +110,7 @@ def redistribute(
     accounts = deepcopy(_accounts)
 
     # go through the accounts and make any manual transfers
-    for r in container.n_redistributions:
+    for r in container.redistributions:
         if r.option == RedistributionOption.TRANSFER:
             transfer_redistribution(accounts, r, conf)
     return accounts

@@ -5,7 +5,20 @@
         "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         "symbol": "WETH",
         "decimals": 18,
-        "amount": "0"
+        "amount": "200000000000000029605"
     },
-    "recipients": {}
+    "recipients": {
+        "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79": {
+            "windowIndex": 14,
+            "accountIndex": 0,
+            "rewards": "200000000000000029605",
+            "token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        },
+        "0x91d1608675646b73069CaD97c88Daeb42418754f": {
+            "windowIndex": 14,
+            "accountIndex": 1,
+            "rewards": "100000000000000014802",
+            "token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        }
+    }
 }

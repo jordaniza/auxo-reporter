@@ -8,7 +8,7 @@ from reporter.models import (
     Config,
     ARVStaker,
     TokenSummaryStats,
-    RewardSummary,
+    ARVRewardSummary,
 )
 from reporter.rewards import compute_rewards
 
@@ -65,7 +65,7 @@ def compute_token_stats(accounts: list[Account]) -> TokenSummaryStats:
 
 def distribute(
     conf: Config, stakers: list[ARVStaker], voters: list[str]
-) -> Tuple[list[Account], RewardSummary, TokenSummaryStats]:
+) -> Tuple[list[Account], ARVRewardSummary, TokenSummaryStats]:
     """Compute the distribution for all accounts, and summarize the data"""
 
     accounts = init_account_rewards(stakers, voters, conf)
@@ -73,5 +73,6 @@ def distribute(
     distribution, distribution_rewards = compute_rewards(
         conf.rewards, Decimal(token_stats.active), accounts
     )
+    summary = ARVRewardSummary.from_existing(distribution_rewards, conf.prv_rewards)
 
-    return (distribution, distribution_rewards, token_stats)
+    return (distribution, summary, token_stats)

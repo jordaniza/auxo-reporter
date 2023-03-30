@@ -51,21 +51,25 @@ def run_prv(path_to_config) -> None:
 
     # compute the stats for the PRV token
     prv_stats = compute_prv_token_stats(accounts, supply)
-    (active_rewards, inactive_rewards) = prv_active_rewards(
-        prv_stats, config.prv_rewards
-    )
 
     # redistribute rewards accruing to inactive stakers
+    (active_rewards, inactive_rewards) = prv_active_rewards(prv_stats, config)
     container = initialize_container(inactive_rewards, config)
     accounts_redistributed = redistribute(accounts, container, config)
 
-    # action the rewards distribution across xauxo stakers
-    total_rewards = config.reward_token(str(int(container.to_stakers)))
     distribution, distribution_rewards = compute_rewards(
-        total_rewards,
+        config.reward_token(amount=str(active_rewards)),
         Decimal(prv_stats.active),  # active PRV not rewards
         accounts_redistributed,
     )
+
+    """
+    @Dev we have a small issue whereby it's not clear how many rewards are going:
+    - To active stakers
+    - Are redistributed
+    - How many rewards are distributed in TOTAL
+    
+    """
 
     # yield the summary for reporting
     summary = create_prv_reward_summary(distribution_rewards, container)

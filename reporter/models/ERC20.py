@@ -37,8 +37,8 @@ class ERC20Amount(ERC20Metadata):
 
 class Lock(BaseModel):
     amount: BigNumber
-    lockDuration: float
-    lockedAt: float
+    lockDuration: int
+    lockedAt: int
 
 
 class ARV(ERC20Amount):

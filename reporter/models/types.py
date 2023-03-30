@@ -1,4 +1,4 @@
-from typing import Literal, Any, Union
+from typing import Literal, Any
 
 # type aliases for clarity
 EthereumAddress = str

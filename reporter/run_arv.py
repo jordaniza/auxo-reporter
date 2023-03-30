@@ -53,7 +53,7 @@ def run_arv(path_to_config) -> None:
         proposals,
         voters,
         non_voters,
-        ARVRewardSummary.from_existing(reward_summaries),
+        reward_summaries,
         stats,
     )
 

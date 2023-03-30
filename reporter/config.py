@@ -70,7 +70,10 @@ def main() -> str:
 
     # write new config file
     with open(f"{epoch}/epoch-conf.json", "w+") as j:
-        j.write(json.dumps(conf.dict(), indent=4))
+        dct = conf.dict()
+        dct["prv_rewards"] = str(conf.prv_rewards)
+        dct["arv_rewards"] = str(conf.arv_rewards)
+        j.write(json.dumps(dct, indent=4))
 
     print(f"😃 Created a new epoch folder reports/{conf.date}")
 
