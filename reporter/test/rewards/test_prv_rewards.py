@@ -94,7 +94,7 @@ def test_transfer_redistribution(config: Config, ADDRESSES):
     )
 
     # Call the function
-    transfer_redistribution(accounts, r, config)
+    accounts = transfer_redistribution(accounts, r, config)
 
     # # Check that the rewards were redistributed correctly
     assert accounts[0].rewards.amount == "175"
@@ -109,7 +109,7 @@ def test_transfer_redistribution(config: Config, ADDRESSES):
         weight=10,
         option=RedistributionOption.TRANSFER,
     )
-    transfer_redistribution(accounts, r, config)
+    accounts = transfer_redistribution(accounts, r, config)
 
     # Check that the new account was added and rewards were set correctly
     assert len(accounts) == 3

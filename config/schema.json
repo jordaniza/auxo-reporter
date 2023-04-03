@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "year": {
+      "type": "integer"
+    },
+    "month": {
+      "type": "integer"
+    },
+    "block_snapshot": {
+      "type": "integer"
+    },
+    "distribution_window": {
+      "type": "integer"
+    },
+    "rewards": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string",
+          "minLength": 42,
+          "maxLength": 42
+        },
+        "decimals": {
+          "type": "integer"
+        },
+        "symbol": {
+          "type": "string"
+        }
+      },
+      "required": ["amount", "address", "decimals", "symbol"]
+    },
+    "arv_percentage": {
+      "type": "integer"
+    },
+    "redistributions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "weight": {
+            "type": "integer"
+          },
+          "address": {
+            "type": "string",
+            "minLength": 42,
+            "maxLength": 42
+          },
+          "option": {
+            "type": "string",
+            "enum": ["transfer", "redistribute_prv"]
+          }
+        },
+        "required": ["weight", "option"]
+      }
+    }
+  },
+  "required": ["year", "month", "block_snapshot", "distribution_window", "rewards", "arv_percentage", "redistributions"]
+}

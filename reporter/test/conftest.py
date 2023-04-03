@@ -11,6 +11,14 @@ from reporter.models import Config
 
 getcontext().prec = 45
 
+_addresses = [
+    "0x9bc33f6155eFAcc290c3C50E9B5b24b668562732",
+    "0xfDe38ad4bBbeC867e6cb4Bb31FbFB2074c959A83",
+    "0x8BB4C0b502f869af3B25166930507a6E8c3038D4",
+    "0x7Ac54A0406FA2B465E0D57C66597BE83A4b149fC",
+    "0xdeA708968f8dd520f5e2F0aB6785F28c98521ca8",
+]
+
 
 @pytest.fixture
 def config() -> Config:
@@ -19,13 +27,7 @@ def config() -> Config:
 
 @pytest.fixture()
 def ADDRESSES():
-    return [
-        "0x9bc33f6155eFAcc290c3C50E9B5b24b668562732",
-        "0xfDe38ad4bBbeC867e6cb4Bb31FbFB2074c959A83",
-        "0x8BB4C0b502f869af3B25166930507a6E8c3038D4",
-        "0x7Ac54A0406FA2B465E0D57C66597BE83A4b149fC",
-        "0xdeA708968f8dd520f5e2F0aB6785F28c98521ca8",
-    ]
+    return _addresses
 
 
 @dataclass

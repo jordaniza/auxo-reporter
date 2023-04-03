@@ -9,3 +9,7 @@ env/
 .DS_Store
 venv
 *.log
+reports/test*/
+
+# specific reports
+reports/2099-*

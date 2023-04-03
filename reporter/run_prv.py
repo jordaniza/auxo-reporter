@@ -59,7 +59,7 @@ def run_prv(path_to_config) -> None:
     accounts_redistributed = redistribute(accounts, container, config)
 
     distribution, distribution_rewards = compute_rewards(
-        config.reward_token(amount=str(active_rewards)),
+        config.reward_token(amount=str(active_rewards + container.to_stakers)),
         Decimal(prv_stats.active),  # active PRV not rewards
         accounts_redistributed,
     )

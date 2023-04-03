@@ -1,7 +1,8 @@
 import { readFileSync, writeFileSync } from "fs";
-import { createMerkleTree, createWithdrawalsTree } from "./create";
-import { postToIPFS } from "./ipfs";
+import { createWithdrawalsTree } from "./create";
 import * as dotenv from "dotenv";
+
+// WIP: The PRV Withdrawals tree
 
 dotenv.config();
 

@@ -1,0 +1,46 @@
+/// Example config file for the distribution script
+{
+  // import the schema relative to the config file for validation
+  "$schema": "./schema.json",
+  // epoch year and month, a directory will be created in the format {yyyy}-{mm}
+  "year": 2099,
+  // month from 1 - 12, pass 1,2 ... 9 instead of 01, 02 ... 09
+  "month": 1,
+  // block number where on chain readings will be taken
+  // it is up to the operator to ensure this block is within the epoch
+  "block_snapshot": 8743599,
+  // should be +1 from the previous window
+  "distribution_window": 99,
+  // total rewards to distribute this epoch
+  // we do not validate this in any way
+  "rewards": {
+    // amount in wei
+    "amount": "1000000000000000000000",
+    // token address
+    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    // token decimals
+    "decimals": 18,
+    // token symbol
+    "symbol": "WETH"
+  },
+  // whole percentage of total rewards to distribute to the ARV
+  // 100 - arv_percentage = percentage of rewards to distribute to PRV
+  "arv_percentage": 70,
+  // [optional] customize redistribution behaviour for PRV  
+  // this redistributes any rewards otherwise allocated to inactive stakers
+  "redistributions": [
+    {
+      // percentage of inactive rewards to redistribute, will be normalized
+      "weight": 50,
+      // transfer: send to a specific address
+      "option": "transfer",
+      // must be specfied if option is "transfer"
+      "address": "0x91d1608675646b73069CaD97c88Daeb42418754f"
+    },
+    {
+      "weight": 50,
+      // redistribute_prv: redistribute the weighted inactive rewards to existing PRV stakers
+      "option": "redistribute_prv"
+    }
+  ]
+}

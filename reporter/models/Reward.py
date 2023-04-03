@@ -58,7 +58,7 @@ class PRVRewardSummary(RewardSummary):
     def add_redistribution_data(self, to_stakers: Decimal, to_transfer: Decimal):
         self.redistributed_to_stakers = str(int(to_stakers))
         self.redistributed_transferred = str(int(to_transfer))
-
-        redistributed_total = int(to_stakers + to_transfer)
-        self.redistributed_total = str(redistributed_total)
-        self.amount = str(int(self.amount) + redistributed_total)
+        self.redistributed_total = str(int(to_stakers + to_transfer))
+        # redistributions to stakers already included as part of the distribution rewards
+        # so we don't want to double count them here.
+        self.amount = str(int(Decimal(self.amount)) + to_transfer)

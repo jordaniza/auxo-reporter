@@ -7,7 +7,6 @@
 # Setup the pyton env
 venv :; python -m venv venv 
 
-
 # install for JS and Python
 # run after activating the env
 setup :; make setup-py && yarn 
@@ -24,17 +23,17 @@ type-check :; python -m mypy reporter
 lint :; make type-check && make format
 
 ### TEST ###
+
+# Run tests once
 test :; python -m pytest -rfPs
 
+# run tests in watch mode
+test-watch :; python -m pytest_watch reporter/test -- -rfPs
+
+# Run tests with coverage
 coverage :; python -m pytest --cov=reporter --cov-report=term-missing
 
 ### SCRIPTS ###
-
-# scenario testing
-scenario-setup :; python -m pytest -rfPs reporter/test/scenario_testing/create_scenario.py
-scenario-test :; python -m pytest -rfPs reporter/test/test_xauxo_veauxo.py
-scenario :; make scenario-setup && make scenario-test
-
 
 # create the claims database
 claims :; python -m reporter.run

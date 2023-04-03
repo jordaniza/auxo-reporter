@@ -49,32 +49,6 @@ function rewardsTree(input: MerkleDistributorInput) {
   ]);
 }
 
-type WithdrawalDistributorInput = {
-  windowIndex: number;
-  maxAmount: string;
-  startBlock: number;
-  endBlock: number;
-  recipients: WithdrawalRecipient;
-};
-
-type WRecipientData = {
-  windowIndex: number;
-  amount: string;
-};
-
-type WithdrawalRecipient = {
-  [recipient: Address]: WRecipientData;
-};
-
-type WMRecipient = {
-  [recipient: Address]: WRecipientData & { proof: Bytes32[] };
-};
-
-type WMerkleDistributor = WithdrawalDistributorInput & {
-  root: Bytes32;
-  recipients: WMRecipient;
-};
-
 function withdrawalsTree(input: WithdrawalDistributorInput) {
   const inputData = Object.entries(input.recipients).map(([address, claim]) => [
     address,

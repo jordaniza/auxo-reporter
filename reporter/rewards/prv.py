@@ -62,15 +62,16 @@ def compute_prv_token_stats(
 
 
 def transfer_redistribution(
-    accounts: list[Account], r: RedistributionWeight, conf: Config
-) -> None:
+    _accounts: list[Account], r: RedistributionWeight, conf: Config
+) -> list[Account]:
     """
-    Redistributes rewards from a transfer to a specific account.
+    Redistributes rewards via a transfer to a specific account.
     Args:
         accounts: A list of Account objects representing the accounts that may receive the transfer.
         r: A RedistributionWeight object specifying the account address and transfer amount.
         conf: A Config object containing information on reward tokens.
     """
+    accounts = deepcopy(_accounts)
     # check to see if the account already is due to receive rewards
     found_account = False
     for account in accounts:
@@ -92,6 +93,7 @@ def transfer_redistribution(
                 notes=[f"Transfer of {r.rewards}"],
             )
         )
+    return accounts
 
 
 def redistribute(
@@ -112,7 +114,7 @@ def redistribute(
     # go through the accounts and make any manual transfers
     for r in container.redistributions:
         if r.option == RedistributionOption.TRANSFER:
-            transfer_redistribution(accounts, r, conf)
+            accounts = transfer_redistribution(accounts, r, conf)
     return accounts
 
 

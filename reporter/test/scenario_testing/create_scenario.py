@@ -80,56 +80,100 @@ class User:
     def create_prv_deposit(self):
         return self.PRV_amount
 
+    @staticmethod
+    def ssn(number):
+        """suppress scientific notation"""
+        return "{:.0f}".format(number)
+
 
 # setup the users
-users = [
-    # ARV Users
-    User(
-        address="0x0000000000000000000000000000000000000001",
-        active_onchain=True,
-    ),
-    User(
-        address="0x0000000000000000000000000000000000000002",
-        active_offchain=True,
-    ),
-    User(
-        address="0x0000000000000000000000000000000000000003",
-        active_onchain=True,
-        active_offchain=True,
-    ),
-    # Inactive ARV Users
-    User(
-        address="0x0000000000000000000000000000000000000004",
-    ),
-    User(
-        address="0x0000000000000000000000000000000000000005",
-    ),
-    # PRV Users
-    User(
-        address="0x0000000000000000000000000000000000000006",
-        ARV_amount="0",
-        PRV_amount=str(BASE_ARV_QTY),
-        staked_PRV=True,
-    ),
-    User(
-        address="0x0000000000000000000000000000000000000007",
-        ARV_amount="0",
-        PRV_amount=str(BASE_ARV_QTY),
-        staked_PRV=True,
-    ),
-    User(
-        address="0x0000000000000000000000000000000000000008",
-        ARV_amount="0",
-        PRV_amount=str(BASE_ARV_QTY),
-        staked_PRV=True,
-    ),
-    # unstaked PRV Users
-    User(
-        address="0x0000000000000000000000000000000000000009",
-        ARV_amount="0",
-        PRV_amount=str(BASE_ARV_QTY),
-        staked_PRV=False,
-    ),
+users_scenario = [
+    [
+        # ARV Users
+        User(
+            address="0x0000000000000000000000000000000000000001",
+            active_onchain=True,
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000002",
+            active_offchain=True,
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000003",
+            active_onchain=True,
+            active_offchain=True,
+        ),
+        # Inactive ARV Users
+        User(
+            address="0x0000000000000000000000000000000000000004",
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000005",
+        ),
+        # PRV Users
+        User(
+            address="0x0000000000000000000000000000000000000006",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=True,
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000007",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=True,
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000008",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=True,
+        ),
+        # unstaked PRV Users
+        User(
+            address="0x0000000000000000000000000000000000000009",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=False,
+        ),
+    ],
+    # next scenario
+    [
+        # ARV Users
+        User(
+            address="0x0000000000000000000000000000000000000001",
+            active_onchain=True,
+            boosted_amount=User.ssn((BASE_ARV_QTY * 2) / 3),
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000002",
+            active_offchain=True,
+            boosted_amount=User.ssn((BASE_ARV_QTY * 3) / 4),
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000003",
+            active_onchain=True,
+            active_offchain=True,
+        ),
+        # Inactive ARV Users
+        User(
+            address="0x0000000000000000000000000000000000000004",
+        ),
+        # PRV Users
+        User(
+            address="0x0000000000000000000000000000000000000006",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=True,
+        ),
+        # unstaked PRV Users
+        User(
+            address="0x0000000000000000000000000000000000000009",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=False,
+        ),
+    ],
 ]
 
 
@@ -143,6 +187,7 @@ def init_users(scenario: int):
     arv_locks = {}
     prv_depositeds = []
     prv_stakes = {}
+    users = users_scenario[scenario]
     for u in users:
         if u.active_onchain:
             votes_on.append(u.create_on_chain_vote())
@@ -159,7 +204,7 @@ def init_users(scenario: int):
             prv_holders.append(u.create_prv_holding())
         if int(u.ARV_amount) > 0:
             arv_holders.append(u.create_arv_holding())
-            arv_boost_data[u.address] = u.boosted_amount
+            arv_boost_data[u.address] = str(u.boosted_amount)
             arv_locks[u.address] = u.create_arv_lock()
 
     directory = f"reporter/test/scenario_testing/{scenario}"
