@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.mypy]
+exclude = ["reporter/old"]
+plugins = ["tinydb.mypy_plugin"]

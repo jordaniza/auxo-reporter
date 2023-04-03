@@ -7,7 +7,6 @@
 # Setup the pyton env
 venv :; python -m venv venv 
 
-
 # install for JS and Python
 # run after activating the env
 setup :; make setup-py && yarn 
@@ -24,12 +23,21 @@ type-check :; python -m mypy reporter
 lint :; make type-check && make format
 
 ### TEST ###
+
+# Run tests once
 test :; python -m pytest -rfPs
+
+# run tests in watch mode
+test-watch :; python -m pytest_watch reporter/test -- -rfPs
+
+# Run tests with coverage
+coverage :; python -m pytest --cov=reporter --cov-report=term-missing
 
 ### SCRIPTS ###
 
 # create the claims database
-claims :; python -m reporter.run all
+claims :; python -m reporter.run
 
 # Generate a merkle tree
 tree :; yarn create-merkle-tree
+tree-test :; yarn ts-node merkleTree/test.ts

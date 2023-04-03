@@ -1,0 +1,24 @@
+{
+  "year": 2099,
+  "month": 2,
+  "block_snapshot": 8743599,
+  "distribution_window": 99,
+  "rewards": {
+    "amount": "5000000000000000000000",
+    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "decimals": 18,
+    "symbol": "WETH"
+  },
+  "arv_percentage": 60,
+  "redistributions": [
+    {
+      "weight": 50,
+      "address": "0x91d1608675646b73069CaD97c88Daeb42418754f",
+      "option": "transfer"
+    },
+    {
+      "weight": 50,
+      "option": "redistribute_prv"
+    }
+  ]
+}

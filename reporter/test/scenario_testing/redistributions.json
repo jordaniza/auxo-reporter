@@ -1,0 +1,11 @@
+[
+  {
+    "weight": 50,
+    "option": "transfer",
+    "address": "0x0000000000000000000000000000000000000007"
+  },
+  {
+    "weight": 50,
+    "option": "redistribute_xauxo"
+  }
+]

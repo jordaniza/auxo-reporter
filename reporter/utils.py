@@ -1,7 +1,7 @@
-import csv, json
-from typing import TypeVar, Any
-from tinydb import TinyDB
-from reporter.types import Account, AccountState
+import csv
+import json
+from typing import Any, TypeVar
+from reporter.models import Account, AccountState
 
 # python insantiates generics separate to function definition
 T = TypeVar("T")
@@ -34,26 +34,16 @@ def filter_state(accounts: list[Account], state: AccountState) -> list[Account]:
     return list(filter(lambda a: a.state == state, accounts))
 
 
-def get_db(db_path: str, drop=False) -> TinyDB:
-    """
-    Get or instantiate existing tinyDB instance. Pass drop to clear.
-    """
-    db = TinyDB(
-        f"{db_path}/reporter-db.json",
-        indent=4,
-    )
-
-    if drop:
-        db.drop_tables()
-
-    return db
-
-
 def write_csv(data: Any, path: str, fieldnames: list[str]) -> None:
     with open(path, "w+") as f:
-        writer = csv.DictWriter(f, delimiter=",", fieldnames=fieldnames)
+        writer = csv.DictWriter(
+            f, delimiter=",", fieldnames=fieldnames, extrasaction="ignore"
+        )
         writer.writeheader()
-        writer.writerows(data)
+        if isinstance(data, list):
+            writer.writerows(data)
+        else:
+            writer.writerow(data)
 
 
 def write_list_csv(data: Any, path: str, fieldname: str) -> None:

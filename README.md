@@ -1,13 +1,30 @@
 # Auxo-Reporter
 
-Largely derived from the existing Pie Reporter, this repository contains the scripts used to compute the rewards for veAUXO and xAUXO holders.
+The Auxo reporter is used to create MerkleTrees for the Auxo protocol.
+It fetches data from The Graph, Snapshot and Directly from the blockchain, then calculates the rewards for each user and generates a MerkleTree of claims that can be uploaded on chain.
 
 ## Structure
 
 ```sh
+Makefile        # set of pre-defined scripts to get you started
+
+# Python files
+reporter/        # Python application to parse config data into rewards database
+  models/        # Classes and class behaviours
+  queries/       # on chain and subgraph queries
+  rewards/       # Reward calculations
+  test/          # Unit tests
+  run.py         # Main script to run the reporter
+  *.py           # other misc python files needed for the app
+reports/         # Output files relating to claims, voting, proposals, rewards and the final tree
+config/          # Config files for the reporter
+pyproject.toml   # Python tooling setup
+requirements.txt # Python dependencies
+
+# Typescript files
 merkleTree/     # Typescript MerkleTree generator with OpenZeppelin
-reporter/       # Python application to parse config data into rewards database
-reports/        # Output files relating to claims, voting, proposals, rewards and the final tree
+package.json    # NodeJS dependencies and scripts
+tsconfig.json   # Typescript config
 ```
 
 ## Installation
@@ -41,36 +58,30 @@ Run unit tests
 make test
 ```
 
+> An E2E test gets run and will write to the `reports` folder in the year 2099. Feel free to delete this.
+
 ## Running the Application
 
-Everything is built from a single config file:
+### Setting up the `.env`:
 
-```json
-{
-  "year": 2023, // must be YYYY
-  "month": 1, // must be MM or M
-  "block_snapshot": 16086234, // block to check stakers
-  "distribution_window": 14, // increment previous window by 1
-  "rewards":
-    // total rewards to distribute to all stakers
-    {
-      "token": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-      "amount": "509976000000000000000000",
-      "decimals": 18,
-      "symbol": "WETH"
-    }
-}
-```
+The [example env](.env.example) file requires you to grab a number of contract addresses, subgraph endpoints and API keys. This needs only doing once and a lot of these are pre-populated for you.
+
+### Running each epoch
+
+Provided the env is configured, everything else is built from a config file, you can find full details by reading the [example file](./config/example.jsonc).
+
+Feel free to copy this file and modify it to your needs.
 
 Create the database of claims and rewards:
 
 ```sh
+# You will be promoted to provide the path to your config file.
 make claims
 ```
 
 If all goes well, you should have a new folder `reports/{year}-{month}/`, i.e. `reports/2022-11/`.
 
-In it you will have the following files
+In it you will have the following files:
 
 ```sh
 csv/                  # Report data in CSV format
@@ -92,12 +103,8 @@ You will be asked whether to post to IPFS. If you want to do this, you will need
 
 ## Posting to IPFS
 
-You can use [Web.storage](https://web3.storage/tokens/) to create an API Key.
+You can use [Web3.storage](https://web3.storage/tokens/) to create an API Key.
 
 Add it to a `.env` file by copying the `.env.example` and adding your key.
 
 That's it! Just follow the instructions in the command prompt and you will automatically post to the IPFS and generate a link.
-
-## Issues
-
-Hop on over to the AUXO discord, [or contact me on github](https://github.com/jordaniza)

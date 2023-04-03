@@ -1,0 +1,24 @@
+{
+  "data": {
+    "voteCasts": [
+      {
+        "id": "7975917-125",
+        "receipt": { "reason": "favoloso" },
+        "support": { "support": 1 },
+        "proposal": {
+          "description": "# What kind of problem is this?\nIs this by any chance, A YOU PROBLEM?",
+          "canceled": false,
+          "executed": false,
+          "id": "0x963866ef17ee4f20377b52c296b7cd82b7f83c36/0x90a5fd76e4c51e67fd288d1e3affb3f30e2810531908a54ca90849fbe199ca3c",
+          "endBlock": "8026282",
+          "startBlock": "7975882",
+          "proposer": { "id": "0xff3ac96ef2a460369e0a460f112e6ba1b31764c9" },
+          "proposalCreated": [{ "timestamp": "1668779844" }]
+        },
+        "governor": { "id": "0x963866ef17ee4f20377b52c296b7cd82b7f83c36" },
+        "voter": { "id": "0xff3ac96ef2a460369e0a460f112e6ba1b31764c9" },
+        "timestamp": "1668781800"
+      }
+    ]
+  }
+}

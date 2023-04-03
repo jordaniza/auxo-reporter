@@ -17,27 +17,50 @@ function prompt(question: string) {
   });
 }
 
-async function main() {
-  const epoch = await prompt("What is the epoch {YYYY}-{MM}? eg: 2022-11\n");
+const destination = (token: string, epoch: unknown) => `reports/${epoch}/merkle-tree-${token}.json`;
 
-  const claims = JSON.parse(
-    readFileSync(`reports/${epoch}/claims.json`, { encoding: "utf8" })
-  );
-  const tree = JSON.stringify(createMerkleTree(claims), null, 4);
-  const destination = `reports/${epoch}/merkle-tree.json`;
-  writeFileSync(destination, tree);
-  console.log(`✨✨ Merkle Tree Created at ${destination} ✨✨`);
+const AUXO_TOKENS = ["veAUXO", "xAUXO"];
+
+export const makeTreeWithPrompt = async (epoch: unknown) => {
+  // create merkle trees for both tokens
+  AUXO_TOKENS.forEach((auxo_token) => {
+    // fetch the claims database
+    const claims = JSON.parse(
+      readFileSync(`reports/${epoch}/claims-${auxo_token}.json`, {
+        encoding: "utf8",
+      })
+    );
+
+    // create the tree as a string
+    const tree = JSON.stringify(createMerkleTree(claims), null, 4);
+
+    // write the file
+    const fileDestination = destination(auxo_token, epoch);
+    writeFileSync(fileDestination, tree);
+    console.log(`✨✨ ${auxo_token} Merkle Tree Created at ${fileDestination} ✨✨`);
+  });
 
   let post = (await prompt("Post to IPFS? [Y/n]\n")) as string;
+
   post = String(post).toLowerCase().trim();
+
   if (!post || post === "y") {
-    console.log("Posting to ipfs...");
-    await postToIPFS(destination);
+    for (const auxo_token of AUXO_TOKENS) {
+      console.log(`Posting ${auxo_token} Merkle Tree to ipfs...`);
+      await postToIPFS(destination(auxo_token, epoch));
+    }
   } else {
     console.warn("Did not post to IPFS");
   }
+};
+
+async function main() {
+  const epoch = await prompt("What is the epoch {YYYY}-{MM}? eg: 2022-11\n");
+  await makeTreeWithPrompt(epoch);
 }
 
-main()
-  .catch(console.error)
-  .finally(() => process.exit(0));
+// only run if called directly
+if (require.main === module)
+  main()
+    .catch(console.error)
+    .finally(() => process.exit(0));

@@ -1,0 +1,25 @@
+[
+  {
+    "weight": 100,
+    "address": "0x8723c6d035106a79242e8a94dd1f6770291cbdf8",
+    "option": "transfer"
+  },
+  {
+    "weight": 1000,
+    "option": "redistribute_xauxo"
+  },
+  {
+    "weight": 2000,
+    "option": "redistribute_xauxo"
+  },
+  {
+    "weight": 200,
+    "address": "0xF14de4cD3390C82F75c5222a4957f386bd20392e",
+    "option": "transfer"
+  },
+  {
+    "weight": 2,
+    "address": "0x951D2471b57BeDDC7117B4628f4e33f35a718812",
+    "option": "transfer"
+  }
+]

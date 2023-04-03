@@ -1,0 +1,23 @@
+{
+  "year": 2023,
+  "month": 12,
+  "block_snapshot": 8338692,
+  "distribution_window": 0,
+  "rewards": {
+    "amount": "1000000000000000000000",
+    "address": "0x8b7e1e0817CAC96bA81c4ce2794D93920FbF35C8",
+    "decimals": 18,
+    "symbol": "RWD"
+  },
+  "date": "2023-1",
+  "start_timestamp": 1674130000,
+  "end_timestamp": 1674140000,
+  "redistributions": [
+    {
+      "weight": 100,
+      "address": "0x91d1608675646b73069CaD97c88Daeb42418754f",
+      "option": "transfer"
+    }
+  ],
+  "xauxo_haircut": 0.5
+}

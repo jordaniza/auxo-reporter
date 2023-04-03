@@ -1,19 +1,10 @@
-import fire  # type: ignore
-from reporter import conf_generator, rewards, writer
-
-
-def main():
-    epoch = conf_generator.main()
-    rewards.main(epoch)
-    writer.main(epoch)
+import sys
+import config
+from reporter.run_prv import run_prv
+from reporter.run_arv import run_arv
 
 
 if __name__ == "__main__":
-    fire.Fire(
-        {
-            "conf": conf_generator.main,
-            "build": rewards.main,
-            "report": writer.main,
-            "all": main,
-        }
-    )
+    epoch = config.main()
+    run_arv(epoch)
+    run_prv(epoch)
