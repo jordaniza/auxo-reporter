@@ -18,10 +18,10 @@
             "rewards": "0"
         }
     ],
-    "arv_percentage": 0.7,
+    "arv_percentage": 70,
     "date": "2023-1",
     "start_timestamp": 1672531200,
     "end_timestamp": 1675209599,
-    "prv_rewards": "300000000000000044408",
-    "arv_rewards": "699999999999999955591"
+    "prv_rewards": "300000000000000000000",
+    "arv_rewards": "700000000000000000000"
 }

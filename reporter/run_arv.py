@@ -46,7 +46,6 @@ def run_arv(path_to_config) -> None:
     distribution, reward_summaries, stats = distribute(config, stakers, voters)
 
     # update the DB and create claims
-    db.write_claims_and_distribution(distribution, "ARV")
     db.write_arv_stats(
         stakers,
         votes,
@@ -56,6 +55,7 @@ def run_arv(path_to_config) -> None:
         reward_summaries,
         stats,
     )
+    db.write_claims_and_distribution(distribution, "ARV")
 
     # write our data to individual CSV and JSON files
     writer.to_csv_and_json([s.dict() for s in stakers], "ARV_stakers")

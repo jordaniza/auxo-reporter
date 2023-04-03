@@ -1,4 +1,6 @@
 import os
+from typing import Optional
+from decimal import Decimal
 from tinydb import TinyDB, where
 from utils import write_json
 from reporter.models import (
@@ -10,17 +12,22 @@ from reporter.models import (
     ClaimsRecipient,
     Vote,
     PRVRewardSummary,
+    RewardSummary,
     Proposal,
     Config,
 )
-from decimal import Decimal
+from reporter.errors import MissingSummaryError
 
 
 class DB(TinyDB):
     config: Config
+    arv_summary: Optional[ARVRewardSummary]
+    prv_summary: Optional[PRVRewardSummary]
 
     def __init__(self, conf: Config, drop=False, **kwargs):
         self.config = conf
+        self.arv_summary = None
+        self.prv_summary = None
         path = f"reports/{conf.date}/reporter-db.json"
 
         # check if the directory exists
@@ -69,20 +76,33 @@ class DB(TinyDB):
                 "token_stats": tokenStats.dict(),
             },
         )
+        self.arv_summary = rewards
 
     def write_prv_stats(
         self,
         accounts: list[Account],
-        rewards: PRVRewardSummary,
+        rewards: RewardSummary,
         tokenStats: TokenSummaryStats,
     ):
+        prv_summary = PRVRewardSummary.from_existing(rewards)
         self.table("PRV_stats").insert(
             {
                 "stakers": len(accounts),
-                "rewards": rewards.dict(),
+                "rewards": prv_summary.dict(),
                 "token_stats": tokenStats.dict(),
             }
         )
+        self.prv_summary = prv_summary
+
+    def get_aggregate_rewards(self, token_name: AUXO_TOKEN_NAMES):
+        if token_name == "ARV":
+            if not self.arv_summary:
+                raise MissingSummaryError("ARV Summary not found")
+            return self.arv_summary
+        elif token_name == "PRV":
+            if not self.prv_summary:
+                raise MissingSummaryError("PRV Summary not found")
+            return self.prv_summary
 
     def build_claims(self, token_name: AUXO_TOKEN_NAMES):
         distribution = self.table(f"{token_name}_distribution")
@@ -103,7 +123,7 @@ class DB(TinyDB):
         claims = {
             "windowIndex": self.config.distribution_window,
             "chainId": 1,
-            "aggregateRewards": distribution.all()[0]["rewards"],
+            "aggregateRewards": self.get_aggregate_rewards(token_name).dict(),
             "recipients": recipients,
         }
         write_json(claims, f"reports/{self.config.date}/claims-{token_name}.json")

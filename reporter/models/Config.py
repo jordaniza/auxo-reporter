@@ -19,7 +19,7 @@ class InputConfig(BaseModel):
     :param `distribution_window`: should be incrementing by +1 from last distribution
     :param `rewards`: list of reward tokens, amount and decimals to be distributed across all recipients
     :param `redistributions`: list of redistribution options and weights
-    :param `arv_percentage`: percentage of rewards to be distributed to ARV
+    :param `arv_percentage`: percentage of rewards to be distributed to ARV (whole percentage)
     """
 
     year: int
@@ -28,7 +28,7 @@ class InputConfig(BaseModel):
     distribution_window: int
     rewards: ERC20Amount
     redistributions: list[RedistributionWeight] = []
-    arv_percentage: float = 0.7
+    arv_percentage: int = 70
 
     def reward_token(self, amount: str = "0") -> ERC20Amount:
         """
@@ -41,7 +41,7 @@ class InputConfig(BaseModel):
     @validator("arv_percentage")
     @classmethod
     def validate_arv_percentage(cls, arv_percentage):
-        if arv_percentage > 1 or arv_percentage < 0:
+        if arv_percentage > 100 or arv_percentage <= 0:
             raise BadConfigException("ARV percentage out of range")
         return arv_percentage
 
@@ -55,7 +55,7 @@ class InputConfig(BaseModel):
     @validator("year")
     @classmethod
     def validate_year(cls, _year):
-        if _year < 2023 or _year > 2025:
+        if _year < 2023:
             raise BadConfigException(f"Year is likely incorrect, adjust in {__file__}")
         return int(_year)
 
@@ -109,9 +109,18 @@ class Config(InputConfig):
     end_timestamp: int
 
     @property
-    def arv_rewards(self) -> str:
-        return str(int(Decimal(self.rewards.amount) * Decimal(self.arv_percentage)))
+    def arv_rewards(self) -> int:
+        return int((int(self.rewards.amount) * self.arv_percentage) / 100)
 
     @property
-    def prv_rewards(self) -> str:
-        return str(int(Decimal(self.rewards.amount) * Decimal(1 - self.arv_percentage)))
+    def prv_rewards(self) -> int:
+        prv_percentage = 100 - self.arv_percentage
+        return int((int(self.rewards.amount) * prv_percentage) / 100)
+
+    @property
+    def arv_erc20(self) -> ERC20Amount:
+        return self.reward_token(str(self.arv_rewards))
+
+    @property
+    def prv_erc20(self) -> ERC20Amount:
+        return self.reward_token(str(self.prv_rewards))

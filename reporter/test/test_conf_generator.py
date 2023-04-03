@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from reporter.config import create_conf, main, load_conf, get_epoch_dates
+from reporter.config import create_conf, main, load_conf, get_epoch_dates, EpochBoundary
 import datetime
 
 PATH = "reporter/test/stubs/config/"
@@ -32,20 +32,20 @@ def test_get_dates():
     # Test case 1: January 2023
     month = 1
     year = 2023
-    expected_output = (
+    expected_output = EpochBoundary(
         datetime.date(2023, 1, 1),
-        datetime.datetime(2023, 1, 1, 0, 0, 0),
-        datetime.datetime(2023, 1, 31, 23, 59, 59),
+        datetime.datetime(2023, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
+        datetime.datetime(2023, 1, 31, 23, 59, 59, tzinfo=datetime.timezone.utc),
     )
     assert get_epoch_dates(month, year) == expected_output
 
     # Test case 2: February 2024 (leap year)
     month = 2
     year = 2024
-    expected_output = (
+    expected_output = EpochBoundary(
         datetime.date(2024, 2, 1),
-        datetime.datetime(2024, 2, 1, 0, 0, 0),
-        datetime.datetime(2024, 2, 29, 23, 59, 59),
+        datetime.datetime(2024, 2, 1, 0, 0, 0, tzinfo=datetime.timezone.utc),
+        datetime.datetime(2024, 2, 29, 23, 59, 59, tzinfo=datetime.timezone.utc),
     )
     assert get_epoch_dates(month, year) == expected_output
 

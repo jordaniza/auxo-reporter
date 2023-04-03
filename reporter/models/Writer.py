@@ -95,6 +95,7 @@ class Writer:
         else:
             csv_data = self.flatten_json(data)
             keys = csv_data.keys()
+            csv_data = [csv_data]
         self.to_json(data, name)
         self.to_csv(csv_data, name, keys)
 

@@ -1,6 +1,5 @@
 import pytest
 from datetime import datetime
-from decimal import Decimal
 from reporter.models import (
     InputConfig,
     RedistributionWeight,
@@ -8,6 +7,7 @@ from reporter.models import (
     Config,
     BadConfigException,
 )
+from decimal import Decimal
 
 
 @pytest.fixture
@@ -31,11 +31,11 @@ def input_config() -> InputConfig:
                 address="0x2", weight=2, option=RedistributionOption.TRANSFER
             ),
         ],
-        arv_percentage=0.7,
+        arv_percentage=70,
     )
 
 
-@pytest.mark.parametrize("pc", [-0.01, 1.01])
+@pytest.mark.parametrize("pc", [101, -1])
 def test_validate_arv_percentage(input_config: InputConfig, pc):
     dct = input_config.dict()
 
@@ -53,7 +53,7 @@ def test_validate_month(input_config: InputConfig, month):
         InputConfig(**dct)
 
 
-@pytest.mark.parametrize("year", [0, 13])
+@pytest.mark.parametrize("year", [2022])
 def test_validate_year(input_config: InputConfig, year):
     dct = input_config.dict()
 
@@ -119,12 +119,14 @@ def config(input_config: InputConfig) -> Config:
     )
 
 
-@pytest.mark.parametrize("split", [0.5, 0.6, 0.75, 0.8, 0.9, 1])
+@pytest.mark.parametrize("split", [0.5, 0.6, 0.7, 0.75, 0.8, 0.9, 1])
 def test_conf_reward_split(config: Config, split):
     dct = config.dict()
 
-    dct["arv_percentage"] = split
+    dct["arv_percentage"] = split * 100
 
     config = Config(**dct)
 
-    assert round(config.arv_rewards) == 1000 * split
+    expected_prv = round(1000 * (1 - split))
+    assert int(config.arv_rewards) == 1000 * split
+    assert int(config.prv_rewards) == expected_prv

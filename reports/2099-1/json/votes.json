@@ -1,0 +1,66 @@
+[
+    {
+        "voter": "0x0000000000000000000000000000000000000002",
+        "choice": 1,
+        "created": 1669837834,
+        "proposal": {
+            "id": "0x63cea594dceb8f8ffae3654a306a6791f60e15a6acae266ab4b71e8d6dff2b76",
+            "title": "DOUGH burn proposal",
+            "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+            "created": 1669643881,
+            "start": 1669644000,
+            "end": 1670248740,
+            "choices": [
+                "FOR",
+                "AGAINST",
+                "MORE INFO"
+            ]
+        }
+    },
+    {
+        "voter": "0x0000000000000000000000000000000000000003",
+        "choice": 1,
+        "created": 1669837834,
+        "proposal": {
+            "id": "0x63cea594dceb8f8ffae3654a306a6791f60e15a6acae266ab4b71e8d6dff2b76",
+            "title": "DOUGH burn proposal",
+            "author": "0xaBf26352aAdAAa1CabFfB3a55e378bac6BF15791",
+            "created": 1669643881,
+            "start": 1669644000,
+            "end": 1670248740,
+            "choices": [
+                "FOR",
+                "AGAINST",
+                "MORE INFO"
+            ]
+        }
+    },
+    {
+        "voter": "0x0000000000000000000000000000000000000001",
+        "choice": 1,
+        "created": 1668781800,
+        "proposal": {
+            "id": "0x963866ef17ee4f20377b52c296b7cd82b7f83c36/0x90a5fd76e4c51e67fd288d1e3affb3f30e2810531908a54ca90849fbe199ca3c",
+            "title": "# What kind of problem is this?\nIs this by any chance, A YOU PROBLEM?",
+            "author": "0xff3ac96Ef2A460369E0a460F112E6bA1B31764C9",
+            "created": 1668779844,
+            "start": 7975882,
+            "end": 8026282,
+            "choices": null
+        }
+    },
+    {
+        "voter": "0x0000000000000000000000000000000000000003",
+        "choice": 1,
+        "created": 1668781800,
+        "proposal": {
+            "id": "0x963866ef17ee4f20377b52c296b7cd82b7f83c36/0x90a5fd76e4c51e67fd288d1e3affb3f30e2810531908a54ca90849fbe199ca3c",
+            "title": "# What kind of problem is this?\nIs this by any chance, A YOU PROBLEM?",
+            "author": "0xff3ac96Ef2A460369E0a460F112E6bA1B31764C9",
+            "created": 1668779844,
+            "start": 7975882,
+            "end": 8026282,
+            "choices": null
+        }
+    }
+]

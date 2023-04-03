@@ -1,0 +1,51 @@
+{
+    "windowIndex": 1,
+    "chainId": 1,
+    "aggregateRewards": {
+        "amount": "70000000000000000000",
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "decimals": 18,
+        "symbol": "WETH",
+        "pro_rata": "58780117916694",
+        "to_xauxo": "30000000000000000000"
+    },
+    "recipients": {
+        "0x00BA3CA0B6Df1486c912893d9f288311A60ED753": {
+            "windowIndex": 1,
+            "accountIndex": 0,
+            "rewards": "10000000000000000000",
+            "proof": [
+                "0x44eb7a099d3cfcf158e9d82fc4b9a5df3b0518dc79285d2e501368d687b131be",
+                "0x78a694294f33d24534c8e0d42e2ef7d4bfa60c2f3a611907239cacb6b243c0b9"
+            ]
+        },
+        "0xd18a54f89603Fe4301b29EF6a8ab11b9Ba24f139": {
+            "windowIndex": 1,
+            "accountIndex": 1,
+            "rewards": "15000000000000000000",
+            "proof": [
+                "0xd954afa5241956e771c9c13a531ef90f544efefc394b4bdccf1e09f9ca81be48",
+                "0x3aa5f49f43df2672bc5dcf3dcd1e7ae7203ace920eeab52e39ec8e5ff964ae76"
+            ]
+        },
+        "0x1A1087Bf077f74fb21fD838a8a25Cf9Fe0818450": {
+            "windowIndex": 1,
+            "accountIndex": 2,
+            "rewards": "20000000000000000000",
+            "proof": [
+                "0x737201c3ade6d0bffc0b57f56ba06620cbf1ab0c36470942feba066e93a54a88",
+                "0x78a694294f33d24534c8e0d42e2ef7d4bfa60c2f3a611907239cacb6b243c0b9"
+            ]
+        },
+        "0x63BCe354DBA7d6270Cb34dAA46B869892AbB3A79": {
+            "windowIndex": 1,
+            "accountIndex": 3,
+            "rewards": "25000000000000000000",
+            "proof": [
+                "0xc2156f30cb3ed2d3bd1eac97ace7c88eac95e2b82e98e4cc0f388489e515111b",
+                "0x3aa5f49f43df2672bc5dcf3dcd1e7ae7203ace920eeab52e39ec8e5ff964ae76"
+            ]
+        }
+    },
+    "root": "0xa3dcd97c8f4f0dfe98c12970dfb1fcc12345452784cb9d22fee9dbd3dcbcc294"
+}

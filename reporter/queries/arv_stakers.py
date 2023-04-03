@@ -28,16 +28,12 @@ MulticallReturnBoost = dict[EthereumAddress, Union[int, str]]
 
 
 def get_boosted_lock(
-    stakers: list[ARVStaker], block_number: int, mock=False
+    stakers: list[ARVStaker],
+    block_number: int,
 ) -> MulticallReturnBoost:
     """
     Multicall out to the DecayOracle to fetch the boosted/decayed balance of ARV for each address
     """
-
-    if mock:
-        with open("reporter/test/scenario_testing/decay_veauxo.json") as j:
-            mock_multicall_response = json.load(j)
-        return mock_multicall_response
 
     calls = [
         Call(

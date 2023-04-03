@@ -38,3 +38,7 @@ class MissingBoostBalanceException(Exception):
 
 class MissingDBException(Exception):
     pass
+
+
+class MissingSummaryError(Exception):
+    pass

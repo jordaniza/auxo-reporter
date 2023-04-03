@@ -1,0 +1,40 @@
+{
+    "windowIndex": 99,
+    "chainId": 1,
+    "aggregateRewards": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18,
+        "amount": "300000000000000000000",
+        "pro_rata": "0.074999999999999997",
+        "redistributed_total": "75000000000000000000",
+        "redistributed_to_stakers": "0",
+        "redistributed_transferred": "75000000000000000000"
+    },
+    "recipients": {
+        "0x0000000000000000000000000000000000000006": {
+            "windowIndex": 99,
+            "accountIndex": 0,
+            "rewards": "75000000000000000000",
+            "token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        },
+        "0x0000000000000000000000000000000000000007": {
+            "windowIndex": 99,
+            "accountIndex": 1,
+            "rewards": "75000000000000000000",
+            "token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        },
+        "0x0000000000000000000000000000000000000008": {
+            "windowIndex": 99,
+            "accountIndex": 2,
+            "rewards": "75000000000000000000",
+            "token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        },
+        "0x91d1608675646b73069CaD97c88Daeb42418754f": {
+            "windowIndex": 99,
+            "accountIndex": 3,
+            "rewards": "75000000000000000000",
+            "token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+        }
+    }
+}

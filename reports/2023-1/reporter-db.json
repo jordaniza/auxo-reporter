@@ -114,10 +114,8 @@
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "1000000000000000000000",
-                "pro_rata": "0.000000000000000000",
-                "non_active_pro_rata": null,
-                "to_prv": "300000000000000044408"
+                "amount": "700000000000000000000",
+                "pro_rata": "0.000000000000000000"
             },
             "token_stats": {
                 "total": "3800000000000000000000",
@@ -139,11 +137,11 @@
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "200000000000000029605"
+                "amount": "200000000000000000000"
             },
             "state": "active",
             "notes": [
-                "active reward of 200000000000000029605"
+                "active reward of 200000000000000000000"
             ]
         },
         "2": {
@@ -159,11 +157,11 @@
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "100000000000000014802"
+                "amount": "100000000000000000000"
             },
             "state": "inactive",
             "notes": [
-                "Transfer of 100000000000000014802"
+                "Transfer of 100000000000000000000"
             ]
         }
     },
@@ -174,12 +172,11 @@
                 "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
                 "symbol": "WETH",
                 "decimals": 18,
-                "amount": "200000000000000029605.333333333333333333333",
-                "pro_rata": "0.200000000000000039",
-                "non_active_pro_rata": null,
-                "redistributed_total": "100000000000000014802",
+                "amount": "300000000000000000000",
+                "pro_rata": "0.200000000000000011",
+                "redistributed_total": "100000000000000000000",
                 "redistributed_to_stakers": "0",
-                "redistributed_transferred": "100000000000000014802"
+                "redistributed_transferred": "100000000000000000000"
             },
             "token_stats": {
                 "total": "1500000000000000000000",

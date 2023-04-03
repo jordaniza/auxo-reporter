@@ -3,45 +3,51 @@ Create the JSON Object for on-chain and off-chain votes, using the existing mock
 https://docs.google.com/spreadsheets/d/11-WOWGjQDJJpKAUqJN0JsxzyMGhoEhV0Pt-isW5NHxk/edit#gid=0
 """
 import json
+import os
 from dataclasses import dataclass
+import time
 
 from pydantic import parse_file_as
 
-from reporter.env import ADDRESSES
-from reporter.models import OffChainVote
+from reporter.models import Vote as OffChainVote
 from reporter.utils import write_json
 
-BASE_VEAUXO_QTY = 100
+# initial ARV amount for each user
+BASE_ARV_QTY = 1000 * 10**18
 
 
 @dataclass
 class User:
     address: str
-    ARV_amount: str = str(BASE_VEAUXO_QTY)
-    boosted_amount: str = str(BASE_VEAUXO_QTY)
-    eligible_amount: str = str(BASE_VEAUXO_QTY)
-    active_on_chain: bool = False
-    active_snapshot: bool = False
-    xAUXO_amount: str = "0"
-    staked_xAUXO: bool = False
+    ARV_amount: str = str(BASE_ARV_QTY)
+    boosted_amount: str = str(BASE_ARV_QTY)
+    active_onchain: bool = False
+    active_offchain: bool = False
+    PRV_amount: str = "0"
+    staked_PRV: bool = False
+    _stubs_dir: str = "reporter/test/stubs"
 
     @property
     def _template_on_chain(self):
-        with open("reporter/test/stubs/votes/onchain-votes.json") as j:
+        with open(f"{self._stubs_dir}/votes/onchain-votes.json") as j:
             api_resp = json.load(j)
         return api_resp["data"]["voteCasts"][0]
 
     @property
     def _template_off_chain(self) -> OffChainVote:
-        return parse_file_as(
-            list[OffChainVote], "reporter/test/stubs/votes/votes.json"
-        )[0]
+        return parse_file_as(list[OffChainVote], f"{self._stubs_dir}/votes/votes.json")[
+            0
+        ]
 
     @property
     def _template_token_holding(self):
-        with open("reporter/test/stubs/tokens/xauxo.json") as j:
+        with open(f"{self._stubs_dir}/tokens/prv.json") as j:
             api_resp = json.load(j)
         return api_resp["data"]["erc20Contract"]["balances"][0]
+
+    @property
+    def is_active(self):
+        return self.active_onchain or self.active_offchain
 
     def create_on_chain_vote(self):
         template = self._template_on_chain
@@ -53,103 +59,144 @@ class User:
         template.voter = self.address
         return template
 
-    def create_xauxo_holding(self):
+    def create_prv_holding(self):
         template = self._template_token_holding
         template["account"] = {"id": self.address}
-        template["valueExact"] = self.xAUXO_amount
+        template["valueExact"] = self.PRV_amount
         return template
 
-    def create_veauxo_holding(self):
+    def create_arv_holding(self):
         template = self._template_token_holding
         template["account"] = {"id": self.address}
         template["valueExact"] = self.ARV_amount
         return template
 
+    def create_arv_lock(self):
+        return [self.ARV_amount, int(time.time()), 86400 * 36]
+
+    def create_prv_depositor(self):
+        return {"user": self.address}
+
+    def create_prv_deposit(self):
+        return self.PRV_amount
+
 
 # setup the users
 users = [
+    # ARV Users
     User(
-        "0x0000000000000000000000000000000000000001",
-        active_on_chain=True,
-        boosted_amount=str(BASE_VEAUXO_QTY / 2),
+        address="0x0000000000000000000000000000000000000001",
+        active_onchain=True,
     ),
     User(
-        "0x0000000000000000000000000000000000000002",
-        active_snapshot=True,
-        boosted_amount=str(BASE_VEAUXO_QTY * (3 / 4)),
+        address="0x0000000000000000000000000000000000000002",
+        active_offchain=True,
     ),
     User(
-        "0x0000000000000000000000000000000000000003",
-        active_on_chain=True,
-        active_snapshot=True,
-        boosted_amount=str(BASE_VEAUXO_QTY / 2),
+        address="0x0000000000000000000000000000000000000003",
+        active_onchain=True,
+        active_offchain=True,
+    ),
+    # Inactive ARV Users
+    User(
+        address="0x0000000000000000000000000000000000000004",
     ),
     User(
-        "0x0000000000000000000000000000000000000004",
-        eligible_amount="0",
-        boosted_amount=str(BASE_VEAUXO_QTY * (3 / 4)),
+        address="0x0000000000000000000000000000000000000005",
     ),
+    # PRV Users
     User(
-        ADDRESSES.STAKING_MANAGER,
-        eligible_amount="0",
-        ARV_amount="400",
-    ),
-    User(
-        "0x0000000000000000000000000000000000000005",
-        xAUXO_amount="200",
+        address="0x0000000000000000000000000000000000000006",
         ARV_amount="0",
-        eligible_amount="0",
-        boosted_amount="0",
+        PRV_amount=str(BASE_ARV_QTY),
+        staked_PRV=True,
     ),
     User(
-        "0x0000000000000000000000000000000000000006",
+        address="0x0000000000000000000000000000000000000007",
         ARV_amount="0",
-        eligible_amount="0",
-        xAUXO_amount="200",
-        staked_xAUXO=True,
-        boosted_amount="0",
+        PRV_amount=str(BASE_ARV_QTY),
+        staked_PRV=True,
+    ),
+    User(
+        address="0x0000000000000000000000000000000000000008",
+        ARV_amount="0",
+        PRV_amount=str(BASE_ARV_QTY),
+        staked_PRV=True,
+    ),
+    # unstaked PRV Users
+    User(
+        address="0x0000000000000000000000000000000000000009",
+        ARV_amount="0",
+        PRV_amount=str(BASE_ARV_QTY),
+        staked_PRV=False,
     ),
 ]
 
 
-def test_go():
+def init_users(scenario: int):
     votes_on = []
     votes_off = []
-    xauxo_stakers = {}
-    xauxo_holders = []
-    veauxo_holders = []
-    veauxo_boost_data = {}
+    prv_stakers = {}
+    prv_holders = []
+    arv_holders = []
+    arv_boost_data = {}
+    arv_locks = {}
+    prv_depositeds = []
+    prv_stakes = {}
     for u in users:
-        if u.active_on_chain:
+        if u.active_onchain:
             votes_on.append(u.create_on_chain_vote())
-        if u.active_snapshot:
+        if u.active_offchain:
             votes_off.append(u.create_off_chain_vote())
-        if u.staked_xAUXO:
-            xauxo_stakers[u.address] = True
+        if u.staked_PRV or int(u.PRV_amount) > 0:
+            prv_depositeds.append(u.create_prv_depositor())
+        if u.staked_PRV:
+            prv_stakers[u.address] = True
+            prv_stakes[u.address] = u.create_prv_deposit()
         else:
-            xauxo_stakers[u.address] = False
-        if int(u.xAUXO_amount) > 0:
-            xauxo_holders.append(u.create_xauxo_holding())
+            prv_stakers[u.address] = False
+        if int(u.PRV_amount) > 0:
+            prv_holders.append(u.create_prv_holding())
         if int(u.ARV_amount) > 0:
-            veauxo_holders.append(u.create_veauxo_holding())
-            veauxo_boost_data[u.address] = u.boosted_amount
+            arv_holders.append(u.create_arv_holding())
+            arv_boost_data[u.address] = u.boosted_amount
+            arv_locks[u.address] = u.create_arv_lock()
+
+    directory = f"reporter/test/scenario_testing/{scenario}"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     write_json(
         {"data": {"voteCasts": [v for v in votes_on]}},
-        "reporter/test/scenario_testing/votes_on.json",
+        directory + "/votes_on.json",
     )
     write_json(
-        [v.dict() for v in votes_off], "reporter/test/scenario_testing/votes_off.json"
+        [v.dict() for v in votes_off],
+        directory + "/votes_off.json",
     )
 
     write_json(
-        {"data": {"erc20Contract": {"balances": [v for v in veauxo_holders]}}},
-        "reporter/test/scenario_testing/mock_veauxo.json",
+        {"data": {"erc20Contract": {"balances": [v for v in arv_holders]}}},
+        directory + "/mock_arv.json",
     )
     write_json(
-        {"data": {"erc20Contract": {"balances": [x for x in xauxo_holders]}}},
-        "reporter/test/scenario_testing/mock_xauxo.json",
+        {"data": {"erc20Contract": {"balances": [x for x in prv_holders]}}},
+        directory + "/mock_prv.json",
     )
 
-    write_json(xauxo_stakers, "reporter/test/scenario_testing/xauxo_stakers.json")
-    write_json(veauxo_boost_data, "reporter/test/scenario_testing/veauxo_boosted.json")
+    write_json(
+        {"data": {"depositeds": prv_depositeds}}, directory + "/prv_depositeds.json"
+    )
+
+    write_json(prv_stakes, directory + "/prv_stakes.json")
+
+    write_json(prv_stakers, directory + "/prv_stakers.json")
+    write_json(arv_boost_data, directory + "/arv_boosted.json")
+
+    write_json(arv_locks, directory + "/arv_locks.json")
+    return users
+
+
+if __name__ == "__main__":
+    SCENARIO_NUMBER = 999
+    init_users(SCENARIO_NUMBER)

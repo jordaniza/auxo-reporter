@@ -2,7 +2,7 @@ import json
 import pytest
 from unittest.mock import Mock
 from reporter.errors import *
-from reporter.models import Config, OffChainVote
+from reporter.models import Config, Vote as OffChainVote
 from reporter.queries import graphql_iterate_query, extract_nested_graphql
 from reporter.test.conftest import (
     LIVE_CALLS_DISABLED,

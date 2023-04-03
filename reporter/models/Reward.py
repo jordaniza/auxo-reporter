@@ -30,11 +30,6 @@ class RewardSummary(ERC20Amount):
     """
 
     pro_rata: BigNumber
-    # we need to confirm:
-    # we need to have a view of rewards paid per active token
-    # and rewards paid per total tokens
-    # they are different and both need to be logged
-    non_active_pro_rata: Optional[BigNumber] = None
 
     @validator("pro_rata")
     @classmethod
@@ -46,11 +41,9 @@ class RewardSummary(ERC20Amount):
 
 
 class ARVRewardSummary(RewardSummary):
-    to_prv: BigNumber = "0"
-
     @staticmethod
-    def from_existing(summary: RewardSummary, to_prv) -> ARVRewardSummary:
-        return ARVRewardSummary(**summary.dict(), to_prv=str(int(to_prv)))
+    def from_existing(summary: RewardSummary) -> ARVRewardSummary:
+        return ARVRewardSummary(**summary.dict())
 
 
 class PRVRewardSummary(RewardSummary):
@@ -65,4 +58,7 @@ class PRVRewardSummary(RewardSummary):
     def add_redistribution_data(self, to_stakers: Decimal, to_transfer: Decimal):
         self.redistributed_to_stakers = str(int(to_stakers))
         self.redistributed_transferred = str(int(to_transfer))
-        self.redistributed_total = str(int(to_stakers + to_transfer))
+
+        redistributed_total = int(to_stakers + to_transfer)
+        self.redistributed_total = str(redistributed_total)
+        self.amount = str(int(self.amount) + redistributed_total)

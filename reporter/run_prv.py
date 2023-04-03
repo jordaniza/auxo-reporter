@@ -54,6 +54,7 @@ def run_prv(path_to_config) -> None:
 
     # redistribute rewards accruing to inactive stakers
     (active_rewards, inactive_rewards) = prv_active_rewards(prv_stats, config)
+
     container = initialize_container(inactive_rewards, config)
     accounts_redistributed = redistribute(accounts, container, config)
 
@@ -63,24 +64,16 @@ def run_prv(path_to_config) -> None:
         accounts_redistributed,
     )
 
-    """
-    @Dev we have a small issue whereby it's not clear how many rewards are going:
-    - To active stakers
-    - Are redistributed
-    - How many rewards are distributed in TOTAL
-    
-    """
-
     # yield the summary for reporting
     summary = create_prv_reward_summary(distribution_rewards, container)
 
     # update the DB and create claims
-    db.write_claims_and_distribution(distribution, "PRV")
     db.write_prv_stats(
         accounts,
-        PRVRewardSummary.from_existing(summary),
+        summary,
         prv_stats,
     )
+    db.write_claims_and_distribution(distribution, "PRV")
 
     # write our data to individual CSV and JSON files
     writer.to_csv_and_json([s.dict() for s in accounts], "PRV_stakers")

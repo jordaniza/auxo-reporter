@@ -9,7 +9,7 @@
     "decimals": 18,
     "symbol": "WETH"
   },
-  "arv_percentage": 0.7,
+  "arv_percentage": 70,
   "redistributions": [
     {
       "weight": 100,

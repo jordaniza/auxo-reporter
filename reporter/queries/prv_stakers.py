@@ -54,7 +54,6 @@ def get_prv_staked_balances(
     """
     For a given list of stakers, fetch the balance in the current epoch that is earning rewards
     """
-
     calls = [
         Call(
             # address to call:

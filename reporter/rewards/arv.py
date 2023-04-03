@@ -71,8 +71,8 @@ def distribute(
     accounts = init_account_rewards(stakers, voters, conf)
     token_stats = compute_token_stats(accounts)
     distribution, distribution_rewards = compute_rewards(
-        conf.rewards, Decimal(token_stats.active), accounts
+        conf.arv_erc20, Decimal(token_stats.active), accounts
     )
-    summary = ARVRewardSummary.from_existing(distribution_rewards, conf.prv_rewards)
+    summary = ARVRewardSummary.from_existing(distribution_rewards)
 
     return (distribution, summary, token_stats)

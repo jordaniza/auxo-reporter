@@ -1,0 +1,44 @@
+{
+  "data": {
+    "erc20Contract": {
+      "decimals": 18,
+      "id": "0x4c30e0025dd25b60906803b5bd74ebfa9de3d035",
+      "name": "Auxo Active Rewards Vault",
+      "symbol": "ARV",
+      "totalSupply": {
+        "value": "203339.49301972871",
+        "valueExact": "203339493019728710000000"
+      },
+      "balances": [
+        {
+          "account": {
+            "id": "0x63bce354dba7d6270cb34daa46b869892abb3a79"
+          },
+          "value": "200000",
+          "valueExact": "200000000000000000000000"
+        },
+        {
+          "account": {
+            "id": "0xff3ac96ef2a460369e0a460f112e6ba1b31764c9"
+          },
+          "value": "3278",
+          "valueExact": "3278000000000000000000"
+        },
+        {
+          "account": {
+            "id": "0x675e75a6f90e0610d150f415e4406b4989aad023"
+          },
+          "value": "60.49301972871",
+          "valueExact": "60493019728710000000"
+        },
+        {
+          "account": {
+            "id": "0x8723c6d035106a79242e8a94dd1f6770291cbdf8"
+          },
+          "value": "1",
+          "valueExact": "1000000000000000000"
+        }
+      ]
+    }
+  }
+}

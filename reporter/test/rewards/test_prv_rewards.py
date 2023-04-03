@@ -22,21 +22,13 @@ def token_summary_stats():
     return TokenSummaryStats(total=100, active=75, inactive=25)
 
 
-ADDRESSES = [
-    "0x9bc33f6155eFAcc290c3C50E9B5b24b668562732",
-    "0xfDe38ad4bBbeC867e6cb4Bb31FbFB2074c959A83",
-    "0x8BB4C0b502f869af3B25166930507a6E8c3038D4",
-    "0x7Ac54A0406FA2B465E0D57C66597BE83A4b149fC",
-    "0xdeA708968f8dd520f5e2F0aB6785F28c98521ca8",
-]
-
 # TODO 0 or 1?
 @pytest.mark.parametrize("prv_reward_pc", [0.2, 0.25, 0.3, 0.5, 0.7])
 def test_prv_active_rewards_active_and_inactive_rewards(
     token_summary_stats: TokenSummaryStats, config: Config, prv_reward_pc: float
 ):
 
-    config.arv_percentage = 1 - prv_reward_pc
+    config.arv_percentage = 100 - int(prv_reward_pc * 100)
     active, inactive = prv_active_rewards(token_summary_stats, config)
     total_prv = Decimal(config.rewards.amount) * Decimal(prv_reward_pc)
 
@@ -73,7 +65,7 @@ def test_prv_active_rewards_no_supply(
     assert inactive_rewards == Decimal(0)
 
 
-def test_transfer_redistribution(config: Config):
+def test_transfer_redistribution(config: Config, ADDRESSES):
 
     # Set up test data
     accounts = [
@@ -127,7 +119,7 @@ def test_transfer_redistribution(config: Config):
     assert accounts[2].state == AccountState.INACTIVE
 
 
-def test_redistribute(config: Config):
+def test_redistribute(config: Config, ADDRESSES):
     conf = config
     # Set up test data
     accounts = [

@@ -1,5 +1,6 @@
 import itertools
 from decimal import Decimal
+from copy import deepcopy
 
 from reporter.models import (
     Account,
@@ -11,19 +12,19 @@ from reporter.models import (
 
 def distribute_rewards(account: Account, pro_rata: Decimal) -> Account:
     """
-    Add the rewards for he account, for a particular token.
+    Add the rewards for the account, for a particular token.
     :param `account`: the account to add rewards to
     :param `pro_rata`: quantity of reward token to be add per token units held by account
-
-    Slashed accounts will be appended a reward entry with an amount equal to zero
     """
-
+    # pass by reference can cause errors, so we allocate a new item in memory
+    new_account = deepcopy(account)
     if account.state == AccountState.ACTIVE:
         account_reward = int(pro_rata * Decimal(account.token.amount))
-        account.rewards.amount = str(Decimal(account.rewards.amount) + account_reward)
-        account.notes.append(f"active reward of {account_reward}")
-
-    return account
+        new_account.rewards.amount = str(
+            Decimal(account.rewards.amount) + account_reward
+        )
+        new_account.notes.append(f"active reward of {account_reward}")
+    return new_account
 
 
 def compute_rewards(
@@ -38,9 +39,6 @@ def compute_rewards(
     :param `total_active_tokens`: tokens belonging to active stakers (total - inactive)
     :param `accounts`: base array of Account objects that have yet to have rewards added
     """
-
-    # compute rewards per veToken held, for the given reward token
-
     pro_rata = (
         0
         if total_active_tokens == 0
@@ -54,6 +52,11 @@ def compute_rewards(
             itertools.repeat(pro_rata),
         )
     )
+    """ 
+    the active rewards are correctly inserted as a string
+    but the total is incorrect
+    
+    """
 
     # add to summary
     distribution_rewards = RewardSummary(
