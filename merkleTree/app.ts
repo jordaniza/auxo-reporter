@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { createMerkleTree } from "./create";
 import { postToIPFS } from "./ipfs";
 import * as dotenv from "dotenv";
+import { validateTree } from "./validate";
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ function prompt(question: string) {
 
 const destination = (token: string, epoch: unknown) => `reports/${epoch}/merkle-tree-${token}.json`;
 
-const AUXO_TOKENS = ["veAUXO", "xAUXO"];
+const AUXO_TOKENS = ["ARV", "PRV"];
 
 export const makeTreeWithPrompt = async (epoch: unknown) => {
   // create merkle trees for both tokens
@@ -32,11 +33,13 @@ export const makeTreeWithPrompt = async (epoch: unknown) => {
     );
 
     // create the tree as a string
-    const tree = JSON.stringify(createMerkleTree(claims), null, 4);
+    const tree = createMerkleTree(claims);
+    if (!validateTree(tree)) throw new Error("Invalid tree");
+    const strTree = JSON.stringify(tree, null, 4);
 
     // write the file
     const fileDestination = destination(auxo_token, epoch);
-    writeFileSync(fileDestination, tree);
+    writeFileSync(fileDestination, strTree);
     console.log(`✨✨ ${auxo_token} Merkle Tree Created at ${fileDestination} ✨✨`);
   });
 
