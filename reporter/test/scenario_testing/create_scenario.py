@@ -172,9 +172,15 @@ users_scenario = [
             PRV_amount=str(BASE_ARV_QTY),
             staked_PRV=True,
         ),
-        # unstaked PRV Users
         User(
             address="0x0000000000000000000000000000000000000007",
+            ARV_amount="0",
+            PRV_amount=str(User.ssn(BASE_ARV_QTY)),
+            staked_PRV=True,
+        ),
+        # unstaked PRV Users
+        User(
+            address="0x0000000000000000000000000000000000000008",
             ARV_amount="0",
             PRV_amount=str(BASE_ARV_QTY),
             staked_PRV=False,

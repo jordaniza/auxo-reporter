@@ -254,10 +254,10 @@ def test_e2e_1(monkeypatch):
     - The inactive voters didn't get anything
     - The active voters got the correct amount
     - Number of voters and non-voters is correct
-    1000 ARV @ 67% ~51.06382979
-    1000 ARV @ 75% ~57.44680851
-    1000 ARV ~76.59574468
-    1500 ARV ~114.893617
+    1000 ARV @ 67% ~51.06382979 WETH
+    1000 ARV @ 75% ~57.44680851 WETH
+    1000 ARV ~76.59574468 WETH
+    1500 ARV ~114.893617 WETH
     """
 
     with open(f"{epoch}/claims-ARV.json", "r") as f:
@@ -311,7 +311,21 @@ def test_e2e_1(monkeypatch):
     - The stakers got the correct amount
     - redistributions happened correctly
 
-    
+    We'd expect 200 WETH distributed as follows
+    2 active PRV users and 1 inactive
+
+    Each active PRV user gets 200/3 = 66.666666666
+    The remaining 66 is split 50/50
+    A transfer to the manual address of 33.33
+    33.33 split 50/50 between the 2 active PRV users:
+
+    Final totals:
+    Active user 1: 66.666666666 + 33.33/2 = 83.33
+    Active user 2: 66.666666666 + 33.33/2 = 83.33
+    Inactive user: 0
+    Manual address: 33.33
+    Total distributed: 83.33 + 83.33 + 33.33 = 200
+
     """
 
     with open(f"{epoch}/claims-PRV.json", "r") as f:
@@ -332,3 +346,13 @@ def test_e2e_1(monkeypatch):
         for u in generate_users
         if not u.staked_PRV
     )
+
+    with open(f"{epoch}/claims-PRV.json", "r") as f:
+        claims_prv = json.load(f)
+
+    recipients = claims_prv["recipients"]
+    rewards = lambda i: recipients[generate_users[i].address]["rewards"]
+
+    assert rewards(5) == "83333333333333333333"
+    assert rewards(6) == "83333333333333333333"
+    assert list(recipients.values())[-1]["rewards"] == "33333333333333333333"
