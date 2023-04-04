@@ -72,7 +72,8 @@ def apply_boost(
             )
 
         # store original amount for reference
-        cast(ARV, s.token).decayed_amount = str(boosted_balance)
+        cast(ARV, s.token).non_decayed_amount = s.token.amount
+        s.token.amount = str(boosted_balance)
         new_stakers.append(s)
 
     return new_stakers

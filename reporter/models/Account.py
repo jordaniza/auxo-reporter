@@ -1,5 +1,6 @@
 from __future__ import annotations
 from enum import Enum
+from typing import Union
 from pydantic import BaseModel, validator
 import eth_utils as eth
 
@@ -39,6 +40,8 @@ class ARVStaker(Staker):
     ARVStaker is a user with a token balance
     """
 
+    token: ARV
+
     def __init__(self, arv_holding: str, **kwargs):
         super().__init__(token=ARV(amount=arv_holding), **kwargs)
 
@@ -47,6 +50,8 @@ class PRVStaker(Staker):
     """
     PRVStaker is a user with a token balance
     """
+
+    token: PRV
 
     def __init__(self, prv_holding: str, **kwargs):
         super().__init__(token=PRV(amount=prv_holding), **kwargs)

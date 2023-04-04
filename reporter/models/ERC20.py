@@ -44,8 +44,8 @@ class Lock(BaseModel):
 class ARV(ERC20Amount):
     """ARV token"""
 
-    # decayed holding of ARV factoring in the user's lock time
-    decayed_amount: Optional[BigNumber]
+    # original amount of tokens, excluding the boost/decay mechanic
+    non_decayed_amount: Optional[BigNumber]
 
     # details of the Auxo Lock
     lock: Optional[Lock]

@@ -155,9 +155,15 @@ users_scenario = [
             active_onchain=True,
             active_offchain=True,
         ),
-        # Inactive ARV Users
         User(
             address="0x0000000000000000000000000000000000000004",
+            active_onchain=True,
+            ARV_amount=str(1500 * 10**18),
+            boosted_amount=str(1500 * 10**18),
+        ),
+        # Inactive ARV Users
+        User(
+            address="0x0000000000000000000000000000000000000005",
         ),
         # PRV Users
         User(
@@ -168,7 +174,7 @@ users_scenario = [
         ),
         # unstaked PRV Users
         User(
-            address="0x0000000000000000000000000000000000000009",
+            address="0x0000000000000000000000000000000000000007",
             ARV_amount="0",
             PRV_amount=str(BASE_ARV_QTY),
             staked_PRV=False,
