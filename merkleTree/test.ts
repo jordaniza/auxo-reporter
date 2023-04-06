@@ -5,7 +5,7 @@ async function test() {
     [10, 11].map((m) =>
       makeTreesWithPrompt(`test/2008-${m}`, {
         ipfsPrompt: false,
-        latest: true,
+        latest: false,
       })
     )
   );
