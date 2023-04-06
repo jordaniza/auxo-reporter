@@ -2,6 +2,9 @@
 type Address = string;
 type Bytes32 = string;
 
+// declare a type of literals either ARV or  PRV as const types
+type AuxoTokenSymbol = "ARV" | "PRV";
+
 type BaseReward = { address: Address; amount: string };
 type Reward = BaseReward & {
   decimals: number;
@@ -20,8 +23,10 @@ type Recipient = {
   [recipient: Address]: RecipientData;
 };
 
+type MRecipientData = RecipientData & { proof: Bytes32[] };
+
 type MRecipient = {
-  [recipient: Address]: RecipientData & { proof: Bytes32[] };
+  [recipient: Address]: MRecipientData;
 };
 
 type MerkleDistributorInput = {
@@ -34,6 +39,21 @@ type MerkleDistributorInput = {
 type MerkleDistributor = MerkleDistributorInput & {
   root: Bytes32;
   recipients: MRecipient;
+};
+
+type MerkleTreesByMonth = {
+  [month: string]: {
+    [token in AuxoTokenSymbol]: MerkleDistributor;
+  };
+};
+
+// Extract the merkle tree by user and split it by 2 different tokens: ARV & PRV
+type MerkleTreesByUser = {
+  [user: string]: {
+    [token in AuxoTokenSymbol]: {
+      [month: string]: MRecipientData;
+    };
+  };
 };
 
 type WithdrawalDistributorInput = {

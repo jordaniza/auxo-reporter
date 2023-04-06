@@ -26,6 +26,7 @@ lint :; make type-check && make format
 
 # Run tests once
 test :; python -m pytest -rfPs
+test-e2e :; python -m pytest -rfPs reporter/test/scenario_testing/test_e2e.py
 
 # run tests in watch mode
 test-watch :; python -m pytest_watch reporter/test -- -rfPs

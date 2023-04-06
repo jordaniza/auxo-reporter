@@ -45,7 +45,7 @@ Meaning with
 
 """
 import json
-import pytest
+from typing import Callable
 
 from reporter import config
 from reporter.run_arv import run_arv as arv_main
@@ -61,21 +61,8 @@ def _read_mock(file_name, SCENARIO_NUMBER):
     return mock
 
 
-def test_e2e_0(monkeypatch):
-    scenario = 0
-    generate_users = init_users(scenario)
-
-    def read_mock(file_name):
-        return _read_mock(file_name, 0)
-
+def init_e2e_arv_mocks(monkeypatch, read_mock: Callable):
     # path to the input file
-    monkeypatch.setattr(
-        "builtins.input",
-        lambda *_: f"./reporter/test/scenario_testing/inputs/scenario-{scenario}.json",
-    )
-
-    epoch = config.main()
-
     # get_token_hodlers
     monkeypatch.setattr(
         "reporter.queries.arv_stakers.get_token_hodlers",
@@ -108,6 +95,44 @@ def test_e2e_0(monkeypatch):
 
     # filter proposals?
     monkeypatch.setattr("builtins.input", lambda _: "N")
+
+
+def init_e2e_prv_mocks(monkeypatch, read_mock: Callable, generate_users):
+    # get_prv_total_supply
+    monkeypatch.setattr(
+        "reporter.run_prv.get_prv_total_supply",
+        lambda *_: sum(int(u.PRV_amount) for u in generate_users),
+    )
+
+    # get_all_prv_depositors
+    monkeypatch.setattr(
+        "reporter.queries.prv_stakers.get_all_prv_depositors",
+        lambda *_: read_mock("prv_depositeds.json")["data"]["depositeds"],
+    )
+
+    # ger_prv_staked_balances
+    monkeypatch.setattr(
+        "reporter.queries.prv_stakers.get_prv_staked_balances",
+        lambda *_: read_mock("prv_stakes.json"),
+    )
+
+
+def test_e2e_0(monkeypatch):
+    scenario = 0
+    generate_users = init_users(scenario)
+
+    def read_mock(file_name):
+        return _read_mock(file_name, scenario)
+
+    # path to the input file
+    monkeypatch.setattr(
+        "builtins.input",
+        lambda *_: f"./reporter/test/scenario_testing/inputs/scenario-{scenario}.json",
+    )
+
+    epoch = config.main()
+
+    init_e2e_arv_mocks(monkeypatch, read_mock)
 
     # run ARV
     arv_main(epoch)
@@ -148,25 +173,7 @@ def test_e2e_0(monkeypatch):
         for u in active_users
     )
 
-    # get_prv_total_supply
-    monkeypatch.setattr(
-        "reporter.run_prv.get_prv_total_supply",
-        lambda *_: sum(int(u.PRV_amount) for u in generate_users),
-    )
-
-    # get_all_prv_depositors
-    monkeypatch.setattr(
-        "reporter.queries.prv_stakers.get_all_prv_depositors",
-        lambda *_: read_mock("prv_depositeds.json")["data"]["depositeds"],
-    )
-
-    # ger_prv_staked_balances
-    monkeypatch.setattr(
-        "reporter.queries.prv_stakers.get_prv_staked_balances",
-        lambda *_: read_mock("prv_stakes.json"),
-    )
-
-    # run PRV
+    init_e2e_prv_mocks(monkeypatch, read_mock, generate_users)
     prv_main(epoch)
 
     """
@@ -202,7 +209,7 @@ def test_e2e_1(monkeypatch):
     generate_users = init_users(scenario)
 
     def read_mock(file_name):
-        return _read_mock(file_name, 1)
+        return _read_mock(file_name, scenario)
 
     # path to the input file
     monkeypatch.setattr(
@@ -212,38 +219,7 @@ def test_e2e_1(monkeypatch):
 
     epoch = config.main()
 
-    # get_token_hodlers
-    monkeypatch.setattr(
-        "reporter.queries.arv_stakers.get_token_hodlers",
-        lambda *_: read_mock("mock_arv.json")["data"]["erc20Contract"]["balances"],
-    )
-
-    # get locks
-    monkeypatch.setattr(
-        "reporter.queries.arv_stakers.get_locks",
-        lambda *_: read_mock("arv_locks.json"),
-    )
-
-    # get_boosted_lock
-    monkeypatch.setattr(
-        "reporter.queries.arv_stakers.get_boosted_lock",
-        lambda *_: read_mock("arv_boosted.json"),
-    )
-
-    # get_offchain_votes
-    monkeypatch.setattr(
-        "reporter.queries.voters.get_offchain_votes",
-        lambda *_: read_mock("votes_off.json"),
-    )
-
-    # get_onchain_votes
-    monkeypatch.setattr(
-        "reporter.queries.voters.get_onchain_votes",
-        lambda *_: read_mock("votes_on.json")["data"]["voteCasts"],
-    )
-
-    # filter proposals?
-    monkeypatch.setattr("builtins.input", lambda _: "N")
+    init_e2e_arv_mocks(monkeypatch, read_mock)
 
     # run ARV
     arv_main(epoch)
@@ -283,23 +259,7 @@ def test_e2e_1(monkeypatch):
     assert rewards(2) == "76595744680851064684"
     assert rewards(3) == "114893617021276597026"
 
-    # get_prv_total_supply
-    monkeypatch.setattr(
-        "reporter.run_prv.get_prv_total_supply",
-        lambda *_: sum(int(u.PRV_amount) for u in generate_users),
-    )
-
-    # get_all_prv_depositors
-    monkeypatch.setattr(
-        "reporter.queries.prv_stakers.get_all_prv_depositors",
-        lambda *_: read_mock("prv_depositeds.json")["data"]["depositeds"],
-    )
-
-    # ger_prv_staked_balances
-    monkeypatch.setattr(
-        "reporter.queries.prv_stakers.get_prv_staked_balances",
-        lambda *_: read_mock("prv_stakes.json"),
-    )
+    init_e2e_prv_mocks(monkeypatch, read_mock, generate_users)
 
     # run PRV
     prv_main(epoch)
@@ -356,3 +316,81 @@ def test_e2e_1(monkeypatch):
     assert rewards(5) == "83333333333333333333"
     assert rewards(6) == "83333333333333333333"
     assert list(recipients.values())[-1]["rewards"] == "33333333333333333333"
+
+
+def test_e2e_2(monkeypatch):
+    scenario = 2
+    generate_users = init_users(scenario)
+
+    def read_mock(file_name):
+        return _read_mock(file_name, scenario)
+
+    # path to the input file
+    monkeypatch.setattr(
+        "builtins.input",
+        lambda *_: f"./reporter/test/scenario_testing/inputs/scenario-{scenario}.json",
+    )
+
+    epoch = config.main()
+
+    init_e2e_arv_mocks(monkeypatch, read_mock)
+
+    # run ARV
+    arv_main(epoch)
+
+    """
+    Now we can run some checks:
+    - The total distributed to holders equals the total ARV rewards
+    - The inactive voters didn't get anything
+    - The active voters got the correct amount
+    - Number of voters and non-voters is correct
+    """
+
+    with open(f"{epoch}/claims-ARV.json", "r") as f:
+        claims_arv = json.load(f)
+
+    with open(f"{epoch}/reporter-db.json", "r") as f:
+        reporter_db_arv = json.load(f)
+
+    recipients = claims_arv["recipients"]
+    total_distributed = sum([int(c["rewards"]) for c in recipients.values()])
+    distributed_addresses = [c for c in recipients.keys()]
+    active_users = [u for u in generate_users if u.is_active]
+    inactive_users = [u for u in generate_users if not u.is_active]
+
+    # abs diff begween total distributed and total rewards is <= 1
+    assert abs(total_distributed - int(claims_arv["aggregateRewards"]["amount"])) <= 1
+    assert all(u.address in distributed_addresses for u in active_users)
+    assert not any(u.address in distributed_addresses for u in inactive_users)
+
+    stats = reporter_db_arv["ARV_stats"]["1"]["token_stats"]
+
+    init_e2e_prv_mocks(monkeypatch, read_mock, generate_users)
+    prv_main(epoch)
+
+    """
+    Additional PRV Checks
+    - The total distributed to holders equals the total PRV rewards
+    - The non-stakers didn't get anything
+    - The stakers got the correct amount
+    - redistributions happened correctly
+    """
+
+    with open(f"{epoch}/claims-PRV.json", "r") as f:
+        claims_prv = json.load(f)
+
+    prv_recipients = claims_prv["recipients"]
+    total_distributed_prv = sum([int(c["rewards"]) for c in prv_recipients.values()])
+    distributed_addresses_prv = [c for c in prv_recipients.keys()]
+
+    assert (
+        abs(total_distributed_prv - int(claims_prv["aggregateRewards"]["amount"])) <= 2
+    )
+    assert all(
+        u.address in distributed_addresses_prv for u in generate_users if u.staked_PRV
+    )
+    assert not any(
+        u.address in distributed_addresses_prv
+        for u in generate_users
+        if not u.staked_PRV
+    )

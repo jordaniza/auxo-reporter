@@ -1,7 +1,14 @@
-import { makeTreeWithPrompt } from "./app";
+import { makeTreesWithPrompt } from "./app";
 
 async function test() {
-  await makeTreeWithPrompt("test-5");
+  await Promise.all(
+    [10, 11].map((m) =>
+      makeTreesWithPrompt(`test/2008-${m}`, {
+        ipfsPrompt: false,
+        latest: false,
+      })
+    )
+  );
 }
 
 test()

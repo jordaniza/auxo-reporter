@@ -186,6 +186,53 @@ users_scenario = [
             staked_PRV=False,
         ),
     ],
+    # works with all ARV not fully staked
+    [
+        # ARV Users
+        User(
+            address="0x0000000000000000000000000000000000000001",
+            active_onchain=True,
+            boosted_amount=User.ssn((BASE_ARV_QTY * 9) / 10),
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000002",
+            active_offchain=True,
+            boosted_amount=User.ssn((BASE_ARV_QTY * 7) / 10),
+        ),
+        # Inactive ARV Users
+        User(
+            address="0x0000000000000000000000000000000000000004",
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000005",
+        ),
+        # PRV Users
+        User(
+            address="0x0000000000000000000000000000000000000006",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=True,
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000007",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=True,
+        ),
+        User(
+            address="0x0000000000000000000000000000000000000008",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=True,
+        ),
+        # unstaked PRV Users
+        User(
+            address="0x0000000000000000000000000000000000000009",
+            ARV_amount="0",
+            PRV_amount=str(BASE_ARV_QTY),
+            staked_PRV=False,
+        ),
+    ],
 ]
 
 
