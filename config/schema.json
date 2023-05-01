@@ -3,30 +3,36 @@
   "type": "object",
   "properties": {
     "year": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 2023
     },
     "month": {
-      "type": "integer"
+      "type": "integer",
+      "maximum": 12,
+      "minimum": 1
     },
     "block_snapshot": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 0
     },
     "distribution_window": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 0
     },
     "rewards": {
       "type": "object",
       "properties": {
         "amount": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^\\d+$"
         },
         "address": {
           "type": "string",
-          "minLength": 42,
-          "maxLength": 42
+          "pattern": "^0x[a-fA-F0-9]{40}$"
         },
         "decimals": {
-          "type": "integer"
+          "type": "integer",
+          "minimum": 1
         },
         "symbol": {
           "type": "string"
@@ -35,7 +41,9 @@
       "required": ["amount", "address", "decimals", "symbol"]
     },
     "arv_percentage": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
     },
     "redistributions": {
       "type": "array",
@@ -47,8 +55,7 @@
           },
           "address": {
             "type": "string",
-            "minLength": 42,
-            "maxLength": 42
+            "pattern": "^0x[a-fA-F0-9]{40}$"
           },
           "option": {
             "type": "string",

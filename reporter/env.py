@@ -21,7 +21,6 @@ class ADDRESSES:
     PRV = env_var("PRV_ADDRESS")
     ARV = env_var("ARV_ADDRESS")
     PRV_ROLLSTAKER = env_var("PRV_ROLLSTAKER")
-    STAKING_MANAGER = env_var("STAKING_MANAGER_ADDRESS")
     DECAY_ORACLE = env_var("DECAY_ORACLE")
     TOKEN_LOCKER = env_var("TOKEN_LOCKER")
 
@@ -30,9 +29,8 @@ class SUBGRAPHS:
     SNAPSHOT = "https://hub.snapshot.org/graphql"
     VEDOUGH = "https://api.thegraph.com/subgraphs/name/pie-dao/vedough"
 
-    AUXO_TOKEN = env_var("SUBGRAPH_AUXO_TOKEN")
+    AUXO_STAKING = env_var("SUBGRAPH_AUXO_STAKING")
     AUXO_GOV = env_var("SUBGRAPH_AUXO_GOV")
-    ROLLSTAKER = env_var("SUBGRAPH_ROLLSTAKER")
 
 
 SNAPSHOT_SPACE_ID = env_var("SNAPSHOT_SPACE_ID")

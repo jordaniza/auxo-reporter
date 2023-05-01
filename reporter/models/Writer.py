@@ -91,7 +91,10 @@ class Writer:
     def to_csv_and_json(self, data, name: str) -> None:
         if isinstance(data, list):
             csv_data = self.flatten_json_array(data)
-            keys = csv_data[0].keys()
+            if len(csv_data) > 0:
+                keys = csv_data[0].keys()
+            else:
+                keys = []
         else:
             csv_data = self.flatten_json(data)
             keys = csv_data.keys()

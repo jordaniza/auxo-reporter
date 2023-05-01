@@ -57,8 +57,5 @@ class ARV(ERC20Amount):
 class PRV(ERC20Amount):
     """PRV token"""
 
-    # locked in RollStaker
-    staked_amount: Optional[BigNumber]
-
     def __init__(self, **kwargs):
         super().__init__(decimals=18, address=ADDRESSES.PRV, symbol="PRV", **kwargs)
