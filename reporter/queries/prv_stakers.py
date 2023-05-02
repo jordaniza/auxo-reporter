@@ -20,30 +20,34 @@ This means we can't just lookup PRV holders - people who are fully staked and ea
 a balance of zero. We need to instead look at who is deposited, and check their balance in the contract.
 """
 
+# {"account": {"id": "0x...0000"}
+PRVDepositorGraphQLReturn = list[
+    dict[Literal["account"], dict[Literal["id"], EthereumAddress]]
+]
 
-def get_all_prv_depositors() -> list[dict[Literal["user"], EthereumAddress]]:
+
+def get_all_prv_depositors(block: int) -> PRVDepositorGraphQLReturn:
     """
-    This function returns a simple list of every user that has ever staked PRV to earn rewards.
-    This will include inactive users, or those who have unstaked.
+    returns a simple list of every user that has a nonzero PRV staked balance in the rollstaker.
+    This will include pending stakes that should not be counted as active
 
-    Therefore, ensure you check the user's balance to see that they actually have "actively" staked
-    tokens (in the current epoch) before assigning rewards.
-
-    In future releases, we may streamline the Subgraph to properly track PRV balances but this approach
-    should suffice for the time being.
+    Therefore, ensure you check the user's active balance (in the current epoch) before assigning rewards.
     """
     query = """
-    query( $skip: Int ) { 
-        depositeds(skip: $skip, first: 1000) { 
-            user 
-        } 
+    query ($block: Int, $skip: Int) {
+      prvstakingBalances(skip: $skip, block: { number: $block }, where: { value_not: "0" }) {
+        account {
+          id
+        }
+        value
+      }
     }
     """
     # this also needs to be at the block number
     return graphql_iterate_query(
-        SUBGRAPHS.ROLLSTAKER,
-        ["depositeds"],
-        dict(query=query, variables={"skip": 0}),
+        SUBGRAPHS.AUXO_STAKING,
+        ["prvstakingBalances"],
+        dict(query=query, variables={"skip": 0, "block": block}),
     )
 
 
@@ -59,7 +63,7 @@ def get_prv_staked_balances(
             # address to call:
             ADDRESSES.PRV_ROLLSTAKER,
             # signature + return value, with argument:
-            ["getCurrentBalanceForUser(address)(uint256)", s],
+            ["getActiveBalanceForUser(address)(uint256)", s],
             # return in a format of {[address]: uint256}:
             [[s, None]],
         )
@@ -73,12 +77,16 @@ def get_prv_staked_balances(
 
 def get_prv_stakers(conf: Config) -> list[PRVStaker]:
     """
-    Fetch a list of all accounts that have ever made deposits in the RollStaker contract
+    Fetch a list of all accounts with deposits in the RollStaker contract
     Then filter to just those with a currently active balance of > 1
     """
 
-    all_depositors_ever = [d["user"] for d in get_all_prv_depositors()]
-    prv_balances = get_prv_staked_balances(all_depositors_ever, conf)
+    all_depositors = [
+        d["account"]["id"] for d in get_all_prv_depositors(conf.block_snapshot)
+    ]
+
+    prv_balances = get_prv_staked_balances(all_depositors, conf)
+
     return [
         PRVStaker(address=addr, prv_holding=staked)
         for addr, staked in prv_balances.items()

@@ -22,6 +22,9 @@ type-check :; python -m mypy reporter
 # Format and type check python files
 lint :; make type-check && make format
 
+# create a config file from the example
+conf :; grep -v "^\s*\/\/" config/example.jsonc >> config/example.json
+
 ### TEST ###
 
 # Run tests once

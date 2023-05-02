@@ -70,7 +70,13 @@ The [example env](.env.example) file requires you to grab a number of contract a
 
 Provided the env is configured, everything else is built from a config file, you can find full details by reading the [example file](./config/example.jsonc).
 
-Feel free to copy this file and modify it to your needs.
+You can autogenerate a config file from the example with:
+
+```sh
+make conf
+```
+
+This will create a `config/example.json` file with some example data and the schema incorporated. The schema provides some basic warnings and validations to help you get started but it is not essential.
 
 Create the database of claims and rewards:
 
@@ -79,7 +85,7 @@ Create the database of claims and rewards:
 make claims
 ```
 
-If all goes well, you should have a new folder `reports/{year}-{month}/`, i.e. `reports/2022-11/`.
+If all goes well, you should have a new folder `reports/{year}-{month}/`, i.e. `reports/2022-11/`. Where {year} and {month} are the year and month as defined in your config file.
 
 In it you will have the following files:
 

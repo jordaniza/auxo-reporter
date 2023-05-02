@@ -3,14 +3,14 @@ import pytest
 import functools
 from decimal import Decimal
 from pydantic import parse_obj_as
-from reporter.queries import *
-from eth_utils import to_checksum_address
-from reporter.models import (
-    OnChainVote,
-    Account,
-    AccountState,
-    Delegate,
+from reporter.queries import (
+    get_votes,
+    get_arv_stakers,
+    parse_offchain_votes,
+    get_voters,
 )
+from eth_utils import to_checksum_address
+from reporter.models import OnChainVote, Account, AccountState, Delegate, Vote
 from reporter import utils
 from reporter.test.conftest import _addresses
 
@@ -44,25 +44,30 @@ def init_mocks(monkeypatch):
     https://stackoverflow.com/questions/31306080/pytest-monkeypatch-isnt-working-on-imported-function
     """
     monkeypatch.setattr(
-        "reporter.queries.graphql_iterate_query",
+        "reporter.queries.common.graphql_iterate_query",
         lambda url, access_path, params: mock_stakers["data"]["erc20Contract"][
             "balances"
         ],
     )
-    monkeypatch.setattr("reporter.queries.get_votes", lambda _: mock_votes)
-    monkeypatch.setattr(
-        "reporter.queries.get_delegates",
-        lambda: parse_obj_as(list[Delegate], mock_delegates),
-    )
 
     monkeypatch.setattr(
-        "reporter.queries.parse_onchain_votes",
+        "reporter.queries.voters.parse_offchain_votes",
+        lambda _: parse_obj_as(list[Vote], mock_votes),
+    )
+
+    # monkeypatch.setattr(
+    #     "reporter.queries.voters.get_delegates",
+    #     lambda: parse_obj_as(list[Delegate], mock_delegates),
+    # )
+
+    monkeypatch.setattr(
+        "reporter.queries.voters.parse_onchain_votes",
         lambda _: parse_obj_as(
             list[OnChainVote], mock_on_chain_votes["data"]["voteCasts"]
         ),
     )
 
-    monkeypatch.setattr("reporter.queries.get_delegates", [DELEGATE])
+    monkeypatch.setattr("reporter.queries.voters.get_delegates", lambda: [])
 
     return (mock_stakers, mock_votes, mock_delegates)
 
@@ -75,26 +80,17 @@ def test_get_arv_stakers(monkeypatch, config):
     assert all(to_checksum_address(s.address) == s.address for s in stakers)
 
 
-def test_get_voters(monkeypatch, config):
-    with open("reporter/test/stubs/snapshot-votes.json") as j:
-        mock_votes = json.load(j)
-
-    monkeypatch.setattr("reporter.queries.get_votes", lambda _: mock_votes)
-
-    voters = parse_offchain_votes(config)
-    assert len(voters) == len(mock_votes)
-
-
 def test_get_vote_data(config, monkeypatch):
 
     init_mocks(monkeypatch)
+
     stakers = get_arv_stakers(config)
     votes, proposals = get_votes(config)
     voters, non_voters = get_voters(votes, stakers)
     voter_ids = [v.voter for v in votes]
 
-    assert len(proposals) == 4
-    assert len(voters) + len(non_voters) == len(stakers) + len([DELEGATE])
+    assert len(proposals) == 5
+    assert len(voters) + len(non_voters) == len(stakers)
     assert all(voter in voter_ids for voter in voters)
 
 

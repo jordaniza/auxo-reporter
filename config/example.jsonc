@@ -1,4 +1,5 @@
 /// Example config file for the distribution script
+/// `make conf` will create a fresh config file without comments
 {
   // import the schema relative to the config file for validation
   "$schema": "./schema.json",
@@ -26,7 +27,7 @@
   // whole percentage of total rewards to distribute to the ARV
   // 100 - arv_percentage = percentage of rewards to distribute to PRV
   "arv_percentage": 70,
-  // [optional] customize redistribution behaviour for PRV  
+  // [optional] customize redistribution behaviour for PRV
   // this redistributes any rewards otherwise allocated to inactive stakers
   "redistributions": [
     {

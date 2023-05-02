@@ -55,6 +55,7 @@ def graphql_iterate_query(
     """
 
     response: GraphQL_Response = requests.post(url, json=params).json()
+
     if not response:
         raise EmptyQueryError(f"No results for graph query to {url}")
     if "errors" in response:
@@ -121,7 +122,7 @@ def get_token_hodlers(conf: Config, token_address: EthereumAddress) -> list:
     }
 
     return graphql_iterate_query(
-        SUBGRAPHS.AUXO_TOKEN,
+        SUBGRAPHS.AUXO_STAKING,
         ["erc20Contract", "balances"],
         dict(query=query, variables=variables),
     )
