@@ -139,13 +139,17 @@ def filter_votes_by_proposal(
         return (votes, list(unique_proposals.values()))
 
 
+# TODO: Delegation is not currently supported
 def get_delegates() -> list[Delegate]:
-    """Fetches list of whitelisted delegate/delegator pairs"""
+    """
+    Delegation is not currently supported
+    """
+    return []
 
-    query = "{ delegates(first: 1000) { delegator, delegate } }"
-    delegates = requests.post(SUBGRAPHS.VEDOUGH, json={"query": query})
-    delegate_data = delegates.json().get("data")
-    return parse_obj_as(list[Delegate], delegate_data.get("delegates"))
+    # query = "{ delegates(first: 1000) { delegator, delegate } }"
+    # delegates = requests.post(SUBGRAPHS.VEDOUGH, json={"query": query})
+    # delegate_data = delegates.json().get("data")
+    # return parse_obj_as(list[Delegate], delegate_data.get("delegates"))
 
 
 def get_voters(
@@ -160,6 +164,8 @@ def get_voters(
     """
     voters = set([v.voter for v in votes])
     stakers_addrs = [s.address for s in stakers]
+
+    # TODO: Delegation is not currently supported
     delegates = get_delegates()
 
     stakers_addrs_no_delegators = [
@@ -211,26 +217,3 @@ def get_votes(conf: Config) -> tuple[list[Vote], list[Proposal]]:
     combined_votes = combine_on_off_chain_votes(offchain_votes, onchain_votes)
 
     return filter_votes_by_proposal(combined_votes)
-
-
-def get_vote_data(
-    conf: Config, stakers: list[ARVStaker]
-) -> tuple[list[Vote], list[Proposal], list[str], list[str]]:
-    """
-    Fetch all information related to voting this month and return a tuple with required info
-    :returns:
-        * list of all votes
-        * list of all valid proposals
-        * list of addresses of active voters
-        * list of addresses of inactive voters
-    """
-    offchain_votes = parse_offchain_votes(conf)
-    onchain_votes = parse_onchain_votes(conf)
-
-    combined_votes = combine_on_off_chain_votes(offchain_votes, onchain_votes)
-
-    (filtered_votes, proposals) = filter_votes_by_proposal(combined_votes)
-
-    (voters, non_voters) = get_voters(filtered_votes, stakers)
-
-    return (filtered_votes, proposals, voters, non_voters)

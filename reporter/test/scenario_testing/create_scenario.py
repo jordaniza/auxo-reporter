@@ -46,6 +46,10 @@ class User:
         return api_resp["data"]["erc20Contract"]["balances"][0]
 
     @property
+    def _template_prv_stake(self):
+        return self._template_token_holding
+
+    @property
     def is_active(self):
         return self.active_onchain or self.active_offchain
 
@@ -75,7 +79,10 @@ class User:
         return [self.ARV_amount, int(time.time()), 86400 * 36]
 
     def create_prv_depositor(self):
-        return {"user": self.address}
+        template = self._template_token_holding
+        template["account"] = {"id": self.address}
+        template["valueExact"] = self.ARV_amount
+        return template
 
     def create_prv_deposit(self):
         return self.PRV_amount
@@ -247,20 +254,26 @@ def init_users(scenario: int):
     prv_depositeds = []
     prv_stakes = {}
     users = users_scenario[scenario]
+
     for u in users:
         if u.active_onchain:
             votes_on.append(u.create_on_chain_vote())
+
         if u.active_offchain:
             votes_off.append(u.create_off_chain_vote())
+
         if u.staked_PRV or int(u.PRV_amount) > 0:
             prv_depositeds.append(u.create_prv_depositor())
+
         if u.staked_PRV:
             prv_stakers[u.address] = True
             prv_stakes[u.address] = u.create_prv_deposit()
         else:
             prv_stakers[u.address] = False
+
         if int(u.PRV_amount) > 0:
             prv_holders.append(u.create_prv_holding())
+
         if int(u.ARV_amount) > 0:
             arv_holders.append(u.create_arv_holding())
             arv_boost_data[u.address] = str(u.boosted_amount)

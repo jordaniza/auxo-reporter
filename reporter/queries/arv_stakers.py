@@ -1,6 +1,4 @@
-import json
 from typing import Any, Union, cast
-
 from multicall import Call, Multicall  # type: ignore
 
 from reporter.env import ADDRESSES
@@ -11,7 +9,7 @@ from reporter.queries import get_token_hodlers, w3
 """
 ARV Stakers get their total balance from the DecayOracle. 
 We simply need the list of holders, which we fetch from the graph.
-At time of writing, we store both their `original_holdings` (without the DecayOracle)
+At time of writing, we store both their original holdings (without the DecayOracle)
 as well as their decayed/boosted balance, which is what we use to calculate rewards
 """
 
